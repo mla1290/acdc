@@ -1,5 +1,6 @@
 /* finalise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 02 Jan 03   MLA           bug: removed a redundant arg to fprintf.
  * 13 Jan 02   MLA           Pass "hidden" type parameters.
@@ -44,10 +45,10 @@ void finalise ()
    extern void *calloc ();
 
    (void) clsfile (code_file, "Automatic code");
-   (void) sprintf (proc_name, "autop%02d.c", ++code_part);
+   (void) sprintf (proc_name, "adv%02d.c", ++code_part);
    if ((code_file = openout (proc_name, "w")) == NULL)
       (void) gripe (proc_name, "Unable to open final code chunk.");
-   (void) fprintf (code_file, "#include \"autod3.h\"\n");
+   (void) fprintf (code_file, "#include \"adv3.h\"\n");
 
    proc_count = type_base [VERB + 1];
    if ((proc_array = (int *) calloc (proc_count, sizeof (int))) == NULL)
@@ -61,8 +62,8 @@ void finalise ()
       "#ifdef __STDC__\nvoid p0(void)\n#else\nvoid p0()\n#endif\n{return;}\n");
 
    (void) clsfile (code_file, "Final automatic code");
-   if ((code_file = openout ("autod3.h", "w")) == NULL)
-      (void) gripe ("finalise", "Unable to open autod3.h.");
+   if ((code_file = openout ("adv3.h", "w")) == NULL)
+      (void) gripe ("finalise", "Unable to open adv3.h.");
 
    proc_arr_ptr = proc_array;
    (void) fprintf (code_file, 
@@ -89,9 +90,9 @@ void finalise ()
    }
    (void) fprintf (code_file, "#endif\n");
 
-   (void) clsfile (code_file, "autod3.h");
-   if ((code_file = openout ("autod4.h", "w")) == NULL)
-      (void) gripe ("finalise", "Unable to open autod4.h.");
+   (void) clsfile (code_file, "adv3.h");
+   if ((code_file = openout ("adv4.h", "w")) == NULL)
+      (void) gripe ("finalise", "Unable to open adv4.h.");
 
    proc_arr_ptr = proc_array;
    (void) fprintf (code_file, "void (*procs[])() = {\n");
@@ -106,7 +107,7 @@ void finalise ()
       }
    }
    (void) fprintf (code_file, "p0 };\n");
-   (void) clsfile (code_file, "autod4.h");
+   (void) clsfile (code_file, "adv4.h");
 
    return;
 }

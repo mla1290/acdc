@@ -1,5 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 23 Feb 03   MLA           Initialise random number generator.
  * 02 Feb 03   MLA           Count autop chunks form 1 (kernel will be 0).
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 01 Oct 02   MLA           Added dynamic copyleft notice.
@@ -78,8 +79,8 @@ char *voc_ptr;
 char *voc_top;
 int voc_buf_len = VOC_INIT_LEN;
 FILE *text_file;
-char dbname [16];
-char *dbname_ptr = &dbname [1];
+char title [80];
+char *title_ptr = &title [1];
 int plain_text = 0;
 
 #include "output.h"
@@ -117,9 +118,9 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.40; MLA, 09 Feb 03]\n");
+      "[A-code to C translator, version 11.43; MLA, 23 Feb 03]\n");
 #ifdef COPYLEFT
-   now = time (NULL);
+   srand ((unsigned int)(now = time (NULL)));
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 #endif /* COPYLEFT */
 

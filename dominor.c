@@ -684,25 +684,6 @@ char *proccond;
                         argval [index]);
                   else
                      (void) fprintf (code_file, "%d)", argval [index]);
-/*
- *                 fprintf (code_file, "location[");
- *                 if (argtyp [1] == VARIABLE)
- *                    (void) fprintf (code_file, "value[%d]]!=", 
- *                       argval [1]);
- *                 else if (argtyp [1] == LOCAL)
- *                    (void) fprintf (code_file, "lval[%d]]!=",
- *                       argval [1]);
- *                 else
- *                    (void) fprintf (code_file, "%d]!=", argval [1]);
- *                 if (argtyp [index] == VARIABLE)
- *                    (void) fprintf (code_file, "evar(%d)", 
- *                       argval [index]);
- *                 else if (argtyp [index] == LOCAL)
- *                    (void) fprintf (code_file, "levar(%d,lval,lbts)", 
- *                       argval [index]);
- *                 else
- *                    (void) fprintf (code_file, "%d", argval [index]);
- */
               }
                (void) fprintf (code_file, ") continue;\n");       
             }

@@ -1,5 +1,8 @@
 /* domajor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 23 Feb 03   MLA           Preserve mask value.
+ * 21 Feb 03   MLA           bug: Display full version string.
+ * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 10 Mar 02   MLA           bug: Write xref for parameter declarations.
  * 13 Jan 02   MLA           Pass "hidden" type parameters.
  * 12 Jan 02   MLA           bug: construct own parameter names.
@@ -7,7 +10,7 @@
  * 01 Jan 02   MLA           bug: only zap local vars at code chunk start.
  * 30 Dec 01   MLA           Added call parameters code.
  * 18 Nov 01   MLA           Tag autop files with 2 digits.
- * 17 Nov 01   MLA           Bug: Corrected dbname construction.
+ * 17 Nov 01   MLA           Bug: Corrected title construction.
  * 04 Nov 01   MLA           Construct a better default name.
  * 14 Mar 01   MLA           Replaced old_style with style.
  * 28 Feb 01   MLA           Allowed assigned text type.
@@ -54,31 +57,47 @@ void stortitl (string)
 char *string;
 #endif
 {
-   char file_name [32];
-   char mask;
+   int len;
+   char *tptr;
+   int mask;
 
-   (void) strncpy (file_name, string, 27);
-   file_name [31] = '\0';
-   (void) strcat (file_name, ".dat");
+   if ((text_file = openout ("adv6.h", MODE)) == NULL)
+      (void) gripe ("adv6.h", "Unable to open data file.");
+   fprintf (text_file, "char text [TEXT_BYTES] = {\n");
 
-   if ((text_file = openout (file_name, MODE)) == NULL)
-      (void) gripe (file_name, "Unable to open data file.");
+   if (string)
+   {
+      tptr = string;
+      len = strlen (string);
+   }
+   else
+   {
+      tptr = raw_line;
+      while (*tptr != ' ' && *tptr != '\t')
+         tptr++;
+      while (*tptr == ' ' || *tptr == '\t')
+         tptr++;
+      len = strlen (tptr) - 1;
+   }
+   if (len > 79) len = 79;
+   (void) strncpy (title, tptr, len);
+   *(title + len) = '\0';
+   title [79] = '\0';
+   key_mask = (rand() & 127) | 'x';
+   if (key_mask == 255) key_mask = 'y';
+   mask = key_mask;
 
-   (void) strncpy (dbname, string, 16);
-   dbname [15] = '\0';
-   mask = 'x';
-
-   (void) fputc ('v', text_file);        /* Virgin data file */
+   fputc ('0', text_file); 
    next_addr++;
 
-   while (*string)
+   while (*tptr && *tptr != '\n')
    {
-      (void) fputc (*string ^ mask, text_file);
-      mask = *string++;
+      (void) fprintf (text_file, ",%d", *tptr ^ mask);
+      mask = *tptr++;
       next_addr++;
    }
 
-   (void) fputc (mask, text_file);
+   fprintf (text_file, ",%d", mask);
    next_addr++;
    return;
 }
@@ -144,29 +163,18 @@ void domajor ()
       if (major_type == DBNAME)
       {
          if (strlen (tp [1]) < 3)
-            (void) gripe (tp [1], "Dbs name too short.");
+            (void) gripe (tp [1], "Game version too short.");
          recase (LOWERCASE, tp [1]);
-         stortitl (tp [1]);
-         (void) printf ("Database: %s\n", tp [1]);
+         stortitl (NULL);
+         (void) printf ("Version: %s\n", title);
          line_status = EOL;
          return;
       }
       else
       {
-         char dbname [MAXLINE + 1];
-         int len = strlen (source_file);
-         if (len > sizeof (dbname) - 6)    /* Allow for "db.dat" */
-            len = sizeof (dbname) - 6;
-         strncpy (dbname, source_file, len);
-         *(dbname + len) = '\0';
-         if (strcmp (dbname + len - 4, ".acd") == 0)
-            *(dbname + len - 4) = '\0';
-         else if (strcmp (dbname + len - 6, ".acode") == 0)
-            *(dbname + len - 6) = '\0';
-         strcat (dbname, "db");
-         stortitl (dbname);
+         stortitl (source_file);
          style = 1;           /* Original A-code style */
-         (void) printf ("No dbs name found. Assuming old-style ACODE.\n");
+         (void) printf ("No game version found. Assuming old-style ACODE.\n");
       }
    }
 
@@ -193,11 +201,11 @@ void domajor ()
          if (minor_count >= CODE_CHUNK)
          {
             (void) clsfile (code_file, "Automatic code");
-            (void) sprintf (proc_name, "autop%02d.c", ++code_part);
+            (void) sprintf (proc_name, "adv%02d.c", ++code_part);
             if ((code_file = openout (proc_name, "w")) == NULL)
                (void) gripe (proc_name, "Unable to open new code chunk.");
-            (void) fprintf (code_file, "#include \"advkern.h\"\n");
-            (void) fprintf (code_file, "#include \"autod3.h\"\n");
+            (void) fprintf (code_file, "#include \"adv0.h\"\n");
+            (void) fprintf (code_file, "#include \"adv3.h\"\n");
             minor_count = 0;
          }
          break;
@@ -537,7 +545,7 @@ void domajor ()
          return;
 
       case DBNAME:
-         (void) gripe (dbname, "Dbs name already defined and cannot be changed.");
+         (void) gripe (title, "Title already defined and cannot be changed.");
          break;
 
       case DEFINE:

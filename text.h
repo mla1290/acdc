@@ -57,13 +57,14 @@ extern long next_addr;
 extern char *text_buf_ptr;
 extern int text_buf_len;
 extern FILE *text_file;
-extern char dbname[];
-extern char *dbname_ptr;
+extern char title[];
+extern char *title_ptr;
 extern int plain_text;
 extern int style;
 extern int text_count;
 extern int switch_count;
 extern long text_lines;
+extern int key_mask;
 
 #define VOC_INIT_LEN 8192
 extern long next_vocaddr;

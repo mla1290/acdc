@@ -22,14 +22,19 @@ int ch;
    else
    {
       int mask;
-      if (*(++dbname_ptr) == '\0')
-         dbname_ptr = dbname;
+
+      if (*(++title_ptr) == '\0')
+         title_ptr = title;
       mask = (next_addr >> 4) & 127;
       if (mask == 0) 
          mask = next_addr & 127;
       if (mask == 0)
          mask = 'X';
-      fputc(ch ^ *dbname_ptr ^ mask, text_file);
+      mask = (17 * mask + 13) & 127;
+      fprintf (text_file, ",%d", ch ^ *title_ptr ^ mask);
+      if ((next_addr + 1) % 16 == 0)
+         fputc ('\n', text_file);
+/*      fputc(ch ^ *title_ptr ^ mask, text_file); */
    }
 /* ENDPRIVATE */
    next_addr++;

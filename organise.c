@@ -1,5 +1,7 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 21 Feb 03   MLA           Added conditional DBNAME definition.
+ * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 09 Feb 03   MLA           Added SAY, F/LDIR, F/LMAGIC.
  * 04 Feb 03   MLA           Added EXCEPT and TYPO.
  * 02 Feb 03   MLA           Renamed autod0 to autod5 (advkern.h will be 0).
@@ -33,6 +35,7 @@
  
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "acdc.h"
 #include "btree.h"
@@ -51,6 +54,7 @@ long *brief_base;
 long *long_base;
 long *detail_base;
 long base_voc_addr;
+int key_mask;
 
 #ifdef __STDC__
 void define_constant(char *name, char *upname, char *type)
@@ -253,7 +257,9 @@ void organise()
 {
    int index;
    int cnt;
+   char *cptr;
    struct node *np;
+   char dbname [80];
 
    void processsymb();
    void process_voc_refno();
@@ -267,6 +273,7 @@ void organise()
    voc_ptr = voc_buf_ptr;
    while (voc_ptr < voc_top)
       storchar(*voc_ptr++);
+   fprintf (text_file, "};\n");
    (void) clsfile (text_file, "Text");
 
 /* Check for mandatory symbols and add them if missing */
@@ -344,8 +351,8 @@ void organise()
  *  into the insert file.
  */
 
-   if ((defs_file = openout("autod5.h","w")) == NULL)
-      (void) gripe ("","Unable to open autod5.h (words.h).");
+   if ((defs_file = openout("adv5.h","w")) == NULL)
+      (void) gripe ("","Unable to open adv5.h (words.h).");
 
    btspan(SYMBOL, processsymb);
 
@@ -361,14 +368,25 @@ void organise()
    dump_array (detail_base, desc_count,  " %8ldL,", 7);
    (void) fprintf (defs_file, "        0L};\n");
 
-   (void) clsfile (defs_file, "autod5.h");      /* Done with this file */
+   (void) clsfile (defs_file, "adv5.h");      /* Done with this file */
 
 /*  Now create the include file which will define various symbolic
  *  constants required by the kernel routines.
  */
-   if ((defs_file = openout("autod1.h","w")) == NULL)
-      (void) gripe ("","Unable to open autod1.h (defs.h).");
-   (void) fprintf (defs_file, "#define DBNAME \"%s\"\n", dbname);
+   if ((defs_file = openout("adv1.h","w")) == NULL)
+      (void) gripe ("","Unable to open adv1.h (defs.h).");
+   (void) fprintf (defs_file, "#define VERSION \"%s\"\n", title);
+   strcpy (dbname, title);
+   cptr = dbname;
+   while (isalnum (*cptr))
+   {
+      *cptr = tolower (*cptr);
+      cptr++;
+   }
+   *cptr = '\0';
+   strcat (dbname, ".dat");
+   (void) fprintf (defs_file, 
+      "#ifdef USEDB\n#  define DBNAME \"%s\"\n#endif\n", dbname);
    (void) fprintf (defs_file, "#define TEXT_BYTES %ld\n", next_addr);
    (void) fprintf (defs_file, "#define OBJSIZE %d\n", 
       flag_field_size[OBJFLAG]/16 + 1);
@@ -392,6 +410,7 @@ void organise()
    (void) fprintf (defs_file, "#define FTEXT %d\n", type_base[TEXT]);
    (void) fprintf (defs_file, "#define LTEXT %d\n", type_base[TEXT + 1]);
    (void) fprintf (defs_file, "#define NOISE %d\n", NOISE);
+   (void) fprintf (defs_file, "#define KNOT %d\n", key_mask);
    (void) fprintf (defs_file, "#define VOCAB_SIZE %d\n", vocab_count);
    (void) fprintf (defs_file, "#define STYLE %d\n", style);
 
@@ -584,10 +603,10 @@ void organise()
       "#define KEY(X) (value[%d]==X || value[%d]==X)\n",
       fndsymb(SYMBOL, "arg1") -> refno, fndsymb(SYMBOL, "arg2") -> refno);
 
-   (void) clsfile (defs_file, "autod1.h");     /* Ahhh.... done at last! */
+   (void) clsfile (defs_file, "adv1.h");     /* Ahhh.... done at last! */
 
-   if ((defs_file = openout("autod2.h","w")) == NULL)
-      (void) gripe ("autod2.h","Unable to open (voc.h).");
+   if ((defs_file = openout("adv2.h","w")) == NULL)
+      (void) gripe ("adv2.h","Unable to open (voc.h).");
 
 /*  Now for the vocabulary include file */
 
@@ -605,7 +624,7 @@ void organise()
    btspan(VOCAB, process_voc_word);
    (void) fprintf (defs_file, "0};\n");
 
-   (void) clsfile (defs_file, "autod2.h");      /* Vocabulary done */
+   (void) clsfile (defs_file, "adv2.h");      /* Vocabulary done */
 
    return;
 }

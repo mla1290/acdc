@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 27 Jul 02   MLA           Added CHECKPOINT.
  * 12 Jul 02   MLA           Added IFNE, IFLE, IFGE.
  *                           Allowed multiple locations with IFLOC.
@@ -86,8 +87,9 @@ struct directive keywords[] =
    {"synonym",   MAJOR,     SYNONYM,   1,   ANY_NUMBER},  /* Compatibility */
    {"synon",     MAJOR,     SYNONYM,   1,   ANY_NUMBER},  /* Compatibility */
    {"define",    MAJOR,     DEFINE,    1,   ANY_NUMBER},  /* Compatibility */
-   {"dbname",    MAJOR,     DBNAME,    1,   1},
+   {"version",   MAJOR,     DBNAME,    1,   ANY_NUMBER},
    {"title",     MAJOR,     DBNAME,    1,   1},           /* Compatibility */
+   {"dbname",    MAJOR,     DBNAME,    1,   1},           /* Compatibility */
    {"style",     MAJOR,     STYLE,     1,   2},
    {"have",      MINOR,     HAVE,      1,   ANY_NUMBER},
    {"near",      MINOR,     NEAR,      1,   ANY_NUMBER},
@@ -242,10 +244,10 @@ void initial()
    voc_ptr = voc_buf_ptr;
    voc_top = voc_buf_ptr + VOC_INIT_LEN - 20;
 
-   if ((code_file = openout("autop01.c", "w")) == NULL)
-      (void) gripe ("autop01.c", "Unable to open code file.");
-   (void) fprintf (code_file, "#include \"advkern.h\"\n");
-   (void) fprintf (code_file, "#include \"autod3.h\"\n");
+   if ((code_file = openout("adv01.c", "w")) == NULL)
+      (void) gripe ("adv01.c", "Unable to open code file.");
+   (void) fprintf (code_file, "#include \"adv0.h\"\n");
+   (void) fprintf (code_file, "#include \"adv3.h\"\n");
 
    next_addr = 0;
    if (trace & TRACE_SOURCE)  /* Declarations over - if source output */
