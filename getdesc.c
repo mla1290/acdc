@@ -1,4 +1,4 @@
-/* getdesc.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* getdesc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 12 Dec 91   MLA           Added third arg to gettext ().

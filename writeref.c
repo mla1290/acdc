@@ -1,4 +1,4 @@
-/* writeref.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* writeref.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 10 Mar 02   MLA           Initial coding.
  *

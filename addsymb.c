@@ -1,5 +1,6 @@
-/* addsymb.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* addsymb.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 24 Jul 01   MLA           Added ANSI C declaration.
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 15 Sep 90   MLA           Initial coding.
@@ -10,33 +11,31 @@
 
 #include "acdc.h"
 #include "symbol.h"
+#include "btree.h"
 
 #ifdef __STDC__
 struct node *addsymb (
-   int root_type,
+   int node_type,
    char *word,
    int type,
    int refno)
 #else
-struct node *addsymb (root_type, word, type, refno)
-   int root_type;
+struct node *addsymb (node_type, word, type, refno)
+   int node_type;
    char *word;
    int type;
    int refno;
 #endif
 {
    struct node *node_ptr;
-   struct node *ret_ptr;
-   int add_compare ();
    int len;
    extern void *malloc ();
-   extern void *tsearch ();
 
    if ((node_ptr = (struct node *) malloc (sizeof (struct node))) == NULL)
       (void) gripe (word, "Unable to allocate memory.");
 
-   len = strlen (word) + 1;
-   if ((node_ptr -> name = (char *) malloc (len)) == NULL)
+   len = strlen (word);
+   if ((node_ptr -> name = (char *) malloc (len + 1)) == NULL)
       (void) gripe (word, "Unable to allocate storage.");
    (void) strcpy (node_ptr -> name, word);
    node_ptr -> type = type;
@@ -48,31 +47,7 @@ struct node *addsymb (root_type, word, type, refno)
    node_ptr -> used_count = 0;
    node_ptr -> head = NULL;
    node_ptr -> tail = NULL;
-   ret_ptr = *(struct node **)
-      tsearch ((char *) node_ptr, &root [root_type], add_compare);
-   if (node_ptr != ret_ptr)
+   if (btadd (node_type, node_ptr) == 0)
       (void) gripe (word, "Symbol already defined.");
-   return (ret_ptr);
+   return (node_ptr);
 }
-
-#ifdef __STDC__
-int add_compare (
-   struct node *node1,
-   struct node *node2)
-#else
-int add_compare (node1, node2)
-   struct node *node1;
-   struct node *node2;
-#endif
-{
-   char *n1;
-   char *n2;
-
-   if (*(n1 = node1 -> name) == '!')
-      n1++;
-   if (*(n2 = node2 -> name) == '!')
-      n2++;
-
-   return (strcmp (n1, n2));
-}
-

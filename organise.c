@@ -1,5 +1,6 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 02 Jan 03   MLA           bug: text_count already defined in acdc.c.
  * 01 Jan 03   MLA           Added refno dumpnig for xref.
  * 21 Dec 01   MLA           Removed obsolete MAX* definitions.
@@ -31,7 +32,7 @@
 #include <stdlib.h>
 
 #include "acdc.h"
-#include "search.h"
+#include "btree.h"
 #include "const.h"
 #include "symbol.h"
 #include "major.h"
@@ -74,136 +75,113 @@ char *type;
 }
 
 #ifdef __STDC__
-void processsymb(struct node **np, VISIT order, int level)
+void processsymb(struct node *np)
 #else
-void processsymb(np, order, level)
-struct node **np;
-VISIT order;
-int level;
+void processsymb(np)
+struct node *np;
 #endif
 {
    int refno;
    long *array_ptr;
 
-   if (order == postorder || order == leaf)
-      if ((*np) -> type < PROCEDURE)
+   if (np -> type < PROCEDURE)
+   {
+      if (np -> type == TEXT) 
       {
-         if ((*np) -> type == TEXT) 
-         {
-            *(text_info + 2 * ((*np) -> refno)) =
-               (*np) -> body.text.text_type;
-            *(text_info + 2 * ((*np) -> refno) + 1) =
-               (*np) -> state_count;
-         }
-         refno = (*np) -> refno += type_base[ (*np) -> type ];
-         if (xref_file)
-            fprintf (xref_file, "+ %d %s\n", refno, (*np) -> name);
-         *(text_base + refno) = (*np) -> body.text.name_addr;
-         if ((*np) -> type != TEXT)
-            *(text_base + refno) += base_voc_addr;
-         if ((*np) -> type <= PLACE)
-         {
-            array_ptr = (*np) -> body.text.text_addr;
-            *(brief_base + refno) = *array_ptr++;
-            if ((*(long_base + refno) = *array_ptr++) == -1L)
-               *(long_base + refno) = *(brief_base + refno);
-            if ((*(detail_base + refno) = *array_ptr) == -1L)
-               *(detail_base + refno) = *(long_base + refno);
-         }
+         *(text_info + 2 * (np -> refno)) =
+            np -> body.text.text_type;
+         *(text_info + 2 * (np -> refno) + 1) =
+            np -> state_count;
       }
+      refno = np -> refno += type_base[ np -> type ];
+      if (xref_file)
+         fprintf (xref_file, "+ %d %s\n", refno, np -> name);
+      *(text_base + refno) = np -> body.text.name_addr;
+      if (np -> type != TEXT)
+         *(text_base + refno) += base_voc_addr;
+      if (np -> type <= PLACE)
+      {
+         array_ptr = np -> body.text.text_addr;
+         *(brief_base + refno) = *array_ptr++;
+         if ((*(long_base + refno) = *array_ptr++) == -1L)
+            *(long_base + refno) = *(brief_base + refno);
+         if ((*(detail_base + refno) = *array_ptr) == -1L)
+            *(detail_base + refno) = *(long_base + refno);
+      }
+   }
    return;
 }
 
 #ifdef __STDC__
-void process_voc_refno(struct node **np, VISIT order, int level)
+void process_voc_refno(struct node *np)
 #else
-void process_voc_refno(np, order, level)
-struct node **np;
-VISIT order;
-int level;
+void process_voc_refno(np)
+struct node *np;
 #endif
 {
    int refno;
 
-   if (order == postorder || order == leaf)
+   if (np -> type <= VERB)
+      refno = np -> refno += type_base[ np -> type ];
+   else
+      refno = 0;
+   (void) fprintf (defs_file, "%4d, ", refno);
+   if (++node_count == 11)
    {
-      if ((*np) -> type <= VERB)
-         refno = (*np) -> refno += type_base[ (*np) -> type ];
-      else
-         refno = 0;
-      (void) fprintf (defs_file, "%4d, ", refno);
-      if (++node_count == 11)
-      {
-         node_count = 0;
-         (void) fputc ('\n', defs_file);
-      }
-      return;
+      node_count = 0;
+      (void) fputc ('\n', defs_file);
    }
+   return;
 }
 
 #ifdef __STDC__
-void process_voc_type(struct node **np, VISIT order, int level)
+void process_voc_type(struct node *np)
 #else
-void process_voc_type(np, order, level)
-struct node **np;
-VISIT order;
-int level;
+void process_voc_type(np)
+struct node *np;
 #endif
 {
-   if (order == postorder || order == leaf)
+   (void) fprintf (defs_file, "%4d, ", np -> type);
+   if (++node_count == 11)
    {
-      (void) fprintf (defs_file, "%4d, ", (*np) -> type);
-      if (++node_count == 11)
-      {
-         node_count = 0;
-         (void) fputc ('\n', defs_file);
-      }
-      return;
+      node_count = 0;
+      (void) fputc ('\n', defs_file);
    }
+   return;
 }
 
 #ifdef __STDC__
-void process_voc_addr(struct node **np, VISIT order, int level)
+void process_voc_addr(struct node *np)
 #else
-void process_voc_addr(np, order, level)
-struct node **np;
-VISIT order;
-int level;
+void process_voc_addr(np)
+struct node *np;
 #endif
 {
-   if (order == postorder || order == leaf)
+   (void) fprintf (defs_file, "%8ldL, ", 
+      base_voc_addr + np -> body.vocab.voc_addr);
+   if (++node_count == 7)
    {
-      (void) fprintf (defs_file, "%8ldL, ", 
-         base_voc_addr + (*np) -> body.vocab.voc_addr);
-      if (++node_count == 7)
-      {
-         node_count = 0;
-         (void) fputc ('\n', defs_file);
-      }
-      return;
+      node_count = 0;
+      (void) fputc ('\n', defs_file);
    }
+   return;
 }
 
 #ifdef __STDC__
-void process_voc_word(struct node **np, VISIT order, int level)
+void process_voc_word(struct node *np)
 #else
-void process_voc_word(np, order, level)
-struct node **np;
-VISIT order;
-int level;
+void process_voc_word(np)
+struct node *np;
 #endif
 {
-   if (order == postorder || order == leaf)
+   (void) fprintf (defs_file, "%8ldL, ", 
+      base_voc_addr + np -> body.vocab.word_addr);
+   if (++node_count == 7)
    {
-      (void) fprintf (defs_file, "%8ldL, ", 
-         base_voc_addr + (*np) -> body.vocab.word_addr);
-      if (++node_count == 7)
-      {
-         node_count = 0;
-         (void) fputc ('\n', defs_file);
-      }
-      return;
+      node_count = 0;
+      (void) fputc ('\n', defs_file);
    }
+   return;
 }
 
 #ifdef __STDC__
@@ -366,7 +344,7 @@ void organise()
    if ((defs_file = openout("autod0.h","w")) == NULL)
       (void) gripe ("","Unable to open autod0.h (words.h).");
 
-   twalk(root[SYMBOL], processsymb);
+   btspan(SYMBOL, processsymb);
 
    (void) fprintf (defs_file, "   long textadr[] = {\n");
    dump_array(text_base, text_count,  " %8ldL,", 7);
@@ -563,16 +541,16 @@ void organise()
 
    (void) fprintf (defs_file, "   short voc_refno[] = {\n");
    node_count = 0;
-   twalk(root[VOCAB], process_voc_refno);
+   btspan(VOCAB, process_voc_refno);
    (void) fprintf (defs_file, "0};\n   short voc_type[] = {\n");
    node_count = 0;
-   twalk(root[VOCAB], process_voc_type);
+   btspan(VOCAB, process_voc_type);
    (void) fprintf (defs_file, "0};\n   long voc_addr[] = {\n");
    node_count = 0;
-   twalk(root[VOCAB], process_voc_addr);
+   btspan(VOCAB, process_voc_addr);
    (void) fprintf (defs_file, "0};\n   long voc_word[] = {\n");
    node_count = 0;
-   twalk(root[VOCAB], process_voc_word);
+   btspan(VOCAB, process_voc_word);
    (void) fprintf (defs_file, "0};\n");
 
    (void) clsfile (defs_file, "autod2.h");      /* Vocabulary done */

@@ -1,4 +1,4 @@
-/* openout.c (acdc) - copyleft Mike Arnautov 2002.
+/* openout.c (acdc) - copyleft Mike Arnautov 2002 - 2003.
  *
  * 18 Nov 01   MLA           Added the copyleft code for adv660, adv770.
  * 30 Sep 00   MLA           Simplified directory serach.

@@ -1,4 +1,4 @@
-/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2002.
+/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2003.
  */
 
 #ifdef COPYLEFT

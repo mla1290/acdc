@@ -1,4 +1,4 @@
-/* opnsrc.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* opnsrc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 08 Mar 94   MLA           Made INCLUDEs relative to umbrella source.
  * 23 Dec 90   MLA           Check for .acd files first!

@@ -1,4 +1,4 @@
-/* parse.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* parse.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 06 Nov 01   MLA           Fiddle FULLDISP for Platt-style A-code.
  * 17 Oct 01   MLA           Improved compatibility with Platt's A-code.

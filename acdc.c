@@ -1,5 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 01 Oct 02   MLA           Added dynamic copyleft notice.
  * 11 Jul 02   MLA           BUG: Fixed ITOBJ initalisation.
  * 23 Jun 02   MLA           Use "real" randomisation for texts.
@@ -56,12 +57,13 @@ int style = 10;                  /* Default to A-code 10.* style */
 
 #include "major.h"           /* Pick up the MAXTYPES value! */
 #include "symbol.h"
+#include "btree.h"
 int vocab_count;
 int type_counts [MAXTYPES];
 int type_base [MAXTYPES];
 int flag_field_size [VARFLAG + 1];
 int *used_counts;
-struct node *root [] = {NULL, NULL, NULL, NULL};
+int *roots [] = {NULL, NULL, NULL, NULL};
 
 #include "text.h"
 long next_addr;
@@ -104,6 +106,7 @@ int main (argc, argv)
 {
    int offset;
    int len;
+   int i;
    char *arg;
    char source_path [MAXLINE + 1];
 
@@ -113,12 +116,17 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.34; MLA, 02 Jan 03]\n");
+      "[A-code to C translator, version 11.35; MLA, 07 Jan 03]\n");
 #ifdef COPYLEFT
    now = time (NULL);
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 #endif /* COPYLEFT */
 
+/* Initialise the search stacks.
+ */
+   for (i = 0; i < sizeof (roots) / sizeof (roots [0]); i++)
+      roots [i] = btinit (NULL);
+      
 /* Obtain the name of the program to process. This may be present on
  * the command line or prompted for.
  */

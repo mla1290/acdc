@@ -1,4 +1,4 @@
-/* output.h (acdc) - copyleft Mike Arnautov 1990-2002.
+/* output.h (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 31 Dec 01   MLA           Added xref.
  * 11 Dec 99   MLA           Upped initial condition buffer to 1K.

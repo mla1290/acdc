@@ -1,4 +1,4 @@
-/* symbol.h (acdc) - copyleft Mike Arnautov 1990-2002.
+/* symbol.h (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 09 Jan 01   MLA           Allowed for active text types.
  * 13 Mar 94   MLA           Made conditional.
@@ -53,7 +53,7 @@
       } body;
    } ;
 
-   extern struct node *root[];
+   extern int *roots[];
 
    extern struct node *fndsymb();
    extern struct node *addsymb();

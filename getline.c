@@ -1,4 +1,4 @@
-/* getline.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* getline.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 25 Feb 01   MLA           Don't count comment or blank lines towards total.
  * 03 Dec 00   MLA           Allowed '#' as a comment delimiter.                

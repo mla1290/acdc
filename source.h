@@ -1,4 +1,4 @@
-/* source.h (acdc) - copyleft Mike Arnautov 1990-2002.
+/* source.h (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 17 Nov 01   MLA           Added the source_* buffers.
  * 14 Mar 01   MLA           Replaced old_style with style and moved to text.h.

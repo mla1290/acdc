@@ -1,4 +1,4 @@
-/* storword.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* storword.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 14 Sep 00   MLA           Replace'_'s with NBSP.
  * 24 Jul 99   MLA           Fixed complier warnings.

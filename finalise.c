@@ -1,5 +1,6 @@
-/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 02 Jan 03   MLA           bug: removed a redundant arg to fprintf.
  * 13 Jan 02   MLA           Pass "hidden" type parameters.
  * 30 Dec 01   MLA           Added proc arguments code.
@@ -18,7 +19,7 @@
 
 #include "acdc.h"
 #include "text.h"
-#include "search.h"
+#include "btree.h"
 #include "symbol.h"
 #include "output.h"
 #include "major.h"
@@ -55,7 +56,7 @@ void finalise ()
    if ((proc_args = (int *) calloc (next_procno, sizeof (int))) == NULL)
       (void) gripe ("", "Unable to allocate argument array space.");
 
-   twalk (root [SYMBOL], process_proc);
+   btspan (SYMBOL, process_proc);
    (void) fprintf (code_file, 
       "#ifdef __STDC__\nvoid p0(void)\n#else\nvoid p0()\n#endif\n{return;}\n");
 
@@ -111,12 +112,10 @@ void finalise ()
 }
 
 #ifdef __STDC__
-void process_proc (struct node **npp, VISIT order, int level)
+void process_proc (struct node *np)
 #else
-void process_proc (npp, order, level)
-struct node **npp;
-VISIT order;
-int level;
+void process_proc np
+struct node *np;
 #endif
 {
    struct proc_list *head;
@@ -124,32 +123,30 @@ int level;
    int refno;
    int type;
 
-   if (order != postorder && order != leaf)
-      return;
-   type = (*npp) -> type;
+   type = np -> type;
 
-   if ((*npp) -> used_count == 0 && *((*npp) -> name) != '.' &&
-      strcmp ((*npp) -> name, "place") && 
-      strcmp ((*npp) -> name, "verb") && 
-      strcmp ((*npp) -> name, "variable") && 
-      strcmp ((*npp) -> name, "object") && 
-      strncmp ((*npp) -> name, "spare", 5) &&
-      strcmp ((*npp) -> name, "arg3"))
-         (void) printf ("%-20s symbol defined but not used.\n", (*npp) -> name);
+   if (np -> used_count == 0 && *(np -> name) != '.' &&
+      strcmp (np -> name, "place") && 
+      strcmp (np -> name, "verb") && 
+      strcmp (np -> name, "variable") && 
+      strcmp (np -> name, "object") && 
+      strncmp (np -> name, "spare", 5) &&
+      strcmp (np -> name, "arg3"))
+         (void) printf ("%-20s symbol defined but not used.\n", np -> name);
 
-   procno = refno = (*npp) -> refno;
+   procno = refno = np -> refno;
 
    if (procno >= type_base [PROCEDURE] && procno < next_procno)
-      *(proc_args + procno - type_base [PROCEDURE]) = (*npp) -> state_count;
+      *(proc_args + procno - type_base [PROCEDURE]) = np -> state_count;
    
    procno = refno;
    if (type > VERB && type != INIT && type != REPEAT)
       return;
 
-   if ((*npp) -> head == NULL)
+   if (np -> head == NULL)
       return;
 
-   head = (*npp) -> head;
+   head = np -> head;
 
    if (head -> next != NULL || type > VERB)
    {

@@ -1,4 +1,4 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 10 Mar 02   MLA           bug: Write xref for parameter declarations.
  * 13 Jan 02   MLA           Pass "hidden" type parameters.

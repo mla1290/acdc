@@ -1,4 +1,4 @@
-/* chrtobin.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* chrtobin.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 15 Sep 90   MLA           Initial coding.

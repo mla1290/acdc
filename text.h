@@ -1,4 +1,4 @@
-/* text.h (acdc) - copyleft Mike Arnautov 1990-2002.
+/* text.h (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 26 Dec 01   MLA           Added text_lines.
  * 25 Nov 01   MLA           Added IGNORE_EOL.

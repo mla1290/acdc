@@ -1,4 +1,4 @@
-/* initial.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* initial.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 27 Jul 02   MLA           Added CHECKPOINT.
  * 12 Jul 02   MLA           Added IFNE, IFLE, IFGE.

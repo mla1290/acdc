@@ -1,4 +1,4 @@
-/* major.h (acdc) - copyleft Mike Arnautov 1990-2002.
+/* major.h (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 10 Mar 02   MLA           Added XREF/NOXREF.
  * 21 Dec 01   MLA           Tidied up.

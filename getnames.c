@@ -1,4 +1,4 @@
-/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 14 Jul 02   MLA           BUG: Report primary names too!
  * 13 Jan 02   MLA           Added xref.

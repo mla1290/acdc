@@ -1,4 +1,4 @@
-/* gettext.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* gettext.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 01 Dec 02   MLA           bug: Allow abutting nested texts.
  * 26 Dec 01   MLA           Added text_lines.

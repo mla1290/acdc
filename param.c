@@ -1,4 +1,4 @@
-/* params.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* params.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 13 Jan 02   MLA          Give up -- pass "hidden" type args.
  * 12 Jan 02   MLA          bug: construct own parameter names.

@@ -1,4 +1,4 @@
-/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 22 Nov 90   MLA           Don't print null file name.
