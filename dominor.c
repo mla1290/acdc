@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
+ * 22 Aug 04   MLA           Made CALL directive optional.
  * 20 Aug 04   MLA           Added IFCGI and IFDOALL.
  * 19 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
  * 08 Aug 04   MLA           Added APPEND.
@@ -148,7 +149,12 @@ char *proccond;
           break;
 
       if ((np = parse (MINOR)) == NULL)
-         (void) gripe (tp [0], "Unknown minor directive.");
+      {
+         if (style < 11)
+            (void) gripe (tp [0], "Not a known minor directive.");
+         else
+            (void) gripe (tp [0], "Not a minor directive or callable symbol.");
+      }
       minor_count++;
       ap[0] = np;
 
@@ -326,6 +332,7 @@ char *proccond;
             fprintf (code_file, proccond);
       }
       
+      index = 0;
       switch (minor_type)
       {
          case KEYWORD:
@@ -334,7 +341,6 @@ char *proccond;
                (void) fprintf (code_file, "   if (!%s(",
                   (minor_type == KEYWORD) ? "keyword" : "anyof");
             multiple_pending = minor_type;
-            index = 0;
             while (tp [++index] != NULL)
             {
                type = argtyp [index];
@@ -436,7 +442,6 @@ char *proccond;
 
          case IFAT:
             cond_ptr += SPRINTF3 (cond_ptr, "%s(", not_pending ? "!" : "");
-            index = 0;
             while (tp [++index] != NULL)
             {
                if (argtyp [index] != OBJECT && argtyp [index] != PLACE &&
@@ -1500,13 +1505,12 @@ char *proccond;
  */
              
          case CALL:
+            index = 1;        /* Point at proc name and fall through. */
          default:
-            if (minor_type == CALL)
-               index = 1;
-            else
+            if (index == 0)
             {
-               index = 0;
                argtyp[0] = ap[0] -> type;
+               argval[0] = ap[0] -> refno;
                write_ref (" prc ", tp [index]);
             }
             proc_index = index;

@@ -22,7 +22,7 @@
       int procno;
       struct proc_list *next;
    } ;
-
+      
    struct node 
    {
       char *name;

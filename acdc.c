@@ -1,7 +1,8 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2004.
  */
-#define VERSION "11.56, MLA 20 Aug 04"
+#define VERSION "11.57, MLA 12 Sep 04"
 /*
+ * 12 Sep 04   MLA           CALL is optional.
  * 20 Aug 04   MLA           Added IFCGI.
  * 19 Aug 04   MLA           Added FREE_ARG notation.
  * 14 Aug 04   MLA           Added SAVE/RESTORE.

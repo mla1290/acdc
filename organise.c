@@ -581,7 +581,7 @@ void organise()
       (void) declare_constant ("ambigtypo", "AMBIGTYPO");
       (void) declare_constant ("sceneword", "SCENEWORD");
    }
-   if (style == 11)
+   if (style >= 11)
       (void) declare_constant ("badsyntax", "BADSYNTAX");
    if (style == 1)
    {
