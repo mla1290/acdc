@@ -204,7 +204,6 @@ void domajor ()
          }           /* Otherwise assume a constant and fall through! */
 
       case STATE:
- index = 1;
       case CONSTANT:
       case FLAGS:
          index = 1;
@@ -298,7 +297,7 @@ void domajor ()
          return;          /* Preserve line_status as BOL ! */
 
       case STYLE:
-      case VERSION:
+      case GAMEID:
       case AUTHOR:
          (void) gripe (tp[0], "Descriptive keyword too late.");
          break;

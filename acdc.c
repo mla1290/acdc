@@ -123,7 +123,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.50; MLA, 29 Mar 03]\n");
+      "[A-code to C translator, version 11.51; MLA, 22 May 03]\n");
    srand ((unsigned int)(now = time (NULL)));
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 

@@ -39,7 +39,7 @@
 #define XREF      28
 #define NOXREF    29
 #define INCLUDE   30
-#define VERSION   31
+#define GAMEID    31
 #define DEFINE    32
 #define STYLE     33
 #define AUTHOR    34

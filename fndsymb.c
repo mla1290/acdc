@@ -11,7 +11,6 @@
  */
  
 #include <string.h>
-#include "search.h"
 #include <setjmp.h>
 
 #include "acdc.h"

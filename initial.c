@@ -90,9 +90,9 @@ struct directive keywords[] =
    {"synonym",   MAJOR,     SYNONYM,   1,   ANY_NUMBER},  /* Compatibility */
    {"synon",     MAJOR,     SYNONYM,   1,   ANY_NUMBER},  /* Compatibility */
    {"define",    MAJOR,     DEFINE,    1,   ANY_NUMBER},  /* Compatibility */
-   {"gameid",    MAJOR,     VERSION,   1,   REST},
-   {"title",     MAJOR,     VERSION,   1,   1},           /* Compatibility */
-   {"dbname",    MAJOR,     VERSION,   1,   1},           /* Compatibility */
+   {"gameid",    MAJOR,     GAMEID,    1,   REST},
+   {"title",     MAJOR,     GAMEID,    1,   1},           /* Compatibility */
+   {"dbname",    MAJOR,     GAMEID,    1,   1},           /* Compatibility */
    {"author",    MAJOR,     AUTHOR,    1,   REST},
    {"style",     MAJOR,     STYLE,     1,   2},
    {"have",      MINOR,     HAVE,      1,   ANY_NUMBER},
@@ -271,7 +271,7 @@ void initial()
       if ((np = parse (MAJOR)) == NULL)
          (void) gripe (tp [0], "Unknown major directive.");
       type = np -> refno;
-      if (type == VERSION)
+      if (type == GAMEID)
       {
          strncpy (version, tp [1], sizeof (version) - 1);
          *(version + sizeof (version) - 1) = '\0';
