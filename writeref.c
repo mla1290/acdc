@@ -1,0 +1,39 @@
+/* writeref.c (acdc) - copyleft Mike Arnautov 1990-2002.
+ *
+ * 10 Mar 02   MLA           Initial coding.
+ *
+ */
+
+#include <stdio.h>
+
+#include "source.h"
+#include "output.h"
+
+char xref_path [MAXLINE + 1];
+#ifdef __STDC__
+
+void write_ref (
+   char *tag,
+   char *token)
+   
+#else
+
+void write_ref (tag, token)
+   char *tag;
+   char *token;
+   
+#endif
+
+{
+   if (xref_file == NULL)
+   {
+      if ((xref_file = fopen (xref_path, "w")) == NULL)
+      {
+         fprintf (stderr, "Sorry, cannot open cross-reference file %s.\n", 
+            xref_path);
+         exit (1);
+      }
+   }
+   (void) fprintf (xref_file, "%24s   %s   %6d %s\n",
+      token, tag, line_count [level], pathname [level]);
+}
