@@ -1017,7 +1017,8 @@ char *proccond;
             else (void) gripe (tp [1], "Not a value holder.");
 
             (void) fprintf (code_file, "   set('%c',%d,", ctype, argval [1]);
-            if      (argtyp [2] == CONSTANT ||
+            if      (argtyp [2] == CONSTANT || 
+                     argtyp [2] == SYNONYM ||
                      argtyp [2] == STATE)    ctype = 'c';
             else if (argtyp [2] == VARIABLE) ctype = 'v';
             else if (argtyp [2] == LOCAL)    ctype = 'l';

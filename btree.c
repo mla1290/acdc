@@ -107,13 +107,18 @@ struct node *nodeptr;
 {
    char *n1;
    char *n2;
+   int result;
 
    if (*(n1 = itemptr -> name) == '!')
       n1++;
    if (*(n2 = nodeptr -> name) == '!')
       n2++;
 
-   return (strcmp (n1, n2));
+   result = strcmp (n1, n2);
+   if (result)
+      return (result > 0 ? 1 : -1);
+   else
+      return (0);
 }
 
 /*--------------------------------------------------------------------*/
@@ -127,13 +132,15 @@ struct node *nodeptr;
 #endif /* __STDC__ */
 {
    char *name;
+   int result;
 
    if (*(name = nodeptr -> name) == '!')
       name++;
-   if (style == 1)
-      return (strncmp (word, name, 12));
+   result =  style == 1 ? strncmp (word, name, 12) : strcmp (word, name);
+   if (result)
+      return (result > 0 ? 1 : -1);
    else
-      return (strcmp (word, name));
+      return (0);
 }
 
 /*====================================================================*/

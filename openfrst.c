@@ -1,5 +1,6 @@
 /* openfrst.c (acdc) - copyleft Mike Arnautov 2002 - 2003.
  *
+ * 24 Jan 03   MLA           Allowed the .acode variant of the suffix.
  * 10 Mar 02   MLA           Moved opening of xref file to writeref.c
  * 31 Dec 01   MLA           Added cross-referencing code.
  * 17 Nov 01   MLA           Bug: Fixed pathname code.
@@ -19,7 +20,7 @@
 #include "output.h"
 #include "source.h"
 char source_stem [MAXLINE + 1];
-char source_file [32];
+char source_file [80];
 
 #ifdef __STDC__
 void openfrst (char *file_spec)
@@ -49,8 +50,9 @@ void openfrst (file_spec)
    strncpy (source_file, nameptr,  sizeof (source_file) - 5);  
       
    sfxptr = strrchr (source_file, '.');
-   if (sfxptr == NULL || strcmp (sfxptr + 1, "acd") != 0)
-      strcat (source_file, ".acd");
+   if (sfxptr == NULL || 
+      (strcmp (sfxptr + 1, "acd") != 0 && strcmp (sfxptr + 1, "acode") != 0))
+         strcat (source_file, ".acd");
    
    sprintf (fullname, "%s%s", source_stem, source_file);
    if ((*infile = fopen (fullname, "r")) == NULL)

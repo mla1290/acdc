@@ -14,11 +14,11 @@ void storchar (ch)
 int ch;
 #endif
 {
-#ifndef STRIP
+/* PRIVATE */
    if (plain_text)
-#endif
+/* ENDPRIVATE */
       fputc(ch, text_file);
-#ifndef STRIP
+/* PRIVATE */
    else
    {
       int mask;
@@ -31,7 +31,7 @@ int ch;
          mask = 'X';
       fputc(ch ^ *dbname_ptr ^ mask, text_file);
    }
-#endif
+/* ENDPRIVATE */
    next_addr++;
    return;
 }

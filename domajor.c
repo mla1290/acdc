@@ -161,6 +161,8 @@ void domajor ()
          *(dbname + len) = '\0';
          if (strcmp (dbname + len - 4, ".acd") == 0)
             *(dbname + len - 4) = '\0';
+         else if (strcmp (dbname + len - 6, ".acode") == 0)
+            *(dbname + len - 6) = '\0';
          strcat (dbname, "db");
          stortitl (dbname);
          style = 1;           /* Original A-code style */
