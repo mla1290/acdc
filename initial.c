@@ -137,6 +137,10 @@ struct directive keywords[] =
    {"itlist",    MINOR,     ITOBJ,     1,   3},     /* For compatibility */
    {"itplace",   MINOR,     ITPLACE,   1,   3},
    {"iterate",   MINOR,     ITERATE,   3,   3},
+   {"next",      MINOR,     NEXT,      0,   0},
+   {"continue",  MINOR,     NEXT,      0,   0},
+   {"break",     MINOR,     BREAK,     0,   0},
+   {"last",      MINOR,     BREAK,     0,   0},
    {"eoi",       MINOR,     EOI,       0,   0},
    {"call",      MINOR,     CALL,      1,   ANY_NUMBER},
    {"proceed",   MINOR,     PROCEED,   0,   0},
@@ -257,7 +261,7 @@ void initial()
 
 /* Now see whether we have any game info lines (style, author, gameid). */
    
-   *title = '\0';
+   *version = '\0';
    *author = '\0';
    style = -1;
    while (1)
@@ -269,8 +273,8 @@ void initial()
       type = np -> refno;
       if (type == VERSION)
       {
-         strncpy (title, tp [1], sizeof (title) - 1);
-         *(title + sizeof (title) - 1) = '\0';
+         strncpy (version, tp [1], sizeof (version) - 1);
+         *(version + sizeof (version) - 1) = '\0';
       }
       else if (type == AUTHOR)
       {
@@ -301,7 +305,7 @@ void initial()
       line_status = EOL;
    }
    if (style == -1)
-      style = *title ? 10 : 1;
+      style = *version ? 10 : 1;
  
    if ((code_file = openout("adv01.c", "w")) == NULL)
       (void) gripe ("adv01.c", "Unable to open code file.");
@@ -332,13 +336,13 @@ void initial()
    if ((text_file = openout (tptr, MODE)) == NULL)
       (void) gripe (tptr, "Unable to open data file.");
 
-   tptr = *title ? title : source_file;
+   tptr = *version ? version : source_file;
    len = strlen (tptr);
    if (len > 79) len = 79;
-   (void) strncpy (title, tptr, len);
-   *(title + len) = '\0';
-   title [79] = '\0';
-   tptr = title;
+   (void) strncpy (version, tptr, len);
+   *(version + len) = '\0';
+   version [79] = '\0';
+   tptr = version;
    if (memory == 3)
    {
       fprintf (text_file, "char text [TEXT_BYTES] = {\n");
@@ -375,7 +379,14 @@ void initial()
       fputc (mask, text_file);
    next_addr++;
 
-   printf ("GameID: %s\n", title);
+   np = addsymb (SYMBOL, ".version", TEXT, type_counts [TEXT]++);
+   np -> body.text.name_addr = next_addr;
+   tptr = version;
+   while (*tptr)
+      storchar(*tptr++);
+   storchar ('\0');
+   
+   printf ("GameID: %s\n", version);
    printf ("Style:  ");
    if (style == 1)
       puts ("Dave Platt's original A-code");

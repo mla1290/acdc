@@ -377,8 +377,8 @@ void organise()
  */
    if ((defs_file = openout("adv1.h","w")) == NULL)
       (void) gripe ("","Unable to open adv1.h (defs.h).");
-   (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", title);
-   strcpy (dbname, title);
+   (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", version);
+   strcpy (dbname, version);
    cptr = dbname;
    while (isalnum (*cptr))
    {
@@ -470,6 +470,14 @@ void organise()
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "typo")) != NULL &&
       np -> type == TEXT)
          (void) fprintf (defs_file, "#define TYPO %d\n", np -> refno);
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "define")) != NULL &&
+      np -> type == VERB)
+         (void) fprintf (defs_file, "#define DEFINE %d\n", np -> refno);
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undefine")) != NULL &&
+      np -> type == VERB)
+         (void) fprintf (defs_file, "#define UNDEFINE %d\n", np -> refno);
 
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "it")) != NULL)
       if (np -> type == OBJECT)

@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 28 Mar 03   MLA           Added NEXT and BREAK.
  * 19 Mar 03   MLA           Check QUIP argument.
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 06 Mar 03   Stuart Munro  Fix non-ASCII dominor() args declaration;
@@ -106,6 +107,7 @@ char *proccond;
    int multiple_pending;
    int brace_count;
    int brace_pending;
+   int loop_count;
    int args_count;
    int got_code;
    int locals;
@@ -125,6 +127,7 @@ char *proccond;
    got_code = 0;
    ifs_pending = 0;
    brace_count = 0;
+   loop_count = 0;
    conjunction_pending = FALSE;
    not_pending = FALSE;
    multiple_pending = FALSE;
@@ -629,6 +632,7 @@ char *proccond;
                (void) fprintf (code_file, "   ");
             if (minor_type == EOT)
             {
+               loop_count = 0;
                brace_pending = FALSE;
                while (brace_count--)
                   (void) fputc ('}', code_file);
@@ -639,6 +643,8 @@ char *proccond;
             {
                (void) fputc ('}', code_file);
                brace_pending = TRUE;
+               if (minor_type == EOI)
+                  loop_count--;
             }
             break;
 
@@ -646,6 +652,7 @@ char *proccond;
             if (argtyp [1] != VARIABLE && argtyp [1] != LOCAL)
                (void) gripe (tp [1], "Not a variable.");
             brace_count++;
+            loop_count++;
             if (argtyp [1] == VARIABLE)
                (void) fprintf (code_file, "   *bitword(%d)= -1; value[%d]=",
                   argval [1], argval [1]);
@@ -713,6 +720,7 @@ char *proccond;
             if (tp[2] && tp [3] && argtyp [3] != PLACE)
                (void) gripe (tp [3], "Not a place!");
             brace_count++;
+            loop_count++;
             if (argtyp [1] == VARIABLE)
                (void) fprintf (code_file, "   *bitword(%d)= -1; value[%d]=",
                   argval [1], argval [1]);
@@ -760,8 +768,19 @@ char *proccond;
                (void) fprintf (code_file, "%d", argval [3]);
             (void) fprintf (code_file, ") {\n");
             brace_count++;
+            loop_count++;
             break;
 
+         case NEXT:
+         case BREAK:
+            if (loop_count <= 0)
+               (void) gripe (tp [0], "Directive not inside a loop!");
+            if (minor_type == NEXT)
+               (void) fprintf (code_file, "continue;\n");
+            else
+               (void) fprintf (code_file, "break;\n");
+            break;
+            
          case CALL:
             if (argtyp [1] != PROCEDURE && argtyp [1] > VERB &&
                argtyp [1] != VARIABLE && argtyp [1] != LOCAL)

@@ -53,11 +53,13 @@
 # define ITOBJ       51
 # define ITPLACE     52
 # define ITERATE     53
-# define EOI         54
+# define NEXT        54
+# define BREAK       55
+# define EOI         56
 
-# define EXEC        55
-# define FAKEARG     56
-# define FAKECOM     57
+# define EXEC        57
+# define FAKEARG     58
+# define FAKECOM     59
 
 # define CALL        61
 # define PROCEED     62
