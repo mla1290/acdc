@@ -1,5 +1,6 @@
 /* const.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 15 Jan 05   MLA           Added AUTOSYMBOL.
  * 19 Aug 04   MLA           Added FREE_ARG.
  * 03 Mar 03   MLA           Added REST.
  * 15 Sep 90   MLA           Initial coding.
@@ -51,22 +52,23 @@ extern void recase ();
 
 /* Symbol searching stuff. */
 
-#define NONE -1
-#define MAJOR 0
-#define MINOR 1
-#define SYMBOL 2
-#define VOCAB 3
-#define ROOTS_COUNT 4
+#define NONE                -1
+#define MAJOR                0
+#define MINOR                1
+#define SYMBOL               2
+#define AUTOSYMBOL          20
 #define SYMBOL_OR_CONSTANT 100
+#define VOCAB                3
+#define ROOTS_COUNT          4
 
-/* A large number. */
+/* A large number of args. */
 
 #define ANY_NUMBER 99
 
 /* Rest of the line. */
 
-#define REST -1
-#define FREE_ARG 1000
+#define REST         -1
+#define FREE_ARG   1000
 
 /* Size of a code chunk. */
 

@@ -253,7 +253,7 @@ char *upname;
    {
       value = next_procno++;
       (type_base [PROCEDURE])++;
-      (void) addsymb (SYMBOL, name, CONSTANT, value);
+      (void) addsymb (AUTOSYMBOL, name, CONSTANT, value);
    }
    (void) fprintf (defs_file, "#define %s %d\n", upname, value);
 
@@ -279,7 +279,7 @@ int   value;
          value = np -> refno;
    }
    else
-      (void) addsymb (SYMBOL, name, FLAGS, value);
+      (void) addsymb (AUTOSYMBOL, name, FLAGS, value);
    (void) fprintf (defs_file, "#define %s %d\n", upname, value);
    return;
 }
@@ -316,36 +316,36 @@ void organise()
 /* Check for mandatory symbols and add them if missing */
 
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "inhand")) == NULL)
-      (void) addsymb (SYMBOL, "inhand", PLACE, type_counts[PLACE]++);
+      (void) addsymb (AUTOSYMBOL, "inhand", PLACE, type_counts[PLACE]++);
    else if (np -> type != PLACE)
       (void) gripe ("INHAND", "Declared as a non-place!");
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "here")) == NULL)
-      (void) addsymb (SYMBOL, "here", VARIABLE, type_counts[VARIABLE]++);
+      (void) addsymb (AUTOSYMBOL, "here", VARIABLE, type_counts[VARIABLE]++);
    else if (np -> type != VARIABLE)
       (void) gripe ("HERE", "Declared as a non-variable!");
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "there")) == NULL)
-      (void) addsymb (SYMBOL, "there", VARIABLE, type_counts[VARIABLE]++);
+      (void) addsymb (AUTOSYMBOL, "there", VARIABLE, type_counts[VARIABLE]++);
    else if (np -> type != VARIABLE)
       (void) gripe ("THERE", "Declared as a non-variable!");
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "status")) == NULL)
-      (void) addsymb (SYMBOL, "status", VARIABLE, type_counts[VARIABLE]++);
+      (void) addsymb (AUTOSYMBOL, "status", VARIABLE, type_counts[VARIABLE]++);
    else if (np -> type != VARIABLE)
       (void) gripe ("STATUS", "Declared as a non-variable!");
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "arg1")) == NULL)
-      (void) addsymb (SYMBOL, "arg1", VARIABLE, type_counts[VARIABLE]++);
+      (void) addsymb (AUTOSYMBOL, "arg1", VARIABLE, type_counts[VARIABLE]++);
    else if (np -> type != VARIABLE)
       (void) gripe ("ARG1", "Declared as a non-variable!");
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "arg2")) == NULL)
-      (void) addsymb (SYMBOL, "arg2", VARIABLE, type_counts[VARIABLE]++);
+      (void) addsymb (AUTOSYMBOL, "arg2", VARIABLE, type_counts[VARIABLE]++);
    else if (np -> type != VARIABLE)
       (void) gripe ("ARG2", "Declared as a non-variable!");
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "arg3")) == NULL)
-      (void) addsymb (SYMBOL, "arg3", VARIABLE, type_counts[VARIABLE]++);
+      (void) addsymb (AUTOSYMBOL, "arg3", VARIABLE, type_counts[VARIABLE]++);
    else if (np -> type != VARIABLE)
       (void) gripe ("ARG3", "Declared as a non-variable!");
 /*
  *   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "pls.clarify")) == NULL)
- *      (void) addsymb (SYMBOL, "pls.clarify", FLAGS, 
+ *      (void) addsymb (AUTOSYMBOL, "pls.clarify", FLAGS, 
  *         ++flag_field_size [VARFLAG]);
  *   else if (np -> type != FLAGS)
  *      (void) gripe ("PLS.CLARIFY", "Declared as a non-flag!");
@@ -357,7 +357,7 @@ void organise()
       undo = np;
       if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo.status")) == NULL)
       {
-         np = addsymb (SYMBOL, "undo.status", VARIABLE, 
+         np = addsymb (AUTOSYMBOL, "undo.status", VARIABLE, 
             type_counts[VARIABLE]++);
       }
       else if (np -> type != VARIABLE)
@@ -426,8 +426,8 @@ void organise()
  */
    if ((defs_file = openout("adv1.h","w")) == NULL)
       (void) gripe ("","Unable to open adv1.h (defs.h).");
-   (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", version);
-   strcpy (dbname, version);
+   (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", gameid);
+   strcpy (dbname, gameid);
    cptr = dbname;
    while (isalnum (*cptr))
    {

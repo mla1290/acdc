@@ -1,5 +1,6 @@
 /* finalise.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 15 Jan 05   MLA           Use the auto flag for checking lack of use.
  * 06 Mar 03   Stuart Munro  Fix non-ASCII process_proc args declaration.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 07 Jan 03   MLA           Use btree instead of tsearch.
@@ -128,12 +129,14 @@ struct node *np;
    type = np -> type;
 
    if (style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
-      strcmp (np -> name, "place") && 
+      (np -> auto_flag) == '\0' && strncmp (np -> name, "spare..", 7))
+/*      strcmp (np -> name, "place") && 
       strcmp (np -> name, "verb") && 
       strcmp (np -> name, "variable") && 
       strcmp (np -> name, "object") && 
       strncmp (np -> name, "spare", 5) &&
-      strcmp (np -> name, "arg3"))
+      strcmp (np -> name, "arg3")) 
+*/
          (void) printf ("   %-22s symbol defined but not used.\n", np -> name);
 
    procno = refno = np -> refno;

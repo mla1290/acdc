@@ -26,8 +26,8 @@ int ch;
    {
       int mask;
 
-      if (*(++version_ptr) == '\0')
-         version_ptr = version;
+      if (*(++gameid_ptr) == '\0')
+         gameid_ptr = gameid;
       mask = (next_addr >> 4) & 127;
       if (mask == 0) 
          mask = next_addr & 127;
@@ -36,12 +36,12 @@ int ch;
       mask = (17 * mask + 13) & 127;
       if (memory == 3)
       {
-         fprintf (text_file, ",%d", ch ^ *version_ptr ^ mask);
+         fprintf (text_file, ",%d", ch ^ *gameid_ptr ^ mask);
          if ((next_addr + 1) % 16 == 0)
             fputc ('\n', text_file);
       }
       else
-         fputc(ch ^ *version_ptr ^ mask, text_file);
+         fputc(ch ^ *gameid_ptr ^ mask, text_file);
    }
 /* ENDPRIVATE */
    next_addr++;

@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 20 Feb 05   MLA           Added separate VERSION and DATE.
  * 20 Aug 04   MLA           Added IFCGI.
  * 14 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
  * 09 Feb 04   MLA           Added ADJECTIVE and PREPOSITION types.
@@ -97,9 +98,11 @@ struct directive keywords[] =
    {"synonym",     MAJOR, SYNONYM,     1,   ANY_NUMBER},  /* Compatibility */
    {"synon",       MAJOR, SYNONYM,     1,   ANY_NUMBER},  /* Compatibility */
    {"define",      MAJOR, DEFINE,      1,   ANY_NUMBER},  /* Compatibility */
-   {"gameid",      MAJOR, GAMEID,      1,   REST},
-   {"title",       MAJOR, GAMEID,      1,   1},           /* Compatibility */
-   {"dbname",      MAJOR, GAMEID,      1,   1},           /* Compatibility */
+   {"name" ,       MAJOR, NAME  ,      1,   REST},
+   {"title",       MAJOR, NAME,        1,   REST},
+   {"dbname",      MAJOR, NAME,        1,   1},           /* Compatibility */
+   {"version",     MAJOR, VERSION,     1,   REST},
+   {"date",        MAJOR, DATE,        1,   REST},
    {"author",      MAJOR, AUTHOR,      1,   REST},
    {"style",       MAJOR, STYLE,       1,   2},
    {"have",        MINOR, HAVE,        1,   ANY_NUMBER},
@@ -235,6 +238,9 @@ void initial()
    int index;
    char *tptr;
    char dbname [80];
+   char title [80];
+   char date [80];
+   char version [80];
    int len;
    int type;
    int mask;
@@ -250,7 +256,7 @@ void initial()
       if (dp -> type == SYMBOL)
       {
          if (style != 1)
-            (void) addsymb(dp -> type, dp -> name, FLAGS, dp -> id);
+            (void) addsymb(AUTOSYMBOL, dp -> name, FLAGS, dp -> id);
       }
       else
       {
@@ -264,8 +270,8 @@ void initial()
    listing = FALSE;
    line_status = EOL;
 
-   (void) addsymb (SYMBOL, "INIT_PROC", INIT, 1);
-   (void) addsymb (SYMBOL, "REPEAT_PROC", REPEAT, 2);
+   (void) addsymb (AUTOSYMBOL, "INIT_PROC", INIT, 1);
+   (void) addsymb (AUTOSYMBOL, "REPEAT_PROC", REPEAT, 2);
 
    if ((text_buf_ptr = (char *) calloc (text_buf_len, sizeof(char))) == NULL)
       (void) gripe ("text_buf", "Unable to allocate space.");
@@ -276,10 +282,15 @@ void initial()
    voc_ptr = voc_buf_ptr;
    voc_top = voc_buf_ptr + VOC_INIT_LEN - 20;
 
-/* Now see whether we have any game info lines (style, author, gameid). */
+/* Now see whether we have any game info lines (style, author, name, 
+ * version, date). 
+ */
    
-   *version = '\0';
+   *gameid = '\0';
    *author = '\0';
+   *date = '\0';
+   *version = '\0';
+   *title = '\0';
    style = -1;
    while (1)
    {
@@ -288,10 +299,30 @@ void initial()
       if ((np = parse (MAJOR)) == NULL)
          (void) gripe (tp [0], "Unknown major directive.");
       type = np -> refno;
-      if (type == GAMEID)
+      if (type == NAME)
+      {
+         strncpy (title, tp [1], sizeof (title) - 1);
+         *(title + sizeof (title) - 1) = '\0';
+      }
+      else if (type == VERSION)
       {
          strncpy (version, tp [1], sizeof (version) - 1);
          *(version + sizeof (version) - 1) = '\0';
+      }
+      else if (type == DATE)
+      {
+         strncpy (date, tp [1], sizeof (date) - 1);
+         if (tp [2])
+         {
+            strncat (date, " ", sizeof (date) - strlen (date) - 1);
+            strncat (date, tp [2], sizeof (date) - strlen (date) - 1);
+         }
+         if (tp [3])
+         {
+            strncat (date, " ", sizeof (date) - strlen (date) - 1);
+            strncat (date, tp [3], sizeof (date) - strlen (date) - 1);
+         }
+         *(date + sizeof (date) - 1) = '\0';
       }
       else if (type == AUTHOR)
       {
@@ -322,7 +353,7 @@ void initial()
       line_status = EOL;
    }
    if (style == -1)
-      style = *version ? 10 : 1;
+      style = *title ? 10 : 1;
  
    if ((code_file = openout("adv01.c", "w")) == NULL)
       (void) gripe ("adv01.c", "Unable to open code file.");
@@ -339,27 +370,47 @@ void initial()
 #  define MODE "wb"
 #endif
 
-   if (memory < 3)
+   strcpy (dbname, source_file);
+   if (tptr = strrchr (dbname, '.'))
+      *tptr = 0;
+   if (*title == '\0')
    {
-      strcpy (dbname, source_file);
-      if (tptr = strrchr (dbname, '.'))
-         *tptr = 0;
-      strcat (dbname, ".dat");
-      tptr =  dbname;
+      strcpy (title, dbname);
+      if (*title >= 'a' && *title <= 'z')
+         *title += 'A' - 'a';
    }
+   strcat (dbname, ".dat");
+
+/* Assemble the game ID */
+
+   strcpy (gameid, title);
+   if (*version || *date)
+      strcat (gameid, ", ");
+   if (*version)
+   {
+      strcat (gameid, "version ");
+      strcat (gameid, version);
+      if (*date)
+         strcat (gameid, " - ");
+   }
+   if (*date)
+      strcat (gameid, date);
+      
+   if (memory < 3)
+      tptr =  dbname;
    else
       tptr = "adv6.h";
    
    if ((text_file = openout (tptr, MODE)) == NULL)
       (void) gripe (tptr, "Unable to open data file.");
 
-   tptr = *version ? version : source_file;
+   tptr = *gameid ? gameid : source_file;
    len = strlen (tptr);
    if (len > 79) len = 79;
-   (void) strncpy (version, tptr, len);
-   *(version + len) = '\0';
-   version [79] = '\0';
-   tptr = version;
+   (void) strncpy (gameid, tptr, len);
+   *(gameid + len) = '\0';
+   gameid [79] = '\0';
+   tptr = gameid;
    if (memory == 3)
    {
       fprintf (text_file, "char text [TEXT_BYTES] = {\n");
@@ -369,7 +420,12 @@ void initial()
       fputc ('\0', text_file);
    next_addr++;
 
-   if (plain_text == 0)
+/* Write off the game ID. Can't use the standard encryption, because that
+ * requires the knowledge of the game ID! I.e. there would be no way of 
+ * decrypting it!
+ */
+ 
+  if (plain_text == 0)
    {
       key_mask = (rand() & 127) ^ 'x';
       if (key_mask == 0 || key_mask == 127) key_mask = 'y';
@@ -396,14 +452,19 @@ void initial()
       fputc (mask, text_file);
    next_addr++;
 
-   np = addsymb (SYMBOL, ".version", TEXT, type_counts [TEXT]++);
+/* Write off the game ID again, this time using the standard encryption.
+ * This is necessary in order to give the game access to the string as
+ * a standard text.
+ */
+ 
+   np = addsymb (AUTOSYMBOL, "game.id", TEXT, type_counts [TEXT]++);
    np -> body.text.name_addr = next_addr;
-   tptr = version;
+   tptr = gameid;
    while (*tptr)
       storchar(*tptr++);
    storchar ('\0');
    
-   printf ("GameID: %s\n", version);
+   printf ("GameID: %s\n", gameid);
    printf ("Style:  ");
    if (style == 1)
       puts ("Dave Platt's original A-code");

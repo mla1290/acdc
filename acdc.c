@@ -1,7 +1,8 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2005.
  */
-#define VERSION "11.61, MLA 11 Jan 13"
+#define ACDC_VERSION "11.62, MLA - 20 Feb 2005"
 /*
+ * 15 Jan 05   MLA           Added auto_flag to symbol structure.
  * 11 Jan 05   MLA           Added pre-declarations for UNDO handling.
  * 01 Jan 05   MLA           Added UNDO/REDO.
  * 12 Sep 04   MLA           CALL is optional.
@@ -93,8 +94,8 @@ char *voc_ptr;
 char *voc_top;
 int voc_buf_len = VOC_INIT_LEN;
 FILE *text_file;
-char version [80];
-char *version_ptr = &version [1];
+char gameid [250];
+char *gameid_ptr = &gameid [1];
 int plain_text = 0;
 
 #include "output.h"
@@ -135,7 +136,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version %s]\n", VERSION);
+      "[A-code to C translator, version %s]\n", ACDC_VERSION);
    srand ((unsigned int)(now = time (NULL)));
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 
@@ -233,7 +234,6 @@ int main (argc, argv)
 /* Initialise search trees and other things */
 
    (void) initial ();
-
    while (line_status != EOF)
    {
       if ((line_status = getline (IGNORE_BLANK)) == EOF)

@@ -1,5 +1,6 @@
 /* symbol.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 15 Jan 05   MLA           Added the 'auto' flag.
  * 09 Jan 01   MLA           Allowed for active text types.
  * 13 Mar 94   MLA           Made conditional.
  * 15 Sep 90   MLA           Initial coding 
@@ -32,6 +33,7 @@
       struct proc_list *tail;
       int state_count;     /* Number of states for objects, places and texts */
       int used_count;
+      char auto_flag;
       union
       {
          struct

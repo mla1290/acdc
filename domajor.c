@@ -298,7 +298,9 @@ void domajor ()
          return;          /* Preserve line_status as BOL ! */
 
       case STYLE:
-      case GAMEID:
+      case NAME:
+      case VERSION:
+      case DATE:
       case AUTHOR:
          (void) gripe (tp[0], "Descriptive keyword too late.");
          break;

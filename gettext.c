@@ -275,9 +275,20 @@ next_char:
          if ((nest_text = fndsymb (SYMBOL, nest_name)) == NULL)
             (void) gripe (nest_name, "Nested text name not known.");
          nest_type = nest_text -> type;
-         if (nest_type != TEXT && nest_type != VARIABLE)
+/*         if (nest_type != TEXT && nest_type != VARIABLE) */
+         *text_ptr++ = NEST_TEXT;
+         if (nest_type > TEXT)
             (void) gripe (nest_name, "Not reducible to text.");
-         *text_ptr++ = nest_type == TEXT ? NEST_TEXT : NEST_VAR;
+         if (nest_type == OBJECT)
+            *text_ptr++ = 0;
+         else if (nest_type == PLACE)
+            *text_ptr++ = 1;
+         else if (nest_type == VERB)
+            *text_ptr++ = 2;
+         else if (nest_type == VARIABLE)
+            *text_ptr++ = 3;
+         else
+            *text_ptr++ = 4;
          nest_type = nest_text -> refno;
          *text_ptr++ = nest_type / 256;
          *text_ptr++ = nest_type % 256;
@@ -345,6 +356,7 @@ store:
          }
          else if (*text_ptr == NEST_TEXT || *text_ptr == NEST_VAR)
          {
+            (void) storchar (*text_ptr++);
             (void) storchar (*text_ptr++);
             (void) storchar (*text_ptr++);
          }

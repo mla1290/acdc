@@ -1,5 +1,6 @@
 /* addsymb.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 15 Jan 05   MLA           Added AUTOSYMBOL handling.
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 24 Jul 01   MLA           Added ANSI C declaration.
  * 24 Jul 99   MLA           Fixed complier warnings.
@@ -11,6 +12,7 @@
 
 #include "acdc.h"
 #include "symbol.h"
+#include "const.h"
 #include "btree.h"
 
 #ifdef __STDC__
@@ -29,8 +31,17 @@ struct node *addsymb (node_type, word, type, refno)
 {
    struct node *node_ptr;
    int len;
+   int auto_flag;
    extern void *malloc ();
 
+   if (node_type == AUTOSYMBOL)
+   {
+      auto_flag = 'a';
+      node_type = SYMBOL;
+   }
+   else
+      auto_flag = '\0';
+      
    if ((node_ptr = (struct node *) malloc (sizeof (struct node))) == NULL)
       (void) gripe (word, "Unable to allocate memory.");
 
@@ -40,6 +51,7 @@ struct node *addsymb (node_type, word, type, refno)
    (void) strcpy (node_ptr -> name, word);
    node_ptr -> type = type;
    node_ptr -> refno = refno;
+   node_ptr -> auto_flag = auto_flag;
    node_ptr -> body.text.text_addr[0] = -1;
    node_ptr -> body.text.text_addr[1] = -1;
    node_ptr -> body.text.text_addr[2] = -1;

@@ -28,7 +28,7 @@ struct node *parse(type)
 int type;
 #endif
 {
-   int index;
+   int index = 0;
    struct node *np;
    extern char *get_token();
    char *cptr = line;
@@ -49,7 +49,6 @@ int type;
                return (NULL);
          direct_call = 1;
       }
-      index = 0;
       if (direct_call == 0 && np -> body.directive.max_args == REST)
       {
          cptr = raw_line + (cptr - line);
