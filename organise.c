@@ -1,5 +1,6 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 09 Feb 03   MLA           Added SAY, F/LDIR, F/LMAGIC.
  * 04 Feb 03   MLA           Added EXCEPT and TYPO.
  * 02 Feb 03   MLA           Renamed autod0 to autod5 (advkern.h will be 0).
  * 07 Jan 03   MLA           Use btree instead of tsearch.
@@ -14,7 +15,7 @@
  *                           style 1.
  * 17 Oct 01   MLA           Improved compatibility with Platt's A-code.
  * 04 Aug 01   MLA           Added definition of IT.
- * 12 May 01   MLA           Conditionally define FIRS_SPECIAL and LAST_SPECIAL.
+ * 12 May 01   MLA           Conditionally define F/LSPECIAL.
  * 14 Mar 01   MLA           Replaced old_style with style.
  *                           Added AMBIGTYPO abd SCENEWORD.
  * 10 Jan 01   MLA           Allowed for dynamic text types.
@@ -484,7 +485,7 @@ void organise()
       if (np -> type != VERB)
          (void) gripe ("first.special", "Declared as other than a verb.");
       else
-         (void) fprintf (defs_file, "#define FIRST_SPECIAL %d\n", np -> refno);
+         (void) fprintf (defs_file, "#define FSPECIAL %d\n", np -> refno);
    }
 
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "last.special")) != NULL)
@@ -492,7 +493,47 @@ void organise()
       if (np -> type != VERB)
          (void) gripe ("last.special", "Declared as other than a verb.");
       else
-         (void) fprintf (defs_file, "#define LAST_SPECIAL %d\n", np -> refno);
+         (void) fprintf (defs_file, "#define LSPECIAL %d\n", np -> refno);
+   }
+   
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "first.magic")) != NULL)
+   {
+      if (np -> type != VERB)
+         (void) gripe ("first.magic", "Declared as other than a verb.");
+      else
+         (void) fprintf (defs_file, "#define FMAGIC %d\n", np -> refno);
+   }
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "last.magic")) != NULL)
+   {
+      if (np -> type != VERB)
+         (void) gripe ("last.magic", "Declared as other than a verb.");
+      else
+         (void) fprintf (defs_file, "#define LMAGIC %d\n", np -> refno);
+   }
+   
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "first.direction")) != NULL)
+   {
+      if (np -> type != VERB)
+         (void) gripe ("first.direction", "Declared as other than a verb.");
+      else
+         (void) fprintf (defs_file, "#define FDIR %d\n", np -> refno);
+   }
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "last.direction")) != NULL)
+   {
+      if (np -> type != VERB)
+         (void) gripe ("last.direction", "Declared as other than a verb.");
+      else
+         (void) fprintf (defs_file, "#define LDIR %d\n", np -> refno);
+   }
+   
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "say")) != NULL)
+   {
+      if (np -> type != VERB)
+         (void) gripe ("say", "Declared as other than a verb.");
+      else
+         (void) fprintf (defs_file, "#define SAY %d\n", np -> refno);
    }
    
    (void) declare_constant ("badword", "BADWORD");
