@@ -1,5 +1,6 @@
-/* storword.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* storword.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
+ * 14 Feb 04   MLA           Converted longs to ints.
  * 11 Mar 03   MLA           Suppressed "vocabulary buffer enlarged" message.
  * 14 Sep 00   MLA           Replace'_'s with NBSP.
  * 24 Jul 99   MLA           Fixed complier warnings.
@@ -14,13 +15,13 @@
 #include "const.h"
 
 #ifdef __STDC__
-void storword(char *string, int type, int refno, long addr)
+void storword(char *string, int type, int refno, int addr)
 #else
 void storword(string, type, refno, addr)
 char *string;
 int type;
 int refno;
-long addr;
+int addr;
 #endif
 {
    char *old_voc_ptr;

@@ -1,4 +1,4 @@
-/* line.h (acdc) - copyleft Mike Arnautov 1990-2003.
+/* line.h (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 15 Sep 90   MLA           Initial coding.
  *

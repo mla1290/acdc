@@ -1,4 +1,4 @@
-/* getline.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* getline.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 25 Feb 01   MLA           Don't count comment or blank lines towards total.

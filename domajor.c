@@ -1,5 +1,6 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
+ * 14 Feb 04   MLA           Converted longs to ints.
  * 24 Mar 03   MLA           Added 4th arg to gettxt().
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 23 Feb 03   MLA           Preserve mask value.
@@ -77,7 +78,7 @@ void domajor ()
    extern void dominor (char *, char *);
    extern void opnsrc (char *);
    extern void organise (void);
-   extern void storword (char *, int, int, long);
+   extern void storword (char *, int, int, int);
    extern void getdesc (struct node *);
    extern struct node *getnames (int, struct node *);
    extern void *malloc (size_t);
@@ -302,7 +303,9 @@ void domajor ()
          (void) gripe (tp[0], "Descriptive keyword too late.");
          break;
 
-      case FEATURE:
+      case NOUN:
+      case ADJECTIVE:
+      case PREPOSITION:
       case VERB:
          np = getnames (major_type, NULL);
          break;

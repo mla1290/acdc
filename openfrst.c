@@ -1,4 +1,4 @@
-/* openfrst.c (acdc) - copyleft Mike Arnautov 2002 - 2003.
+/* openfrst.c (acdc) - copyleft Mike Arnautov 2002 - 2004.
  *
  * 24 Jan 03   MLA           Allowed the .acode variant of the suffix.
  * 10 Mar 02   MLA           Moved opening of xref file to writeref.c

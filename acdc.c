@@ -1,6 +1,8 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
- * 03 Feb 04   MLA           Added FEATURE type.
+ * 14 Feb 04   MLA           Converted longs to ints.
+ * 09 Feb 04   MLA           Added ADJECTIVE and PREPOSITION types.
+ * 03 Feb 04   MLA           Added NOUN type.
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 03 Mar 03   MLA           Added author.
  * 23 Feb 03   MLA           Initialise random number generator.
@@ -53,8 +55,8 @@ char *tp [ANY_NUMBER + 1];
 #include "source.h"
 int level = -1;
 int file_count;
-long total_lines = 0;
-long text_lines = 0;
+int total_lines = 0;
+int text_lines = 0;
 int line_count [MAXLEVEL];
 char pathname [MAXLEVEL] [MAXLINE + 1];
 FILE *infile [MAXLEVEL];
@@ -71,12 +73,12 @@ int *used_counts;
 int *roots [] = {NULL, NULL, NULL, NULL};
 
 #include "text.h"
-long next_addr;
+int next_addr;
 char *text_buf_ptr;
 int text_buf_len = TEXT_INIT_LEN;
 int switch_count = 0;
 int text_count = 0;
-long next_vocaddr;
+int next_vocaddr;
 char *voc_buf_ptr;
 char *voc_ptr;
 char *voc_top;
@@ -124,7 +126,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.52; MLA, 03 Feb 04]\n");
+      "[A-code to C translator, version 11.53; MLA, 14 Feb 04]\n");
    srand ((unsigned int)(now = time (NULL)));
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 

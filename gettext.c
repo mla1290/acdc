@@ -1,4 +1,4 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 24 Mar 03   MLA           Added 4th argument to signal presence of a
  *                           word holder, if requested to do so.

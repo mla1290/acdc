@@ -1,4 +1,4 @@
-/* text.h (acdc) - copyleft Mike Arnautov 1990-2003.
+/* text.h (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 03 Mar 03   MLA           Adedd memory.
  * 26 Dec 01   MLA           Added text_lines.
@@ -54,7 +54,7 @@ extern void clsfile ();
 #define ASSIGNED_TEXT     4
 #define TIED_TEXT         5
 
-extern long next_addr;
+extern int next_addr;
 extern char *text_buf_ptr;
 extern int text_buf_len;
 extern FILE *text_file;
@@ -65,11 +65,11 @@ extern int memory;
 extern int style;
 extern int text_count;
 extern int switch_count;
-extern long text_lines;
+extern int text_lines;
 extern int key_mask;
 
 #define VOC_INIT_LEN 8192
-extern long next_vocaddr;
+extern int next_vocaddr;
 extern char *voc_buf_ptr;
 extern int voc_buf_len;
 extern char *voc_ptr;

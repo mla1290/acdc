@@ -1,4 +1,4 @@
-/* writeref.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* writeref.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 06 Mar 03   Stuart Munro  Include stdlib.h.
  * 10 Mar 02   MLA           Initial coding.

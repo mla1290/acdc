@@ -1,4 +1,4 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 28 Mar 03   MLA           Added NEXT and BREAK.
  * 19 Mar 03   MLA           Check QUIP argument.

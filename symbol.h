@@ -1,4 +1,4 @@
-/* symbol.h (acdc) - copyleft Mike Arnautov 1990-2003.
+/* symbol.h (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 09 Jan 01   MLA           Allowed for active text types.
  * 13 Mar 94   MLA           Made conditional.
@@ -36,14 +36,15 @@
       {
          struct
          {
-            long text_addr[3];      /* Text address */
-            long name_addr;         /* OBJECT/PLACE/VERB name or TEXT text */
-            int text_type;          /* Types like plain, auto-increment, random... */
+            int text_addr[3];      /* Text address */
+            int name_addr;         /* OBJECT/PLACE/VERB name or TEXT text */
+            int text_type;         /* Types like plain, auto-increment, random... */
          } text;               /* Text pointers */
          struct
          {
-            long voc_addr;         /* Vocabulary word address */
-            long word_addr;        /* Voc. full word address */
+            int voc_addr;         /* Vocabulary word address */
+            int word_addr;        /* Voc. full word address */
+            int word_types;       /* Type mask (noun, verb, adjective...) */
          } vocab;              /* Vocabulary words */
          struct
          {

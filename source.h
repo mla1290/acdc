@@ -1,4 +1,4 @@
-/* source.h (acdc) - copyleft Mike Arnautov 1990-2003.
+/* source.h (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 17 Nov 01   MLA           Added the source_* buffers.
  * 14 Mar 01   MLA           Replaced old_style with style and moved to text.h.
@@ -32,7 +32,7 @@
 extern int file_count;
 extern int level;
 extern int line_count [];
-extern long total_lines;
+extern int total_lines;
 extern char pathname [MAXLEVEL] [MAXLINE + 1];
 extern FILE *infile [];
 extern char source_stem [];

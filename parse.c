@@ -1,4 +1,4 @@
-/* parse.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* parse.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 03 Mar 03   MLA           Use new-style get_token().
  * 06 Nov 01   MLA           Fiddle FULLDISP for Platt-style A-code.

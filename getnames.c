@@ -1,5 +1,6 @@
-/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
+ * 14 Feb 04   MLA           Converted longs to ints.
  * 14 Jul 02   MLA           BUG: Report primary names too!
  * 13 Jan 02   MLA           Added xref.
  * 24 Jul 99   MLA           Fixed complier warnings.
@@ -32,7 +33,7 @@ struct node *gp;
    int real_type;
    int refno;
    int used;
-   long last_addr;
+   int last_addr;
    char *tag;
    struct node *np;
    extern void storword ();
@@ -41,8 +42,9 @@ struct node *gp;
       (void) gripe (tp [1], "No preceding word to equate to!");
    index = 0;
    current_type = real_type = major_type;
-   if (major_type == FEATURE) 
-       current_type = major_type = VERB;
+   if (major_type == NOUN || major_type == ADJECTIVE || 
+       major_type == PREPOSITION)  
+          current_type = major_type = VERB;
    np = gp;
 
    if (np == NULL)
@@ -71,14 +73,20 @@ struct node *gp;
             np -> used_count = 1;
          if (xref)
          {
-            if (major_type == PLACE)
+            if (real_type == PLACE)
                tag = "PLACE";
-            else if (major_type == OBJECT)
+            else if (real_type == OBJECT)
                tag = " OBJ ";
-            else if (major_type == SYNONYM)
+            else if (real_type == SYNONYM)
                tag = "SYNON";
-            else if (major_type == VERB)
+            else if (real_type == VERB)
                tag = " VRB ";
+            else if (real_type == NOUN)
+               tag = "NOUN  ";
+            else if (real_type == ADJECTIVE)
+               tag = " ADJ ";
+            else if (real_type == PREPOSITION)
+               tag = "PREP ";
             write_ref (tag, tp [index]);
          }
          if (prefix != '-')
@@ -89,26 +97,32 @@ struct node *gp;
 
       if (xref) 
       {
-         if (major_type == PLACE)
+         if (real_type == PLACE)
             tag = "place";
-         else if (major_type == OBJECT)
+         else if (real_type == OBJECT)
             tag = " obj ";
-         else if (major_type == SYNONYM)
+         else if (real_type == SYNONYM)
             tag = "synon";
-         else if (major_type == VERB)
+         else if (real_type == VERB)
             tag = " vrb ";
+         else if (real_type == NOUN)
+            tag = "noun ";
+         else if (real_type == ADJECTIVE)
+            tag = " adj ";
+         else if (real_type == PREPOSITION)
+            tag = "prep ";
          write_ref (tag, tp [index]);
       }
 
       if (prefix == '!') tp [index]--;
-      current_type = SYNONYM;
+      current_type = SYNONYM;            /* For the next loop! */
 
       if (prefix == '=')
-         (void) storword (tp [index], real_type, refno, last_addr);
+         (void) storword (tp [index], major_type, refno, last_addr);
       else
       {
          last_addr = next_vocaddr;
-         (void) storword (tp [index], real_type, refno, next_vocaddr);
+         (void) storword (tp [index], major_type, refno, next_vocaddr);
       }
    }
 

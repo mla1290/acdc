@@ -1,4 +1,4 @@
-/* minor.h (acdc) - copyleft Mike Arnautov 1990-2003.
+/* minor.h (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 27 Jul 02   MLA           Added CHECKPOINT.
  * 12 Jul 02   MLA           Added IFNE, IFLE, IFGE, DESCRIBE.

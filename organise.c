@@ -1,4 +1,4 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 06 Mar 03   Stuart Munro  Remove unused variable.
  * 04 Mar 03   MLA           VERSION repaced with GAMEID and DBNAME.
@@ -50,12 +50,12 @@
 
 int node_count;
 int desc_count;
-long *text_info;
-long *text_base;
-long *brief_base;
-long *long_base;
-long *detail_base;
-long base_voc_addr;
+int *text_info;
+int *text_base;
+int *brief_base;
+int *int_base;
+int *detail_base;
+int base_voc_addr;
 int key_mask;
 
 #ifdef __STDC__
@@ -91,7 +91,7 @@ struct node *np;
 #endif
 {
    int refno;
-   long *array_ptr;
+   int *array_ptr;
 
    if (np -> type < PROCEDURE)
    {
@@ -112,10 +112,10 @@ struct node *np;
       {
          array_ptr = np -> body.text.text_addr;
          *(brief_base + refno) = *array_ptr++;
-         if ((*(long_base + refno) = *array_ptr++) == -1L)
-            *(long_base + refno) = *(brief_base + refno);
+         if ((*(int_base + refno) = *array_ptr++) == -1L)
+            *(int_base + refno) = *(brief_base + refno);
          if ((*(detail_base + refno) = *array_ptr) == -1L)
-            *(detail_base + refno) = *(long_base + refno);
+            *(detail_base + refno) = *(int_base + refno);
       }
    }
    return;
@@ -131,10 +131,10 @@ struct node *np;
    int refno;
    int feature;
    
-   if (np -> type == FEATURE)
+   if (np -> type == NOUN)
    {
       np -> type = VERB;
-      feature = -1;
+      feature = 1 << 15;
    }
    else
       feature = 1;
@@ -202,16 +202,16 @@ struct node *np;
 }
 
 #ifdef __STDC__
-void dump_array (long *addr, int count, char *pattern, int group)
+void dump_array (int *addr, int count, char *pattern, int group)
 #else
 void dump_array (addr, count, pattern, group)
-long *addr;
+int *addr;
 int count;
 char *pattern;
 int group;
 #endif
 {
-    long *base;
+    int *base;
     int tokens;
 
     tokens = 0;
@@ -338,20 +338,20 @@ void organise()
 /*  Allocate the space for message addresses and types  */
 
    text_count = type_base[TEXT + 1];
-   if ((text_base = (long *) calloc (text_count, sizeof(long))) == NULL)
+   if ((text_base = (int *) calloc (text_count, sizeof(int))) == NULL)
       (void) gripe ("", "Unable to allocate text address memory.");
-   if ((text_info = (long *) calloc (2 * (type_base[TEXT + 1] - 
-      type_base[TEXT]), sizeof(long))) == NULL)
+   if ((text_info = (int *) calloc (2 * (type_base[TEXT + 1] - 
+      type_base[TEXT]), sizeof(int))) == NULL)
         (void) gripe ("", "Unable to allocate text type memory.");
 
-/*  Allocate space for description addresses - brief, long and detailed.  */
+/*  Allocate space for description addresses - brief, int and detailed.  */
 
    desc_count = type_base[PLACE + 1];
-   if ((brief_base = (long *) calloc (desc_count, sizeof(long))) == NULL)
+   if ((brief_base = (int *) calloc (desc_count, sizeof(int))) == NULL)
       (void) gripe ("", "Unable to allocate brief description address memory.");
-   if ((long_base = (long *) calloc (desc_count, sizeof(long))) == NULL)
-      (void) gripe ("", "Unable to allocate long description address memory.");
-   if ((detail_base = (long *) calloc (desc_count, sizeof(long))) == NULL)
+   if ((int_base = (int *) calloc (desc_count, sizeof(int))) == NULL)
+      (void) gripe ("", "Unable to allocate int description address memory.");
+   if ((detail_base = (int *) calloc (desc_count, sizeof(int))) == NULL)
       (void) gripe ("", "Unable to allocate detailed description address memory.");
 
 /*  Open include file which will initialise respective arrays.  Then
@@ -366,15 +366,15 @@ void organise()
 
    btspan(SYMBOL, processsymb);
 
-   (void) fprintf (defs_file, "   long textadr[] = {\n");
+   (void) fprintf (defs_file, "   int textadr[] = {\n");
    dump_array(text_base, text_count,  " %8ldL,", 7);
    (void) fprintf (defs_file, "        0L};\n char text_info[] = {\n");
    dump_array(text_info, 2 * (text_count - type_base[TEXT]),  " %4ld,", 12);
-   (void) fprintf (defs_file, "    0};\n long brief_desc[] = {\n");
+   (void) fprintf (defs_file, "    0};\n int brief_desc[] = {\n");
    dump_array (brief_base, desc_count,  " %8ldL,", 7);
-   (void) fprintf (defs_file, "        0L};\n long long_desc[] = {\n");
-   dump_array (long_base, desc_count,  " %8ldL,", 7);
-   (void) fprintf (defs_file, "        0L};\n long detail_desc[] = {\n");
+   (void) fprintf (defs_file, "        0L};\n int long_desc[] = {\n");
+   dump_array (int_base, desc_count,  " %8ldL,", 7);
+   (void) fprintf (defs_file, "        0L};\n int detail_desc[] = {\n");
    dump_array (detail_base, desc_count,  " %8ldL,", 7);
    (void) fprintf (defs_file, "        0L};\n");
 
@@ -626,7 +626,7 @@ void organise()
    (void) clsfile (defs_file, "adv1.h");     /* Ahhh.... done at last! */
 
    if ((defs_file = openout("adv2.h","w")) == NULL)
-      (void) gripe ("adv2.h","Unable to open (voc.h).");
+      (void) gripe ("adv2.h","Unable to open (adv2.h).");
 
 /*  Now for the vocabulary include file */
 
@@ -636,10 +636,10 @@ void organise()
    (void) fprintf (defs_file, "0};\n   short voc_type[] = {\n");
    node_count = 0;
    btspan(VOCAB, process_voc_type);
-   (void) fprintf (defs_file, "0};\n   long voc_addr[] = {\n");
+   (void) fprintf (defs_file, "0};\n   int voc_addr[] = {\n");
    node_count = 0;
    btspan(VOCAB, process_voc_addr);
-   (void) fprintf (defs_file, "0};\n   long voc_word[] = {\n");
+   (void) fprintf (defs_file, "0};\n   int voc_word[] = {\n");
    node_count = 0;
    btspan(VOCAB, process_voc_word);
    (void) fprintf (defs_file, "0};\n");

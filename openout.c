@@ -1,4 +1,4 @@
-/* openout.c (acdc) - copyleft Mike Arnautov 2002 - 2003.
+/* openout.c (acdc) - copyleft Mike Arnautov 2002 - 2004.
  *
  * 06 Mar 03   Stuart Munro  Remove unused variables.
  * 04 Mar 03   MLA           Changed copyleft code to be unconditional.

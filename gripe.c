@@ -1,4 +1,4 @@
-/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 06 Mar 03   Stuart Munro  Include string.h.
  * 24 Jul 99   MLA           Fixed complier warnings.

@@ -1,4 +1,6 @@
-/* Balanced tree handling on a linear stack.
+/* btree.h (acdc) copyleft Mike Arnautov 2001 - 2004.
+ *
+ * Balanced tree handling on a linear stack.
  *
  * 07 Mar 03   Stuart Munro.     Fixed btfind() type for non-ANSI compilers.
  * 07 Jan 03   MLA               Adapted for use by acdc.

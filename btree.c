@@ -1,4 +1,6 @@
-/* Balanced tree handling on a linear stack.
+/* btree.c (acdc) - copyleft Mike Arnautov, 2001-2004.
+ *
+ * Balanced tree handling on a linear stack.
  *
  * 06 Mar 03   Stuart Munro      Fix non-ASCII btfind args declaration;
  *                               include stdlib.h; remove unused variables.

@@ -1,4 +1,4 @@
-/* const.h (acdc) - copyleft Mike Arnautov 1990-2003.
+/* const.h (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 03 Mar 03   MLA           Added REST.
  * 15 Sep 90   MLA           Initial coding.

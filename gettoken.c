@@ -1,4 +1,4 @@
-/* get_token.c (acdc) - copyleft Mike Arnautov 2003.
+/* get_token.c (acdc) - copyleft Mike Arnautov 2004.
  *
  * 01 Mar 03   MLA         Initial coding.
  *

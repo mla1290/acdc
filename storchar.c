@@ -1,4 +1,4 @@
-/* storchar.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* storchar.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
  * 09 Mar 03   MLA           Store as binary or ASCII data depending on 
  *                           value of memory. 
