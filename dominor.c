@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 19 Mar 03   MLA           Check QUIP argument.
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 06 Mar 03   Stuart Munro  Fix non-ASCII dominor() args declaration;
  *                           declare addparam(), fndparam() and iniparam().
@@ -949,8 +950,11 @@ char *proccond;
             argval [1] = argval [index]; argval [2] = argval [index + 1];
             minor_type = QUIP;
  
-         case SAY:
          case QUIP:
+            if (argtyp [1] != TEXT && argtyp [1] != VARIABLE &&
+                argtyp [1] != LOCAL&& argtyp [1] != OBJECT)
+                   gripe (tp[1], "QUIP argument not reducible to a text!");
+         case SAY:
          case VALUE:
          case DESCRIBE:
             if (minor_type == VALUE)

@@ -1,5 +1,6 @@
 /* storword.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 11 Mar 03   MLA           Suppressed "vocabulary buffer enlarged" message.
  * 14 Sep 00   MLA           Replace'_'s with NBSP.
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 30 Dec 90   MLA           Use voc_buf for intermediate vocab storage.
@@ -39,7 +40,9 @@ long addr;
          (void) gripe ("","Unable to extend vocabulary buffer.");
       voc_ptr = voc_buf_ptr + (voc_ptr - old_voc_ptr);
       voc_top = voc_buf_ptr + voc_buf_len - 20;
-      (void) printf ("Vocabulary buffer size increased to %d.\n", voc_buf_len);
+/*
+ *      (void) printf ("Vocabulary buffer size increased to %d.\n", voc_buf_len);
+ */
    }
 
    while (*string != '\0')
