@@ -1,5 +1,6 @@
 /* domajor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 09 Mar 03   MLA           Replaced trace with debug.
  * 23 Feb 03   MLA           Preserve mask value.
  * 21 Feb 03   MLA           bug: Display full version string.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
@@ -349,7 +350,7 @@ void domajor ()
          np = addsymb (SYMBOL, tp [1], PROCEDURE, next_procno);
          if (xref)
             write_ref (" PRC ", tp [1]);
-         if (trace & TRACE_HEADERS)
+         if (debug)
             (void) fprintf (code_file, "/* %s */\n", tp [1]);
          (void) fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", next_procno);
          next_arg = 0;
@@ -382,7 +383,7 @@ void domajor ()
             (void) fprintf (code_file, ")\n");
          (void) fprintf (code_file, "#endif\n{\n");
          next_procno++;
-         if (trace & TRACE_ECHO)
+         if (debug)
          {
             strcpy (prochead, tp [0]);
             for (index = 1; tp [index]; index++)
@@ -422,13 +423,13 @@ void domajor ()
             (np -> tail) -> next = temp_list;
          np -> tail = temp_list;
 
-         if (trace & TRACE_HEADERS)
+         if (debug)
             (void) fprintf (code_file, "/* %s %s */\n", tp [1],
                (tp [2] == NULL) ? "" : tp [2]);
          (void) fprintf (code_file,
             "#ifdef __STDC__\nvoid p%d(void)\n#else\nvoid p%d()\n#endif\n{\n",
                proc, proc);
-         if (trace & TRACE_ECHO)
+         if (debug)
          {
             strcpy (prochead, tp [0]);
             for (index = 1; tp [index]; index++)

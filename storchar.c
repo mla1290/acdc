@@ -1,5 +1,8 @@
 /* storchar.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 09 Mar 03   MLA           Store as binary or ASCII data depending on 
+ *                           value of memory. 
+ * 03 Mar 03   MLA           Store as ASCII data.
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 15 Sep 90   MLA           Initial coding.
  *
@@ -31,10 +34,14 @@ int ch;
       if (mask == 0)
          mask = 'X';
       mask = (17 * mask + 13) & 127;
-      fprintf (text_file, ",%d", ch ^ *title_ptr ^ mask);
-      if ((next_addr + 1) % 16 == 0)
-         fputc ('\n', text_file);
-/*      fputc(ch ^ *title_ptr ^ mask, text_file); */
+      if (memory == 3)
+      {
+         fprintf (text_file, ",%d", ch ^ *title_ptr ^ mask);
+         if ((next_addr + 1) % 16 == 0)
+            fputc ('\n', text_file);
+      }
+      else
+         fputc(ch ^ *title_ptr ^ mask, text_file);
    }
 /* ENDPRIVATE */
    next_addr++;

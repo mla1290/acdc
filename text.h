@@ -1,5 +1,6 @@
 /* text.h (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 03 Mar 03   MLA           Adedd memory.
  * 26 Dec 01   MLA           Added text_lines.
  * 25 Nov 01   MLA           Added IGNORE_EOL.
  * 06 Oct 01   MLA           Added text_count and switch_count.
@@ -60,6 +61,7 @@ extern FILE *text_file;
 extern char title[80];
 extern char *title_ptr;
 extern int plain_text;
+extern int memory;
 extern int style;
 extern int text_count;
 extern int switch_count;

@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 09 Mar 03   MLA           Replaced trace with debug.
  * 06 Mar 03   Stuart Munro  Fix non-ASCII dominor() args declaration;
  *                           declare addparam(), fndparam() and iniparam().
  * 01 Mar 03   MLA           Bug: Fake argtyp[2] if faking argval[2] in SAY.
@@ -304,7 +305,7 @@ char *proccond;
       {
          locals = iniparam (flag_field_size[VARFLAG]/16 + 1);
          got_code = 1;
-         if (trace & TRACE_ECHO && prochead && *prochead)
+         if (debug && prochead && *prochead)
             fprintf (code_file, "   puts(\"*** %s ***\");\n", prochead);
          if (proccond && *proccond)
             fprintf (code_file, proccond);

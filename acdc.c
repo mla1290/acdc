@@ -1,5 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 09 Mar 03   MLA           Replaced trace with debug.
  * 03 Mar 03   MLA           Added author.
  * 23 Feb 03   MLA           Initialise random number generator.
  * 02 Feb 03   MLA           Count autop chunks form 1 (kernel will be 0).
@@ -35,7 +36,7 @@
 #include "acdc.h"
 char author [40];
 char datbuf [16];
-int no_warn = 0;
+int memory;
 time_t now;
 
 #include "const.h"
@@ -91,7 +92,7 @@ FILE *xref_file = NULL;
 
 int code_part = 1;
 int minor_count = 0;
-int trace = 0;
+int debug = 0;
 int xref = 0;
 int next_procno;
 char *cond_buf_ptr;
@@ -108,6 +109,9 @@ int main (argc, argv)
 #endif
 {
    int offset;
+   int file = 0;
+   int readin = 0;
+   int builtin = 0;
    int len;
    int i;
    char *arg;
@@ -119,7 +123,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.45; MLA, 03 Mar 03]\n");
+      "[A-code to C translator, version 11.46; MLA, 09 Mar 03]\n");
    srand ((unsigned int)(now = time (NULL)));
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 
@@ -140,35 +144,61 @@ int main (argc, argv)
          len = strlen(*argv);
          arg = *argv;
          if (len == 1 && **argv == '-')  arg = "-rhubarb";
-         if (strncmp (arg, "-headers", len) == 0)
-            trace |= TRACE_HEADERS;
-         else if (strncmp (arg, "-trace", len) == 0)
-            trace |= TRACE_ECHO;  
-         else if (strncmp (arg, "-source", len) == 0)
-            trace |= TRACE_SOURCE;
          else if (strncmp (arg, "-debug", len) == 0)
-            trace = -1;
+            debug = 1;
          else if (strncmp (arg, "-plain", len) == 0)
             plain_text = 1;
          else if (strncmp (arg, "-xref", len) == 0)
-            xref = 2;            /* "Super TRUE" -- noxref doesn't override */
-         else if (strncmp (arg, "-nowarn", len) == 0)
-            no_warn = 1;
+            xref = 2;         /* "Super TRUE" -- noxref doesn't override */
+         else if (strncmp (arg, "-file", len) == 0)
+            file = 1;
+         else if (strncmp (arg, "-memory", len) == 0)
+            readin = 1;
+         else if (strncmp (arg, "-preload", len) == 0)
+            builtin = 1;
          else if (*arg == '-')
          {
-            (void) printf (
-  "Usage: acdc [(path)name] [-headers] [-trace] [-source] [-plain] [-xref]\n");
+            (void) puts ("\n   Usage: acdc [options] [(path)name]") ;
+            (void) puts ("\n   Where allowed options are:");
+            (void) puts ("      -plain (abbreviable to -p)");
+            (void) puts ("         Do not encrypt text.");
+            (void) puts ("      -file (abbreviable to -f)");
+            (void) puts ("         Read all text directly from the text file.");
+            (void) puts ("      -memory (abbreviable to -m)");
+            (void) puts ("         Read all text into memory on startup.");
+            (void) puts ("      -preload (abbreviable to -pr)");
+            (void) puts ("         Do not create a separate text file.");
+            (void) puts ("      -xref (abbreviable to -x)");
+            (void) puts ("         Generate the .xrf cross-reference listing.");
+            (void) puts ("      -debug (abbreviable to -d)");
+            (void) puts ("         Add A-code source as comments in C source and");
+            (void) puts ("         announce entry to distinct A-code chunks.\n");
             return (ERROR);
          }
          else         
             (void) strcpy (source_path, arg);
       }
+      if (file)
+      {
+         if (readin || builtin)
+         {
+            (void) puts ("Keyword -file no tcompatible with -memory or -preload.");
+            exit (ERROR);
+         }
+         memory = 0;
+      }
+      else if (builtin)
+         memory = 3;
+      else if (readin)
+         memory = 2;
+      else
+         memory = 1;
    }
    
    if (getenv ("PLAIN"))
       plain_text = 1;
    if (getenv ("DEBUG"))
-      trace = -1;   
+      debug = 1;   
    
    if (*source_path == '\0')
    {

@@ -274,7 +274,8 @@ void organise()
    voc_ptr = voc_buf_ptr;
    while (voc_ptr < voc_top)
       storchar(*voc_ptr++);
-   fprintf (text_file, "};\n");
+   if (memory == 3)
+      fprintf (text_file, "};\n");
    (void) clsfile (text_file, "Text");
 
 /* Check for mandatory symbols and add them if missing */
@@ -599,6 +600,8 @@ void organise()
 
    if (plain_text)
       (void) fprintf (defs_file, "#define PLAIN\n");
+
+   (void) fprintf (defs_file, "#define DBSTATUS %d\n", 3 - memory);
 
    (void) fprintf (defs_file,
       "#define KEY(X) (value[%d]==X || value[%d]==X)\n",

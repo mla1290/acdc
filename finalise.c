@@ -127,7 +127,7 @@ struct node *np;
 
    type = np -> type;
 
-   if (no_warn == 0 && np -> used_count == 0 && *(np -> name) != '.' &&
+   if (style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
       strcmp (np -> name, "place") && 
       strcmp (np -> name, "verb") && 
       strcmp (np -> name, "variable") && 

@@ -1,5 +1,6 @@
 /* getline.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 09 Mar 03   MLA           Replaced trace with debug.
  * 25 Feb 01   MLA           Don't count comment or blank lines towards total.
  * 03 Dec 00   MLA           Allowed '#' as a comment delimiter.                
  * 24 Jul 99   MLA           Fixed complier warnings.
@@ -38,7 +39,7 @@ next_line:
          }
       }
       line_count [level]++;
-      if (trace & PRINT_SOURCE)
+      if (debug > 1)
       {
          int len;
          len = strlen (line) - 1;

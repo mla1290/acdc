@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 09 Mar 03   MLA           Replaced trace with debug.
  * 03 Mar 03   MLA           Added AUTHOR.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 27 Jul 02   MLA           Added CHECKPOINT.
@@ -211,6 +212,7 @@ void initial()
 {
    int index;
    char *tptr;
+   char dbname [80];
    int len;
    int type;
    int mask;
@@ -306,8 +308,8 @@ void initial()
    (void) fprintf (code_file, "#include \"adv3.h\"\n");
 
    next_addr = 0;
-   if (trace & TRACE_SOURCE)  /* Declarations over - if source output */
-      trace |= PRINT_SOURCE;  /* is required, turn it on!             */
+   if (debug)     /* Declarations over - if source output */
+      debug = 2;  /* is required, turn it on!             */
 
 #ifdef __50SERIES
 #  define MODE "o"
@@ -315,11 +317,19 @@ void initial()
 #  define MODE "wb"
 #endif
 
-   if ((text_file = openout ("adv6.h", MODE)) == NULL)
-      (void) gripe ("adv6.h", "Unable to open data file.");
-   fprintf (text_file, "char text [TEXT_BYTES] = {\n");
-   fputc ('0', text_file); 
-   next_addr++;
+   if (memory < 3)
+   {
+      strcpy (dbname, source_file);
+      if (tptr = strrchr (dbname, '.'))
+         *tptr = 0;
+      strcat (dbname, ".dat");
+      tptr =  dbname;
+   }
+   else
+      tptr = "adv6.h";
+   
+   if ((text_file = openout (tptr, MODE)) == NULL)
+      (void) gripe (tptr, "Unable to open data file.");
 
    tptr = *title ? title : source_file;
    len = strlen (tptr);
@@ -327,18 +337,41 @@ void initial()
    (void) strncpy (title, tptr, len);
    *(title + len) = '\0';
    title [79] = '\0';
-   key_mask = (rand() & 127) | 'x';
-   if (key_mask == 0 || key_mask == 127) key_mask = 'y';
+   tptr = title;
+   if (memory == 3)
+   {
+      fprintf (text_file, "char text [TEXT_BYTES] = {\n");
+      fputc ('0', text_file); 
+   }
+   else
+      fputc ('\0', text_file);
+   next_addr++;
+
+   if (plain_text == 0)
+   {
+      key_mask = (rand() & 127) ^ 'x';
+      if (key_mask == 0 || key_mask == 127) key_mask = 'y';
+   }
+   else
+      key_mask = 0;
    mask = key_mask;
 
    while (*tptr && *tptr != '\n')
    {
-      (void) fprintf (text_file, ",%d", *tptr ^ mask);
-      mask = *tptr++;
+      if (memory == 3)
+         (void) fprintf (text_file, ",%d", *tptr ^ mask);
+      else
+         fputc (*tptr ^ mask, text_file);
+      if (plain_text == 0)
+         mask ^= *tptr;
+      tptr++;
       next_addr++;
    }
 
-   fprintf (text_file, ",%d", mask);
+   if (memory == 3)
+      fprintf (text_file, ",%d", mask);
+   else
+      fputc (mask, text_file);
    next_addr++;
 
    printf ("GameID: %s\n", title);
