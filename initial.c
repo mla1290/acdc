@@ -242,8 +242,8 @@ void initial()
    voc_ptr = voc_buf_ptr;
    voc_top = voc_buf_ptr + VOC_INIT_LEN - 20;
 
-   if ((code_file = openout("autop00.c", "w")) == NULL)
-      (void) gripe ("code0.c", "Unable to open code file.");
+   if ((code_file = openout("autop01.c", "w")) == NULL)
+      (void) gripe ("autop01.c", "Unable to open code file.");
    (void) fprintf (code_file, "#include \"advkern.h\"\n");
    (void) fprintf (code_file, "#include \"autod3.h\"\n");
 

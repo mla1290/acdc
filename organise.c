@@ -1,5 +1,7 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 04 Feb 03   MLA           Added EXCEPT and TYPO.
+ * 02 Feb 03   MLA           Renamed autod0 to autod5 (advkern.h will be 0).
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 02 Jan 03   MLA           bug: text_count already defined in acdc.c.
  * 01 Jan 03   MLA           Added refno dumpnig for xref.
@@ -341,8 +343,8 @@ void organise()
  *  into the insert file.
  */
 
-   if ((defs_file = openout("autod0.h","w")) == NULL)
-      (void) gripe ("","Unable to open autod0.h (words.h).");
+   if ((defs_file = openout("autod5.h","w")) == NULL)
+      (void) gripe ("","Unable to open autod5.h (words.h).");
 
    btspan(SYMBOL, processsymb);
 
@@ -358,7 +360,7 @@ void organise()
    dump_array (detail_base, desc_count,  " %8ldL,", 7);
    (void) fprintf (defs_file, "        0L};\n");
 
-   (void) clsfile (defs_file, "autod0.h");      /* Done with this file */
+   (void) clsfile (defs_file, "autod5.h");      /* Done with this file */
 
 /*  Now create the include file which will define various symbolic
  *  constants required by the kernel routines.
@@ -437,6 +439,15 @@ void organise()
        (np = fndsymb(SYMBOL_OR_CONSTANT, "everything")) != NULL)
       if (np -> type == OBJECT)
          (void) fprintf (defs_file, "#define ALL %d\n", np -> refno);
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "except")) != NULL ||
+       (np = fndsymb(SYMBOL_OR_CONSTANT, "but")) != NULL)
+      if (np -> type == VERB || np -> type == OBJECT)
+         (void) fprintf (defs_file, "#define EXCEPT %d\n", np -> refno);
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "typo")) != NULL &&
+      np -> type == TEXT)
+         (void) fprintf (defs_file, "#define TYPO %d\n", np -> refno);
 
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "it")) != NULL)
       if (np -> type == OBJECT)

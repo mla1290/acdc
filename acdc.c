@@ -1,5 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 02 Feb 03   MLA           Count autop chunks form 1 (kernel will be 0).
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 01 Oct 02   MLA           Added dynamic copyleft notice.
  * 11 Jul 02   MLA           BUG: Fixed ITOBJ initalisation.
@@ -86,7 +87,7 @@ FILE *defs_file;
 FILE *code_file;
 FILE *xref_file = NULL;
 
-int code_part = 0;
+int code_part = 1;
 int minor_count = 0;
 int trace = 0;
 int xref = 0;
@@ -116,7 +117,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.37; MLA, 24 Jan 03]\n");
+      "[A-code to C translator, version 11.39; MLA, 04 Feb 03]\n");
 #ifdef COPYLEFT
    now = time (NULL);
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
