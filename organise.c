@@ -1,5 +1,6 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 02 Jan 03   MLA           bug: text_count already defined in acdc.c.
  * 01 Jan 03   MLA           Added refno dumpnig for xref.
  * 21 Dec 01   MLA           Removed obsolete MAX* definitions.
  * 06 Nov 01   MLA           If style == 1, define QUICKIE etc...
@@ -39,7 +40,6 @@
 #include "source.h"
 
 int node_count;
-int text_count;
 int desc_count;
 long *text_info;
 long *text_base;

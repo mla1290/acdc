@@ -1,5 +1,6 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 02 Jan 03   MLA           bug: Don't try for CALL args unless PROCEDURE.
  * 21 Dec 02   MLA           Bug: Make itobj...place cater for schizoids!
  * 30 Sep 02   MLA           bug: Fixed gripe argument in RESPOND code.
  * 27 Jul 02   MLA           Added CHECKPOINT.
@@ -254,7 +255,7 @@ char *proccond;
             if ((argval [index] = fndparam (tp [index])) != -1)
             {
                argtyp [index] = LOCAL;
-               ap [index] == NULL;
+               ap [index] = NULL;
             }
             else if (ap [index] = fndsymb (SYMBOL_OR_CONSTANT, tp [index]))
             {
@@ -781,30 +782,34 @@ char *proccond;
                   "   (*procs[lval[%d]])(", argval [1]);
             else
                (void) fprintf (code_file, "   (*procs[%d])(", argval [1]);
-            args_count = -(ap [1] -> state_count);
-            for (index = 2; tp [index]; index++)
-            { 
-               if (args_count == 0)
-                  (void) gripe (tp [1], "too many arguments!");
-               if (argtyp [index] > TEXT && argtyp [index] != CONSTANT &&
-                   argtyp [index] != LOCAL)
-                     (void) gripe (tp [index], "illegal argument type!");
-               (void) fprintf (code_file, "%s", index == 2 ? "" : ",");
-               if (argtyp [index] != VARIABLE)
-                  (void) fprintf (code_file, "%d,", 
-                     argtyp [index] == CONSTANT ? 0 : -1);
-               else
-                  (void) fprintf (code_file, "*bitword(%d),", argval [index]);
-               if (argtyp [index] == VARIABLE)
-                  (void) fprintf (code_file, "value[%d]", argval [index]);
-               else if (argtyp [index] == LOCAL)
-                  (void) fprintf (code_file, "lval[%d]", argval [index]);
-               else
-                  (void) fprintf (code_file, "%d", argval [index]);
-               args_count--;
-            }
-            if (args_count)
-               (void) gripe (tp [1], "too few arguments!");
+            if (argtyp [1] == PROCEDURE)
+            {
+               args_count = -(ap [1] -> state_count);
+               for (index = 2; tp [index]; index++)
+               { 
+                  if (args_count == 0)
+                     (void) gripe (tp [1], "too many arguments!");
+                  if (argtyp [index] > TEXT && argtyp [index] != CONSTANT &&
+                      argtyp [index] != LOCAL)
+                        (void) gripe (tp [index], "illegal argument type!");
+                  (void) fprintf (code_file, "%s", index == 2 ? "" : ",");
+                  if (argtyp [index] != VARIABLE)
+                     (void) fprintf (code_file, "%d,", 
+                        argtyp [index] == CONSTANT ? 0 : -1);
+                  else
+                     (void) fprintf (code_file, "*bitword(%d),", 
+                        argval [index]);
+                  if (argtyp [index] == VARIABLE)
+                     (void) fprintf (code_file, "value[%d]", argval [index]);
+                  else if (argtyp [index] == LOCAL)
+                     (void) fprintf (code_file, "lval[%d]", argval [index]);
+                  else
+                     (void) fprintf (code_file, "%d", argval [index]);
+                  args_count--;
+               }
+               if (args_count)
+                  (void) gripe (tp [1], "too few arguments!");
+	    }
             (void) fprintf (code_file, ");\n");
             break;
 
@@ -1360,7 +1365,7 @@ char *proccond;
                   (void) fprintf (code_file, "lval[%d]", argval [2]);
                else
                   (void) fprintf (code_file, "%d", argval [2]);
-               (void) fprintf (code_file, "; (void)fake(1,", argval [2]);
+               (void) fprintf (code_file, "; (void)fake(1,");
                if (argtyp [2] == VARIABLE)
                   (void) fprintf (code_file, "value[%d]);}\n", argval [2]);
                else if (argtyp [2] == LOCAL)

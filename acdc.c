@@ -1,4 +1,4 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2002.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 01 Oct 02   MLA           Added dynamic copyleft notice.
  * 11 Jul 02   MLA           BUG: Fixed ITOBJ initalisation.
@@ -113,7 +113,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.33; MLA, 21 Dec 02]\n");
+      "[A-code to C translator, version 11.34; MLA, 02 Jan 03]\n");
 #ifdef COPYLEFT
    now = time (NULL);
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));

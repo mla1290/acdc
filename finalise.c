@@ -1,5 +1,6 @@
 /* finalise.c (acdc) - copyleft Mike Arnautov 1990-2002.
  *
+ * 02 Jan 03   MLA           bug: removed a redundant arg to fprintf.
  * 13 Jan 02   MLA           Pass "hidden" type parameters.
  * 30 Dec 01   MLA           Added proc arguments code.
  * 18 Nov 01   MLA           Autop* files now tagged with 2 digits.
@@ -76,7 +77,7 @@ void finalise ()
             (void) fprintf (code_file, "int,int%s", count ? "," : "");
       else
          (void) fprintf (code_file, "void");
-      (void) fprintf (code_file, ");\n", index);
+      (void) fprintf (code_file, ");\n");
    }
    (void) fprintf (code_file, "#else\nextern void fake();\n");
    (void) fprintf (code_file, 
