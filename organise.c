@@ -1,4 +1,4 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 06 Mar 03   Stuart Munro  Remove unused variable.
  * 04 Mar 03   MLA           VERSION repaced with GAMEID and DBNAME.
@@ -498,6 +498,29 @@ void organise()
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "dwarven")) != NULL)
       if (np -> type == VARIABLE)
          (void) fprintf (defs_file, "#define DWARVEN %d\n", np -> refno);
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo")) != NULL)
+   {
+      if (np -> type == VERB)
+         (void) fprintf (defs_file, "#define UNDO %d\n", np -> refno);
+      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undostat")) == NULL)
+      {
+         np = addsymb (SYMBOL, "undostat", VARIABLE, type_counts[VARIABLE]++);
+      }
+      else if (np -> type != VARIABLE)
+         (void) gripe ("UNDOSTAT", "Declared as a non-variable!");
+      (void) fprintf (defs_file, "#define UNDOSTAT %d\n", np -> refno);
+   }
+   
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "redo")) != NULL)
+   {
+      if (np -> type == VERB)
+         (void) fprintf (defs_file, "#define REDO %d\n", np -> refno);
+      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo")) == NULL)
+         (void) gripe ("REDO", "Verb declared without UNDO!");
+      else if (np -> type != VERB)
+         (void) gripe ("UNDO", "Declared as a non-verb!");
+   }
 
 #ifdef OBSOLETE
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "fulldisplay")) != NULL)

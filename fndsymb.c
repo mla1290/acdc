@@ -1,4 +1,4 @@
-/* fndsymb.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* fndsymb.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 17 Oct 01   MLA           Improved compatibility with Platt's A-code.

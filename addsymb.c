@@ -1,4 +1,4 @@
-/* addsymb.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* addsymb.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 24 Jul 01   MLA           Added ANSI C declaration.

@@ -1,5 +1,6 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 03 Jan 05   MLA           Added VHOLDER.
  * 24 Mar 03   MLA           Added 4th argument to signal presence of a
  *                           word holder, if requested to do so.
  * 01 Dec 02   MLA           bug: Allow abutting nested texts.
@@ -358,6 +359,11 @@ store:
             {
                if (got_holder) *got_holder |= 1024;
                *text_ptr = HOLDER;
+            }
+            if (*text_ptr == '$' && style >= 11)
+            {
+               if (got_holder) *got_holder |= 1024;
+               *text_ptr = VHOLDER;
             }
             else if (*text_ptr == SILENCE)
                *text_ptr = '\0';

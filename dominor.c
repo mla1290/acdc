@@ -1,5 +1,6 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 02 Jan 05   MLA           Added UNDO/REDO.
  * 22 Aug 04   MLA           Made CALL directive optional.
  * 20 Aug 04   MLA           Added IFCGI and IFDOALL.
  * 19 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
@@ -1470,6 +1471,12 @@ char *proccond;
             
            case VERBATIM:
               fprintf (code_file, "   verbatim(%d);\n", argval [1]);
+              break;
+              
+           case UNDO:
+           case REDO:
+              fprintf (code_file, "   value[STATUS]=%s();\n", 
+                 minor_type == UNDO ? "undo" : "redo");
               break;
               
 /*         case DELETE:

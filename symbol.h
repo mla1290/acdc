@@ -1,4 +1,4 @@
-/* symbol.h (acdc) - copyleft Mike Arnautov 1990-2004.
+/* symbol.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 09 Jan 01   MLA           Allowed for active text types.
  * 13 Mar 94   MLA           Made conditional.

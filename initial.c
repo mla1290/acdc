@@ -1,4 +1,4 @@
-/* initial.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* initial.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 20 Aug 04   MLA           Added IFCGI.
  * 14 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
@@ -215,6 +215,8 @@ struct directive keywords[] =
    {"delete",      MINOR, DELETE,      1,   1},
    {"savedlist",   MINOR, SAVEDLIST,   FREE_ARG + 1,   2},
    {"verbatim",    MINOR, VERBATIM,    1,   1},
+   {"undo",        MINOR, UNDO,        0,   1},
+   {"redo",        MINOR, REDO,        0,   1},
    {"local",       MINOR, LOCAL,       1,   ANY_NUMBER},
    {"checkpoint",  MINOR, CHECKPOINT,  0,   0},
    {"object",      SYMBOL,OBJFLAG,     0,   0},

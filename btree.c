@@ -1,4 +1,4 @@
-/* btree.c (acdc) - copyleft Mike Arnautov, 2001-2004.
+/* btree.c (acdc) - copyleft Mike Arnautov, 2001-2005.
  *
  * Balanced tree handling on a linear stack.
  *

@@ -1,5 +1,6 @@
-/* minor.h (acdc) - copyleft Mike Arnautov 1990-2004.
+/* minor.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 01 Jan 05   MLA           Added UNDO/REDO.
  * 27 Jul 02   MLA           Added CHECKPOINT.
  * 12 Jul 02   MLA           Added IFNE, IFLE, IFGE, DESCRIBE.
  * 01 Jan 02   MLA           Added LOCAL.
@@ -118,3 +119,6 @@
 # define SAVEDLIST  154
 
 # define VERBATIM   161
+
+# define UNDO       171
+# define REDO       172

@@ -1,4 +1,4 @@
-/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 06 Mar 03   Stuart Munro  Fix non-ASCII process_proc args declaration.
  * 20 Feb 03   MLA           Chage to code file naming conventions.

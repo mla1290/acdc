@@ -1,4 +1,4 @@
-/* text.h (acdc) - copyleft Mike Arnautov 1990-2004.
+/* text.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 03 Mar 03   MLA           Adedd memory.
  * 26 Dec 01   MLA           Added text_lines.
@@ -47,6 +47,7 @@ extern void clsfile ();
 #define BLOCK_END    '\364'
 #define CENTRE_START '\363'
 #define DWARVISH     '\362'
+#define VHOLDER      '\361'
 
 #define RANDOM_TEXT       1
 #define INCREMENTAL_TEXT  2

@@ -1,4 +1,4 @@
-/* const.h (acdc) - copyleft Mike Arnautov 1990-2004.
+/* const.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 19 Aug 04   MLA           Added FREE_ARG.
  * 03 Mar 03   MLA           Added REST.

@@ -1,7 +1,8 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2005.
  */
-#define VERSION "11.57, MLA 12 Sep 04"
+#define VERSION "11.60, MLA 03 Jan 05"
 /*
+ * 01 Jan 05   MLA           Added UNDO/REDO.
  * 12 Sep 04   MLA           CALL is optional.
  * 20 Aug 04   MLA           Added IFCGI.
  * 19 Aug 04   MLA           Added FREE_ARG notation.

@@ -1,4 +1,4 @@
-/* voc.h (acdc) - copyleft Mike Arnautov 1990-2004.
+/* voc.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 02 Feb 03   MLA            Initial coding.
  */

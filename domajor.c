@@ -1,4 +1,4 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2004.
+/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
  * 14 Feb 04   MLA           Converted longs to ints.
  * 24 Mar 03   MLA           Added 4th arg to gettxt().
