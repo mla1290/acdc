@@ -1,5 +1,6 @@
 /* parse.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
+ * 19 Aug 04   MLA           Added FREE_ARG.
  * 03 Mar 03   MLA           Use new-style get_token().
  * 06 Nov 01   MLA           Fiddle FULLDISP for Platt-style A-code.
  * 17 Oct 01   MLA           Improved compatibility with Platt's A-code.
@@ -31,6 +32,8 @@ int type;
    struct node *np;
    extern char *get_token();
    char *cptr = line;
+   int minargs;
+   int direct_call = 0;
 
    (void) strcpy (raw_line, line);
    recase(LOWERCASE, line);
@@ -40,9 +43,14 @@ int type;
    if (type != NONE)
    {
       if ((np = fndsymb(type, tp[0])) == NULL)
-         return (NULL);
+      {
+         if (type != MINOR || 
+            (np = fndsymb(SYMBOL_OR_CONSTANT, tp[0])) == NULL)
+               return (NULL);
+         direct_call = 1;
+      }
       index = 0;
-      if (np -> body.directive.max_args == REST)
+      if (direct_call == 0 && np -> body.directive.max_args == REST)
       {
          cptr = raw_line + (cptr - line);
          cptr += strspn (cptr, " ,\n\0");
@@ -80,10 +88,16 @@ int type;
 
    if (type == NONE)
       return NULL;
-   index--;
-   if (index < np -> body.directive.min_args)
-      (void) gripe (tp[0],"Not enough arguments.");
-   if (index > np -> body.directive.max_args)
-      (void) gripe (tp[0],"Too many arguments.");
+   if (direct_call == 0)
+   {
+      index--;
+      minargs = np -> body.directive.min_args;
+      if (minargs >= FREE_ARG)
+         minargs -= FREE_ARG - 1;
+      if (index < minargs)
+         (void) gripe (tp[0],"Not enough arguments.");
+      if (index > np -> body.directive.max_args)
+         (void) gripe (tp[0],"Too many arguments.");
+   }
    return (np);
 }

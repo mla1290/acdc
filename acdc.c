@@ -1,5 +1,11 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2004.
- *
+ */
+#define VERSION "11.56, MLA 20 Aug 04"
+/*
+ * 20 Aug 04   MLA           Added IFCGI.
+ * 19 Aug 04   MLA           Added FREE_ARG notation.
+ * 14 Aug 04   MLA           Added SAVE/RESTORE.
+ * 08 Aug 04   MLA           Added APPEND.
  * 14 Feb 04   MLA           Converted longs to ints.
  * 09 Feb 04   MLA           Added ADJECTIVE and PREPOSITION types.
  * 03 Feb 04   MLA           Added NOUN type.
@@ -126,7 +132,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.53; MLA, 14 Feb 04]\n");
+      "[A-code to C translator, version %s]\n", VERSION);
    srand ((unsigned int)(now = time (NULL)));
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 

@@ -1,5 +1,8 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
+ * 20 Aug 04   MLA           Added IFCGI and IFDOALL.
+ * 19 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
+ * 08 Aug 04   MLA           Added APPEND.
  * 28 Mar 03   MLA           Added NEXT and BREAK.
  * 19 Mar 03   MLA           Check QUIP argument.
  * 09 Mar 03   MLA           Replaced trace with debug.
@@ -101,6 +104,7 @@ char *proccond;
    char ctype;
    int index;
    int end_index;
+   int proc_index;
    int ifs_pending;
    int conjunction_pending;
    int not_pending;
@@ -146,6 +150,7 @@ char *proccond;
       if ((np = parse (MINOR)) == NULL)
          (void) gripe (tp [0], "Unknown minor directive.");
       minor_count++;
+      ap[0] = np;
 
       minor_type = np -> refno;
 
@@ -265,9 +270,15 @@ char *proccond;
          chr = tp [index];
          argtyp [index] = -1;
          if (isdigit (*chr) || *chr == '+' || *chr == '-')
-            ap [index] = NULL;
+            ap [index] = NULL;        
          else
          {
+            if (index == 1 && np -> body.directive.min_args >= FREE_ARG)
+            {
+               argtyp [index] = FREE_ARG;
+               argval [index] = 0;
+               continue;
+            }
             if ((argval [index] = fndparam (tp [index])) != -1)
             {
                argtyp [index] = LOCAL;
@@ -560,6 +571,13 @@ char *proccond;
                (void) gripe (tp [1], "Not a variable.");
             break;
 
+         case IFCGI:
+         case IFDOALL:
+            cond_ptr += SPRINTF4 (cond_ptr, "%stest(\"%s\")", 
+               (not_pending) ? "!" : "", 
+                  minor_type == IFCGI ? "cgi" : "doall");
+            break;
+            
          case IFLOC:
             if (argtyp [1] != OBJECT && argtyp [1] != VARIABLE &&
                argtyp [1] != LOCAL)
@@ -781,51 +799,6 @@ char *proccond;
                (void) fprintf (code_file, "break;\n");
             break;
             
-         case CALL:
-            if (argtyp [1] != PROCEDURE && argtyp [1] > VERB &&
-               argtyp [1] != VARIABLE && argtyp [1] != LOCAL)
-                  (void) gripe (tp [1], "Not a CALLable symbol.");
-            if (argtyp [1] == PROCEDURE)
-               (void) fprintf (code_file, "   p%d(", argval [1]);
-            else if (argtyp [1] == VARIABLE)
-               (void) fprintf (code_file, 
-                  "   (*procs[value[%d]])(", argval [1]);
-            else if (argtyp [1] == LOCAL)
-               (void) fprintf (code_file, 
-                  "   (*procs[lval[%d]])(", argval [1]);
-            else
-               (void) fprintf (code_file, "   (*procs[%d])(", argval [1]);
-            if (argtyp [1] == PROCEDURE)
-            {
-               args_count = -(ap [1] -> state_count);
-               for (index = 2; tp [index]; index++)
-               { 
-                  if (args_count == 0)
-                     (void) gripe (tp [1], "too many arguments!");
-                  if (argtyp [index] > TEXT && argtyp [index] != CONSTANT &&
-                      argtyp [index] != LOCAL)
-                        (void) gripe (tp [index], "illegal argument type!");
-                  (void) fprintf (code_file, "%s", index == 2 ? "" : ",");
-                  if (argtyp [index] != VARIABLE)
-                     (void) fprintf (code_file, "%d,", 
-                        argtyp [index] == CONSTANT ? 0 : -1);
-                  else
-                     (void) fprintf (code_file, "*bitword(%d),", 
-                        argval [index]);
-                  if (argtyp [index] == VARIABLE)
-                     (void) fprintf (code_file, "value[%d]", argval [index]);
-                  else if (argtyp [index] == LOCAL)
-                     (void) fprintf (code_file, "lval[%d]", argval [index]);
-                  else
-                     (void) fprintf (code_file, "%d", argval [index]);
-                  args_count--;
-               }
-               if (args_count)
-                  (void) gripe (tp [1], "too few arguments!");
-	    }
-            (void) fprintf (code_file, ");\n");
-            break;
-
          case PROCEED:
             (void) fprintf (code_file, "   return;\n");
             break;
@@ -969,18 +942,10 @@ char *proccond;
             argtyp [1] = argtyp [index]; argtyp [2] = argtyp [index + 1];
             argval [1] = argval [index]; argval [2] = argval [index + 1];
             minor_type = QUIP;
- 
+         case APPEND:
+            if (minor_type == APPEND) /* I.e. we didn't fall through to here */
+               fprintf (code_file, "glue_text();\n");
          case QUIP:
-            if (argtyp [1] != TEXT && argtyp [1] != VARIABLE &&
-                argtyp [1] != LOCAL&& argtyp [1] != OBJECT)
-                   gripe (tp[1], "QUIP argument not reducible to a text!");
-            if (argtyp [1] == TEXT &&
-               ((*(ap[1])).body.text.text_type & 1024) && tp[2] == NULL)
-            {
-               printf ("Text %s: max states %d, type %o\n",ap[1]->name,
-                  ap[1] -> state_count, (*(ap[1])).body.text.text_type);
-                  gripe (tp[1], "Missing required word qualifier.");
-	    }
          case SAY:
          case VALUE:
          case DESCRIBE:
@@ -998,8 +963,16 @@ char *proccond;
             else
                type = 0;
 
-            if (argtyp [1] > TEXT && argtyp [1] != LOCAL)
-               gripe (tp [1], "Not reducible to a text!");
+            if (argtyp [1] != TEXT && argtyp [1] != VARIABLE &&
+                argtyp [1] != LOCAL&& argtyp [1] != OBJECT)
+                   gripe (tp[1], "Argument not reducible to a text!");
+            if (argtyp [1] == TEXT &&
+               ((*(ap[1])).body.text.text_type & 1024) && tp[2] == NULL)
+            {
+               printf ("Text %s: max states %d, type %o\n",ap[1]->name,
+                  ap[1] -> state_count, (*(ap[1])).body.text.text_type);
+                  gripe (tp[1], "Missing required word qualifier.");
+	    }
             if (minor_type == DESCRIBE && 
                (argtyp [1] == VERB || argtyp [1] == TEXT ||
                 argtyp [1] == PLACE))
@@ -1443,12 +1416,144 @@ char *proccond;
             
          case CHECKPOINT:
             (void) fprintf (code_file, 
-               "puts (\"=== Checkpoint: %s, line %d ===\");",
+               "   puts (\"=== Checkpoint: %s, line %d ===\");",
                   pathname[level], line_count[level]);
             break;
          
+         case SAVE:
+         case RESTORE:
+            if (tp[1] == NULL)
+            {
+               (void) gripe (tp[0], "Missing operation type indicator");
+            }
+            if (tp[2] == NULL)
+            {
+               tp[3] = NULL;
+               argval[2] = 0;
+            }
+            else if (argtyp[2] != VARIABLE && argtyp[2] != LOCAL)
+            {
+               (void) gripe (tp [2], "Not a variable.");
+            }
+            if (strcmp (tp[1], "file") == 0)
+            {
+               type = (minor_type == SAVE) ? 1 : 2;
+            }
+            else if (strcmp (tp[1], "memory") == 0)
+            {
+               type = (minor_type == SAVE) ? 0 : 1;
+               fprintf (code_file, "   %s[%d] = memstore (%d);\n",
+                  (argtyp[2] == LOCAL) ? "lval" : "value", argval[2],
+                     (minor_type == SAVE) ? 0 : 1);
+               break;
+            }
+            else if (strcmp (tp[1], "command") == 0)
+            {
+               type = (minor_type == SAVE) ? 23 : 24;
+            }
+            else if (strcmp (tp[1], "value") == 0)
+            {
+               type = (minor_type == SAVE) ? 6 : 7;
+            }
+            else
+            {
+               (void) gripe (tp[1], "Unknown save/restore operation type");
+            }
+            (void) fprintf (code_file, "   special(%d, &%s[%d]);\n",
+               type, argtyp [2] == LOCAL ? "lval" : "value", argval [2]);
+            break;
+            
+           case VERBATIM:
+              fprintf (code_file, "   verbatim(%d);\n", argval [1]);
+              break;
+              
+/*         case DELETE:
+ *            if (tp[1])
+ *            {
+ *               if (strcmp (tp[1], "value)
+ *               {
+ *               }
+ *               else
+ *               {
+ *               }
+ *            }
+ *            else
+ *            {
+ *            }
+ *            break;
+ */
+             
+/*         case SAVEDLIST:
+ *            if (tp[1] == NULL)
+ *            {
+ *            }
+ *            if (strcmp (tp[1], "count")
+ *            {
+ *            }
+ *            else if (strcmp (tp[1], "show")
+ *            {
+ *            }
+ *            else
+ *            {
+ *            }
+ *            break;
+ */
+             
+         case CALL:
          default:
-            (void) gripe (tp [0], "Unimplemented minor directive.");
+            if (minor_type == CALL)
+               index = 1;
+            else
+            {
+               index = 0;
+               argtyp[0] = ap[0] -> type;
+               write_ref (" prc ", tp [index]);
+            }
+            proc_index = index;
+            if (argtyp [index] != PROCEDURE && argtyp [index] > VERB &&
+               argtyp [index] != VARIABLE && argtyp [index] != LOCAL)
+                  (void) gripe (tp [index], 
+                     "Not a minor directive or a callable symbol.");
+            if (argtyp [index] == PROCEDURE)
+               (void) fprintf (code_file, "   p%d(", argval [index]);
+            else if (argtyp [index] == VARIABLE)
+               (void) fprintf (code_file, 
+                  "   (*procs[value[%d]])(", argval [index]);
+            else if (argtyp [index] == LOCAL)
+               (void) fprintf (code_file, 
+                  "   (*procs[lval[%d]])(", argval [index]);
+            else
+               (void) fprintf (code_file, "   (*procs[%d])(", argval [index]);
+            if (argtyp [index] == PROCEDURE)
+            {
+               args_count = -(ap [index] -> state_count);
+               for (++index; tp [index]; index++)
+               { 
+                  if (args_count == 0)
+                     (void) gripe (tp [proc_index], "too many arguments!");
+                  if (argtyp [index] > TEXT && argtyp [index] != CONSTANT &&
+                      argtyp [index] != LOCAL)
+                        (void) gripe (tp [index], "illegal argument type!");
+                  (void) fprintf (code_file, "%s", index == 2 ? "" : ",");
+                  if (argtyp [index] != VARIABLE)
+                     (void) fprintf (code_file, "%d,", 
+                        argtyp [index] == CONSTANT ? 0 : -1);
+                  else
+                     (void) fprintf (code_file, "*bitword(%d),", 
+                        argval [index]);
+                  if (argtyp [index] == VARIABLE)
+                     (void) fprintf (code_file, "value[%d]", argval [index]);
+                  else if (argtyp [index] == LOCAL)
+                     (void) fprintf (code_file, "lval[%d]", argval [index]);
+                  else
+                     (void) fprintf (code_file, "%d", argval [index]);
+                  args_count--;
+               }
+               if (args_count)
+                  (void) gripe (tp [proc_index], "too few arguments!");
+	    }
+            (void) fprintf (code_file, ");\n");
+            break;
       }
       if (minor_type < NOT) not_pending = FALSE;
    }

@@ -1,5 +1,6 @@
 /* const.h (acdc) - copyleft Mike Arnautov 1990-2004.
  *
+ * 19 Aug 04   MLA           Added FREE_ARG.
  * 03 Mar 03   MLA           Added REST.
  * 15 Sep 90   MLA           Initial coding.
  *
@@ -65,6 +66,7 @@ extern void recase ();
 /* Rest of the line. */
 
 #define REST -1
+#define FREE_ARG 1000
 
 /* Size of a code chunk. */
 

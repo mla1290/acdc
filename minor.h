@@ -30,13 +30,15 @@
 # define IFKEY       14
 # define IFANY       15
 # define IFFLAG      16
-# define CHANCE      17
-# define QUERY       18
+# define IFCGI       17
+# define IFDOALL     18
+# define CHANCE      19
+# define QUERY       20
 
-# define NOT         20
-# define AND         21
-# define OR          22
-# define XOR         23
+# define NOT         25
+# define AND         26
+# define OR          27
+# define XOR         28
 
 # define ELSE        31
 # define FIN         32
@@ -76,6 +78,7 @@
 # define QUIP        84
 # define RESPOND     85
 # define DICT        86
+# define APPEND      87
 
 # define FLAG        91
 # define UNFLAG      92
@@ -108,3 +111,10 @@
 # define LOCAL      131
 
 # define CHECKPOINT 141
+
+# define SAVE       151
+# define RESTORE    152
+# define DELETE     153
+# define SAVEDLIST  154
+
+# define VERBATIM   161

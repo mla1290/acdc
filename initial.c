@@ -1,5 +1,7 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2004.
  *
+ * 20 Aug 04   MLA           Added IFCGI.
+ * 14 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
  * 09 Feb 04   MLA           Added ADJECTIVE and PREPOSITION types.
  * 03 Feb 04   MLA           Added FEATURE.
  * 09 Mar 03   MLA           Replaced trace with debug.
@@ -129,6 +131,8 @@ struct directive keywords[] =
    {"ifinrange",   MINOR, IFINRANGE,   3,   3},
    {"ifis",        MINOR, IFIS,        2,   2},
    {"ifloc",       MINOR, IFLOC,       2,   ANY_NUMBER},
+   {"ifcgi",       MINOR, IFCGI,       0,   0},
+   {"ifdoall",     MINOR, IFDOALL,     0,   0},
    {"and",         MINOR, AND,         0,   0},
    {"or",          MINOR, OR,          0,   0},
    {"xor",         MINOR, XOR,         0,   0},
@@ -170,6 +174,7 @@ struct directive keywords[] =
    {"quip",        MINOR, QUIP,        1,   2},
    {"value",       MINOR, VALUE,       2,   2},
    {"vocab",       MINOR, DICT,        4,   4},
+   {"append",      MINOR, APPEND,      1,   2},
    {"set",         MINOR, SET,         2,   2},
    {"add",         MINOR, ADD,         2,   2},
    {"subtract",    MINOR, SUBTRACT,    2,   2},
@@ -205,6 +210,11 @@ struct directive keywords[] =
    {"tie",         MINOR, TIE,         2,   ANY_NUMBER},
    {"fakearg",     MINOR, FAKEARG,     2,   2},
    {"fakecom",     MINOR, FAKECOM,     2,   2},
+   {"save",        MINOR, SAVE,        FREE_ARG,   2},
+   {"restore",     MINOR, RESTORE,     FREE_ARG,   2},
+   {"delete",      MINOR, DELETE,      1,   1},
+   {"savedlist",   MINOR, SAVEDLIST,   FREE_ARG + 1,   2},
+   {"verbatim",    MINOR, VERBATIM,    1,   1},
    {"local",       MINOR, LOCAL,       1,   ANY_NUMBER},
    {"checkpoint",  MINOR, CHECKPOINT,  0,   0},
    {"object",      SYMBOL,OBJFLAG,     0,   0},
