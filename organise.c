@@ -98,7 +98,7 @@ struct node *np;
       if (np -> type == TEXT) 
       {
          *(text_info + 2 * (np -> refno)) =
-            np -> body.text.text_type;
+            (np -> body.text.text_type & 1023);   /* Strip off the 1024 flag */
          *(text_info + 2 * (np -> refno) + 1) =
             np -> state_count;
       }

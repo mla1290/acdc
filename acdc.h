@@ -7,7 +7,8 @@ extern int no_warn;
 #ifdef __STDC__
 extern int getline (int key);
 extern void gripe (char *error_token, char *error_message);
-extern int gettext (int description, int *max_states, int fragment);
+extern int gettext (int description, int *max_states, int fragment, 
+                    int *got_holder);
 extern void storchar (int ch);
 extern void doswitch (char *text_ptr, int *max_states);
 extern void write_ref (char *tag, char *token);

@@ -31,7 +31,7 @@ struct node *np;
    while (description > 0)
    {
       np -> body.text.text_addr [description - 1] = next_addr;
-      description = gettext (description, &states, FALSE);
+      description = gettext (description, &states, FALSE, NULL);
       if (max_states < states) max_states = states;
    }
    np -> state_count = max_states;

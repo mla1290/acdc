@@ -1,5 +1,6 @@
 /* domajor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 24 Mar 03   MLA           Added 4th arg to gettext().
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 23 Feb 03   MLA           Preserve mask value.
  * 21 Feb 03   MLA           bug: Display full version string.
@@ -342,7 +343,8 @@ void domajor ()
          if (xref && tp [1] != dummy_text)
             write_ref (major_type == TEXT ? " TXT " : " FRG ", tp [1]);
          line_status = EOL;
-         (void) gettext (0, &(np -> state_count), major_type == FRAGMENT);
+         (void) gettext (0, &(np -> state_count), 
+            major_type == FRAGMENT, &type);
          np -> body.text.text_type = type;
          return;          /* preserve the BOL line_status! */
 

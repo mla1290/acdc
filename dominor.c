@@ -945,6 +945,7 @@ char *proccond;
             if (tp [index] == NULL)
                (void) gripe ("", "Missing text argument!");
             (void) fprintf (code_file, "-1))");
+            ap [1]     = ap [index];     ap [2]     = ap [index + 1];
             tp [1]     = tp [index];     tp [2]     = tp [index + 1];
             argtyp [1] = argtyp [index]; argtyp [2] = argtyp [index + 1];
             argval [1] = argval [index]; argval [2] = argval [index + 1];
@@ -954,6 +955,13 @@ char *proccond;
             if (argtyp [1] != TEXT && argtyp [1] != VARIABLE &&
                 argtyp [1] != LOCAL&& argtyp [1] != OBJECT)
                    gripe (tp[1], "QUIP argument not reducible to a text!");
+            if (argtyp [1] == TEXT &&
+               ((*(ap[1])).body.text.text_type & 1024) && tp[2] == NULL)
+            {
+               printf ("Text %s: max states %d, type %o\n",ap[1]->name,
+                  ap[1] -> state_count, (*(ap[1])).body.text.text_type);
+                  gripe (tp[1], "Missing required word qualifier.");
+	    }
          case SAY:
          case VALUE:
          case DESCRIBE:

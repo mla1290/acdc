@@ -1,5 +1,7 @@
 /* gettext.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 24 Mar 03   MLA           Added 4th argument to signal presence of a
+ *                           word holder, if requested to do so.
  * 01 Dec 02   MLA           bug: Allow abutting nested texts.
  * 26 Dec 01   MLA           Added text_lines.
  * 25 Nov 01   MLA           Bug: Throw a new line if text ends on BLOCK_END.
@@ -31,12 +33,13 @@
 #include "text.h"
 
 #ifdef __STDC__
-int gettext (int description, int *max_states, int fragment)
+int gettext (int description, int *max_states, int fragment, int *got_holder)
 #else
-int gettext (description, max_states, fragment)
+int gettext (description, max_states, fragment, got_holder)
 int description;
 int *max_states;
 int fragment;
+int *got_holder;
 #endif
 {
    char *text_ptr;
@@ -352,7 +355,10 @@ store:
                continue;
             }
             if (*text_ptr == '#')
+            {
+               if (got_holder) *got_holder |= 1024;
                *text_ptr = HOLDER;
+            }
             else if (*text_ptr == SILENCE)
                *text_ptr = '\0';
             else if (*text_ptr == '_' && style >= 10)
