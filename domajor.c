@@ -1,6 +1,6 @@
 /* domajor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
- * 24 Mar 03   MLA           Added 4th arg to gettext().
+ * 24 Mar 03   MLA           Added 4th arg to gettxt().
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 23 Feb 03   MLA           Preserve mask value.
  * 21 Feb 03   MLA           bug: Display full version string.
@@ -20,7 +20,7 @@
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 31 Dec 98   MLA           Allowed array declarations.
  * 20 Mar 94   MLA           Tracing now done dynamically.
- * 18 Mar 94   MLA           Second arg to gettext should be NULL, not 0!
+ * 18 Mar 94   MLA           Second arg to gettxt should be NULL, not 0!
  * 14 Mar 94   MLA           Corrected FLAGS type handling.
  * 12 Dec 91   MLA           Added the FRAGMENT directive.
  * 23 Feb 91   MLA           Allowed variable bit fields.
@@ -302,8 +302,9 @@ void domajor ()
          (void) gripe (tp[0], "Descriptive keyword too late.");
          break;
 
+      case FEATURE:
       case VERB:
-         (void) getnames (major_type, NULL);
+         np = getnames (major_type, NULL);
          break;
 
       case OBJECT:
@@ -342,7 +343,7 @@ void domajor ()
          if (xref && tp [1] != dummy_text)
             write_ref (major_type == TEXT ? " TXT " : " FRG ", tp [1]);
          line_status = EOL;
-         (void) gettext (0, &(np -> state_count), 
+         (void) gettxt (0, &(np -> state_count), 
             major_type == FRAGMENT, &type);
          np -> body.text.text_type = type;
          return;          /* preserve the BOL line_status! */

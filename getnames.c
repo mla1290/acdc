@@ -29,6 +29,7 @@ struct node *gp;
    int index;
    int prefix;
    int current_type;
+   int real_type;
    int refno;
    int used;
    long last_addr;
@@ -39,7 +40,9 @@ struct node *gp;
    if (*tp [1] == '=')
       (void) gripe (tp [1], "No preceding word to equate to!");
    index = 0;
-   current_type = major_type;
+   current_type = real_type = major_type;
+   if (major_type == FEATURE) 
+       current_type = major_type = VERB;
    np = gp;
 
    if (np == NULL)
@@ -101,11 +104,11 @@ struct node *gp;
       current_type = SYNONYM;
 
       if (prefix == '=')
-         (void) storword (tp [index], major_type, refno, last_addr);
+         (void) storword (tp [index], real_type, refno, last_addr);
       else
       {
          last_addr = next_vocaddr;
-         (void) storword (tp [index], major_type, refno, next_vocaddr);
+         (void) storword (tp [index], real_type, refno, next_vocaddr);
       }
    }
 

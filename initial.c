@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 03 Feb 04   MLA           Added FEATURE.
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 03 Mar 03   MLA           Added AUTHOR.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
@@ -66,6 +67,7 @@ struct directive keywords[] =
    {"variable",  MAJOR,     VARIABLE,  1,   ANY_NUMBER},
    {"array",     MAJOR,     ARRAY,     2,   2},
    {"verb",      MAJOR,     VERB,      1,   ANY_NUMBER},
+   {"feature",   MAJOR,     FEATURE,   1,   ANY_NUMBER},
    {"text",      MAJOR,     TEXT,      0,   2},
    {"fragment",  MAJOR,     FRAGMENT,  0,   2},
    {"procedure", MAJOR,     PROCEDURE, 1,   ANY_NUMBER},

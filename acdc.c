@@ -1,5 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 03 Feb 04   MLA           Added FEATURE type.
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 03 Mar 03   MLA           Added author.
  * 23 Feb 03   MLA           Initialise random number generator.
@@ -123,7 +124,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.51; MLA, 22 May 03]\n");
+      "[A-code to C translator, version 11.52; MLA, 03 Feb 04]\n");
    srand ((unsigned int)(now = time (NULL)));
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 

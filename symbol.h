@@ -26,11 +26,11 @@
    struct node 
    {
       char *name;
-      int type;             /* Type of node */
-      int refno;             /* Node id */
+      int type;            /* Type of node */
+      int refno;              /* Node id */
       struct proc_list *head;
       struct proc_list *tail;
-      int state_count;       /* Number of states for objects, places and texts */
+      int state_count;     /* Number of states for objects, places and texts */
       int used_count;
       union
       {

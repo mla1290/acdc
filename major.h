@@ -26,6 +26,7 @@
 #define FRAGMENT  12         /* A kind of text */
 #define ARRAY     13         /* A kind of variable */
 #define SYNONYM   14         /* An additional name for name or place */
+#define FEATURE   15         /* A pseudo-verb */
 
 /* The rest are compilation directives */
 

@@ -1,4 +1,4 @@
-/* gettext.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
  * 24 Mar 03   MLA           Added 4th argument to signal presence of a
  *                           word holder, if requested to do so.
@@ -33,9 +33,9 @@
 #include "text.h"
 
 #ifdef __STDC__
-int gettext (int description, int *max_states, int fragment, int *got_holder)
+int gettxt (int description, int *max_states, int fragment, int *got_holder)
 #else
-int gettext (description, max_states, fragment, got_holder)
+int gettxt (description, max_states, fragment, got_holder)
 int description;
 int *max_states;
 int fragment;

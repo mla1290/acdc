@@ -129,12 +129,20 @@ struct node *np;
 #endif
 {
    int refno;
-
+   int feature;
+   
+   if (np -> type == FEATURE)
+   {
+      np -> type = VERB;
+      feature = -1;
+   }
+   else
+      feature = 1;
    if (np -> type <= VERB)
-      refno = np -> refno += type_base[ np -> type ];
+      refno = np -> refno += type_base [np -> type];
    else
       refno = 0;
-   (void) fprintf (defs_file, "%4d, ", refno);
+   (void) fprintf (defs_file, "%4d, ", feature * refno);
    if (++node_count == 11)
    {
       node_count = 0;
