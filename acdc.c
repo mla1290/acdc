@@ -1,7 +1,8 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2005.
  */
-#define VERSION "11.60, MLA 03 Jan 05"
+#define VERSION "11.61, MLA 11 Jan 13"
 /*
+ * 11 Jan 05   MLA           Added pre-declarations for UNDO handling.
  * 01 Jan 05   MLA           Added UNDO/REDO.
  * 12 Sep 04   MLA           CALL is optional.
  * 20 Aug 04   MLA           Added IFCGI.

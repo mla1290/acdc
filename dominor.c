@@ -1475,7 +1475,7 @@ char *proccond;
               
            case UNDO:
            case REDO:
-              fprintf (code_file, "   value[STATUS]=%s();\n", 
+              fprintf (code_file, "   %s();\n", 
                  minor_type == UNDO ? "undo" : "redo");
               break;
               

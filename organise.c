@@ -1,5 +1,6 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 13 Jan 04   MLA           Added UNDO/REDO handling.
  * 06 Mar 03   Stuart Munro  Remove unused variable.
  * 04 Mar 03   MLA           VERSION repaced with GAMEID and DBNAME.
  * 21 Feb 03   MLA           Added conditional VERSION definition.
@@ -260,6 +261,30 @@ char *upname;
 }
 
 #ifdef __STDC__
+void declare_flag(char *name, char *upname, int value)
+#else
+void declare_flag(name, upname, value)
+char *name;
+char *upname;
+int   value;
+#endif
+{
+   struct node *np;
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, name)) != NULL)
+   {
+      if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
+         (void) gripe (upname, "Declared as other than a flag.");
+      else
+         value = np -> refno;
+   }
+   else
+      (void) addsymb (SYMBOL, name, FLAGS, value);
+   (void) fprintf (defs_file, "#define %s %d\n", upname, value);
+   return;
+}
+
+#ifdef __STDC__
 void organise(void)
 #else
 void organise()
@@ -269,7 +294,9 @@ void organise()
    char *cptr;
    struct node *np;
    char dbname [80];
-
+   struct node *undo_stat = NULL;
+   struct node *undo = NULL;
+   
    void processsymb();
    void process_voc_refno();
    void process_voc_type();
@@ -324,6 +351,20 @@ void organise()
  *      (void) gripe ("PLS.CLARIFY", "Declared as a non-flag!");
  */
 
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo")) != NULL &&
+      np -> type == VERB)
+   {
+      undo = np;
+      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo.status")) == NULL)
+      {
+         np = addsymb (SYMBOL, "undo.status", VARIABLE, 
+            type_counts[VARIABLE]++);
+      }
+      else if (np -> type != VARIABLE)
+         (void) gripe ("UNDO.STATUS", "Declared as a non-variable!");
+      undo_stat = np;
+   }
+
 /*  Calculate the individual type bases, making sure that the refno numbering
  *  starts from 3. This is done to have two fixed refnos for INIT_PROC and
  *  REPEAT_PROC (1 and two respectively), even though true procs come at the
@@ -361,10 +402,10 @@ void organise()
  *  into the insert file.
  */
 
+   btspan(SYMBOL, processsymb);
+
    if ((defs_file = openout("adv5.h","w")) == NULL)
       (void) gripe ("","Unable to open adv5.h (words.h).");
-
-   btspan(SYMBOL, processsymb);
 
    (void) fprintf (defs_file, "   int textadr[] = {\n");
    dump_array(text_base, text_count,  " %8ldL,", 7);
@@ -439,6 +480,27 @@ void organise()
    (void) fprintf (defs_file,
       "#define ARG3 %d\n", fndsymb(SYMBOL, "arg3") -> refno);
 
+   if (undo_stat)
+   {
+      (void) fprintf (defs_file, "#define UNDO %d\n", undo -> refno);
+      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "redo")) != NULL)
+      {
+         if (np -> type == VERB)
+            (void) fprintf (defs_file, "#define REDO %d\n", np -> refno);
+         if (undo == NULL)
+            (void) gripe ("REDO", "Verb declared without UNDO!");
+         else if (np -> type != VERB)
+            (void) gripe ("UNDO", "Declared as a non-verb!");
+      }
+      (void) fprintf (defs_file, "#define UNDO_STAT %d\n", undo_stat -> refno);
+      declare_flag ("undo.off",  "UNDO_OFF",   3);
+      declare_flag ("undo.info", "UNDO_INFO" , 4);
+      declare_flag ("undo.none", "UNDO_NONE" , 5);
+      declare_flag ("undo.trim", "UNDO_TRIM" , 6);
+      declare_flag ("undo.inv",  "UNDO_INV"  , 7);
+      declare_flag ("undo.bad",  "UNDO_BAD"  , 8);
+   }
+   
    define_constant ("schizoid",   "SCHIZOID",   "object flag");
    define_constant ("juggled",    "JUGGLED",    "variable flag");
    define_constant ("moved",      "MOVED",      "variable flag");
@@ -498,29 +560,6 @@ void organise()
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "dwarven")) != NULL)
       if (np -> type == VARIABLE)
          (void) fprintf (defs_file, "#define DWARVEN %d\n", np -> refno);
-
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo")) != NULL)
-   {
-      if (np -> type == VERB)
-         (void) fprintf (defs_file, "#define UNDO %d\n", np -> refno);
-      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undostat")) == NULL)
-      {
-         np = addsymb (SYMBOL, "undostat", VARIABLE, type_counts[VARIABLE]++);
-      }
-      else if (np -> type != VARIABLE)
-         (void) gripe ("UNDOSTAT", "Declared as a non-variable!");
-      (void) fprintf (defs_file, "#define UNDOSTAT %d\n", np -> refno);
-   }
-   
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "redo")) != NULL)
-   {
-      if (np -> type == VERB)
-         (void) fprintf (defs_file, "#define REDO %d\n", np -> refno);
-      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo")) == NULL)
-         (void) gripe ("REDO", "Verb declared without UNDO!");
-      else if (np -> type != VERB)
-         (void) gripe ("UNDO", "Declared as a non-verb!");
-   }
 
 #ifdef OBSOLETE
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "fulldisplay")) != NULL)
