@@ -1,5 +1,6 @@
 /* parse.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 03 Mar 03   MLA           Use new-style get_token().
  * 06 Nov 01   MLA           Fiddle FULLDISP for Platt-style A-code.
  * 17 Oct 01   MLA           Improved compatibility with Platt's A-code.
  * 03 Dec 00   MLA           Allowed '#' as a comment delimiter.
@@ -29,33 +30,54 @@ int type;
    int index;
    struct node *np;
    extern char *get_token();
+   char *cptr = line;
 
    (void) strcpy (raw_line, line);
    recase(LOWERCASE, line);
-   if ((tp[0] = get_token(line, " ,\n\0")) == NULL)
+   tp [1] = NULL;
+   if ((tp[0] = get_token(&cptr, " ,\n\0")) == NULL)
       (void) gripe ("","Null directive???");
    if (type != NONE)
+   {
       if ((np = fndsymb(type, tp[0])) == NULL)
          return (NULL);
-   index = 0;
-   while ((tp[++index] = get_token(NULL," ,\n\0\r")) != NULL)
+      index = 0;
+      if (np -> body.directive.max_args == REST)
+      {
+         cptr = raw_line + (cptr - line);
+         cptr += strspn (cptr, " ,\n\0");
+         tp [1] = cptr;
+         cptr += strlen(cptr) - 1;
+         if (*cptr == '\n') *cptr = '\0';
+         if (! *tp[1])
+            (void) gripe (tp[0], "Missing \"rest of line\" argument.");
+         return (np);
+      }
+   }
+   while (cptr && (tp[++index] = get_token(&cptr," ,\n\0\r")) != NULL)
    {
       if (style == 1)
       {
-         if (strcmp (tp[index], "object") == 0) tp[index] = "objflag";
-         else if (strcmp (tp[index], "place") == 0) tp[index] = "placeflag";
-         else if (strcmp (tp[index], "verb") == 0) tp[index] = "verbflag";
-         else if (strcmp (tp[index], "variable") == 0) tp[index] = "varflag";
-         else if (strcmp (tp[index], "fulldisp") == 0) tp[index] = "fulldisplay";
+         if (strcmp (tp[index], "object") == 0) 
+            tp[index] = "objflag";
+         else if (strcmp (tp[index], "place") == 0) 
+            tp[index] = "placeflag";
+         else if (strcmp (tp[index], "verb") == 0) 
+           tp[index] = "verbflag";
+         else if (strcmp (tp[index], "variable") == 0) 
+            tp[index] = "varflag";
+         else if (strcmp (tp[index], "fulldisp") == 0) 
+            tp[index] = "fulldisplay";
       }
       if (index > ANY_NUMBER)
-         (void) gripe ("","*Far* too many arguments!");
-      if (*tp[index] == '{' || *tp[index] == '#')
+          (void) gripe ("","*Far* too many arguments!");
+      if (! *tp[index] || *tp[index] == '{' || *tp[index] == '#')
       {
          tp[index] = NULL;
          break;
       }
    }
+
    if (type == NONE)
       return NULL;
    index--;

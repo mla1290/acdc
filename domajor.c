@@ -44,64 +44,6 @@
 #include "output.h"
 #include "param.h"
 
-#ifdef __50SERIES
-#  define MODE "o"
-#else
-#  define MODE "wb"
-#endif
-
-#ifdef __STDC__
-void stortitl (char *string)
-#else
-void stortitl (string)
-char *string;
-#endif
-{
-   int len;
-   char *tptr;
-   int mask;
-
-   if ((text_file = openout ("adv6.h", MODE)) == NULL)
-      (void) gripe ("adv6.h", "Unable to open data file.");
-   fprintf (text_file, "char text [TEXT_BYTES] = {\n");
-
-   if (string)
-   {
-      tptr = string;
-      len = strlen (string);
-   }
-   else
-   {
-      tptr = raw_line;
-      while (*tptr != ' ' && *tptr != '\t')
-         tptr++;
-      while (*tptr == ' ' || *tptr == '\t')
-         tptr++;
-      len = strlen (tptr) - 1;
-   }
-   if (len > 79) len = 79;
-   (void) strncpy (title, tptr, len);
-   *(title + len) = '\0';
-   title [79] = '\0';
-   key_mask = (rand() & 127) | 'x';
-   if (key_mask == 255) key_mask = 'y';
-   mask = key_mask;
-
-   fputc ('0', text_file); 
-   next_addr++;
-
-   while (*tptr && *tptr != '\n')
-   {
-      (void) fprintf (text_file, ",%d", *tptr ^ mask);
-      mask = *tptr++;
-      next_addr++;
-   }
-
-   fprintf (text_file, ",%d", mask);
-   next_addr++;
-   return;
-}
-
 #ifdef __STDC__
 void domajor (void)
 #else
@@ -157,26 +99,6 @@ void domajor ()
 
    index = 0;
    major_type = np -> refno;
-
-   if (next_addr == 0)
-   {
-      if (major_type == DBNAME)
-      {
-         if (strlen (tp [1]) < 3)
-            (void) gripe (tp [1], "Game version too short.");
-         recase (LOWERCASE, tp [1]);
-         stortitl (NULL);
-         (void) printf ("Version: %s\n", title);
-         line_status = EOL;
-         return;
-      }
-      else
-      {
-         stortitl (source_file);
-         style = 1;           /* Original A-code style */
-         (void) printf ("No game version found. Assuming old-style ACODE.\n");
-      }
-   }
 
    switch (major_type)
    {
@@ -279,9 +201,10 @@ void domajor ()
             break;
          }           /* Otherwise assume a constant and fall through! */
 
+      case STATE:
+ index = 1;
       case CONSTANT:
       case FLAGS:
-      case STATE:
          index = 1;
          value = -1;
          flag_type = -1;
@@ -373,21 +296,9 @@ void domajor ()
          return;          /* Preserve line_status as BOL ! */
 
       case STYLE:
-            if (strcmp (tp[1], "old") == 0 || strcmp (tp[1], "original") == 0)
-               style = 1;
-            else if (style != 1)
-            {
-               index = chrtobin (tp[2] ? tp[2] : tp[1]);
-               if (index > 11)
-                  (void) gripe ("", "Style higher than current maximum (11)!");
-               if (index < 10 && style != 1)
-                  (void) gripe ("", "Style values from 2 to 9 are meaningless.");
-               style = index;
-            }
-            else
-               (void) gripe ("", 
-                  "Style already defaulted to 1 and hence cannot be modified!");
-            
+      case VERSION:
+      case AUTHOR:
+         (void) gripe (tp[0], "Descriptive keyword too late.");
          break;
 
       case VERB:
@@ -543,10 +454,6 @@ void domajor ()
          dominor (prochead, proccond);
          (void) fprintf (code_file, "}\n");
          return;
-
-      case DBNAME:
-         (void) gripe (title, "Title already defined and cannot be changed.");
-         break;
 
       case DEFINE:
          index = 0;

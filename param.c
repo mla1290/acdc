@@ -1,25 +1,30 @@
-/* params.c (acdc) - copyleft Mike Arnautov 1990-2003.
+/* param.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
- * 13 Jan 02   MLA          Give up -- pass "hidden" type args.
- * 12 Jan 02   MLA          bug: construct own parameter names.
- * 10 Jan 02   MLA          BUG: sundry fixes.
- * 30 Dec 01   MLA          Initial coding.
+ * 06 Mar 03   Stuart Munro  Include stdlib.h; declare gripe().
+ * 13 Jan 02   MLA           Give up -- pass "hidden" type args.
+ * 12 Jan 02   MLA           bug: construct own parameter names.
+ * 10 Jan 02   MLA           BUG: sundry fixes.
+ * 30 Dec 01   MLA           Initial coding.
  *
  */
  
 #include <string.h>
+#include <stdlib.h>
 
 #include "output.h"
 #include "param.h"
+
 struct param_list *param_root = NULL;
 
 #ifdef __STDC__
+void gripe (char *token, char *message);
 
 void addparam (
    int   arg,
    char *name)
    
 #else
+void gripe ();
 
 void addparam (arg, name)
 int   arg;

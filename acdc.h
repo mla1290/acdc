@@ -1,9 +1,9 @@
 /* acdc.h (acdc) - copyleft Mike Arnautov 1990-2003.
  */
 
-#ifdef COPYLEFT
-   extern char datbuf [];
-#endif /* COPYLEFT */
+extern char author [40];
+extern char datbuf [];
+extern int no_warn;
 #ifdef __STDC__
 extern int getline (int key);
 extern void gripe (char *error_token, char *error_message);

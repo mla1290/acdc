@@ -57,7 +57,7 @@ extern long next_addr;
 extern char *text_buf_ptr;
 extern int text_buf_len;
 extern FILE *text_file;
-extern char title[];
+extern char title[80];
 extern char *title_ptr;
 extern int plain_text;
 extern int style;

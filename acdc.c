@@ -1,5 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 03 Mar 03   MLA           Added author.
  * 23 Feb 03   MLA           Initialise random number generator.
  * 02 Feb 03   MLA           Count autop chunks form 1 (kernel will be 0).
  * 07 Jan 03   MLA           Use btree instead of tsearch.
@@ -32,13 +33,13 @@
 #include <time.h>
 
 #include "acdc.h"
+char author [40];
+char datbuf [16];
+int no_warn = 0;
+time_t now;
+
 #include "const.h"
 #include "line.h"
-
-#ifdef COPYLEFT
-   char datbuf [16];
-   time_t now;
-#endif /* COPYLEFT */
 
 int listing;
 int line_status;
@@ -118,11 +119,9 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.43; MLA, 23 Feb 03]\n");
-#ifdef COPYLEFT
+      "[A-code to C translator, version 11.45; MLA, 03 Mar 03]\n");
    srand ((unsigned int)(now = time (NULL)));
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
-#endif /* COPYLEFT */
 
 /* Initialise the search stacks.
  */
@@ -153,6 +152,8 @@ int main (argc, argv)
             plain_text = 1;
          else if (strncmp (arg, "-xref", len) == 0)
             xref = 2;            /* "Super TRUE" -- noxref doesn't override */
+         else if (strncmp (arg, "-nowarn", len) == 0)
+            no_warn = 1;
          else if (*arg == '-')
          {
             (void) printf (

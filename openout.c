@@ -1,5 +1,7 @@
 /* openout.c (acdc) - copyleft Mike Arnautov 2002 - 2003.
  *
+ * 06 Mar 03   Stuart Munro  Remove unused variables.
+ * 04 Mar 03   MLA           Changed copyleft code to be unconditional.
  * 18 Nov 01   MLA           Added the copyleft code for adv660, adv770.
  * 30 Sep 00   MLA           Simplified directory serach.
  * 07 Aug 99   MLA           Initial coding.
@@ -22,9 +24,7 @@ FILE *openout (file, mode)
    char *mode;
 #endif
 {
-   char *cptr;
    char *brk;
-   char path_buf [80];
    char full_name [128];
    int try = 0;
    FILE *outfile;
@@ -43,7 +43,7 @@ FILE *openout (file, mode)
 
       if ((outfile = fopen (full_name, mode)) == NULL)
       {
-         gripe (file, "Unable to find");
+         gripe (file, "Unable to find.");
          return (NULL);
       }
    }
@@ -56,10 +56,9 @@ FILE *openout (file, mode)
          strcpy (full_name, source_file);
          brk = strrchr (full_name, '.');
          if (brk) *brk = '\0';
-#ifdef COPYLEFT
-         fprintf (outfile, "/* %s: %s - copyleft %s, %s.\n */\n", file,
-            full_name, COPYLEFT, datbuf);
-#endif /* COPYLEFT */
+         if (*author)
+            fprintf (outfile, "/* %s: %s - copyleft %s, %s. */\n\n", file,
+               full_name, author, datbuf);
       }
    }
 

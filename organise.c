@@ -1,6 +1,8 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
- * 21 Feb 03   MLA           Added conditional DBNAME definition.
+ * 06 Mar 03   Stuart Munro  Remove unused variable.
+ * 04 Mar 03   MLA           VERSION repaced with GAMEID and DBNAME.
+ * 21 Feb 03   MLA           Added conditional VERSION definition.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 09 Feb 03   MLA           Added SAY, F/LDIR, F/LMAGIC.
  * 04 Feb 03   MLA           Added EXCEPT and TYPO.
@@ -256,7 +258,6 @@ void organise()
 #endif
 {
    int index;
-   int cnt;
    char *cptr;
    struct node *np;
    char dbname [80];
@@ -375,7 +376,7 @@ void organise()
  */
    if ((defs_file = openout("adv1.h","w")) == NULL)
       (void) gripe ("","Unable to open adv1.h (defs.h).");
-   (void) fprintf (defs_file, "#define VERSION \"%s\"\n", title);
+   (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", title);
    strcpy (dbname, title);
    cptr = dbname;
    while (isalnum (*cptr))
@@ -520,7 +521,7 @@ void organise()
       if (np -> type != VERB)
          (void) gripe ("first.magic", "Declared as other than a verb.");
       else
-         (void) fprintf (defs_file, "#define FMAGIC %d\n", np -> refno);
+         (void) fprintf (defs_file, "#define FACT %d\n", np -> refno);
    }
 
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "last.magic")) != NULL)
@@ -528,7 +529,7 @@ void organise()
       if (np -> type != VERB)
          (void) gripe ("last.magic", "Declared as other than a verb.");
       else
-         (void) fprintf (defs_file, "#define LMAGIC %d\n", np -> refno);
+         (void) fprintf (defs_file, "#define LACT %d\n", np -> refno);
    }
    
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "first.direction")) != NULL)

@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 03 Mar 03   MLA           Added AUTHOR.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 27 Jul 02   MLA           Added CHECKPOINT.
  * 12 Jul 02   MLA           Added IFNE, IFLE, IFGE.
@@ -87,9 +88,10 @@ struct directive keywords[] =
    {"synonym",   MAJOR,     SYNONYM,   1,   ANY_NUMBER},  /* Compatibility */
    {"synon",     MAJOR,     SYNONYM,   1,   ANY_NUMBER},  /* Compatibility */
    {"define",    MAJOR,     DEFINE,    1,   ANY_NUMBER},  /* Compatibility */
-   {"version",   MAJOR,     DBNAME,    1,   ANY_NUMBER},
-   {"title",     MAJOR,     DBNAME,    1,   1},           /* Compatibility */
-   {"dbname",    MAJOR,     DBNAME,    1,   1},           /* Compatibility */
+   {"gameid",    MAJOR,     VERSION,   1,   REST},
+   {"title",     MAJOR,     VERSION,   1,   1},           /* Compatibility */
+   {"dbname",    MAJOR,     VERSION,   1,   1},           /* Compatibility */
+   {"author",    MAJOR,     AUTHOR,    1,   REST},
    {"style",     MAJOR,     STYLE,     1,   2},
    {"have",      MINOR,     HAVE,      1,   ANY_NUMBER},
    {"near",      MINOR,     NEAR,      1,   ANY_NUMBER},
@@ -208,7 +210,13 @@ void initial()
 #endif
 {
    int index;
-
+   char *tptr;
+   int len;
+   int type;
+   int mask;
+   struct node *np;
+   struct node *parse ();
+   
    extern void *calloc();
 
    index = 0;
@@ -244,6 +252,54 @@ void initial()
    voc_ptr = voc_buf_ptr;
    voc_top = voc_buf_ptr + VOC_INIT_LEN - 20;
 
+/* Now see whether we have any game info lines (style, author, gameid). */
+   
+   *title = '\0';
+   *author = '\0';
+   style = -1;
+   while (1)
+   {
+      if ((line_status = getline (IGNORE_BLANK)) == EOF)
+         (void) gripe ("", "Unexpected end of file!");
+      if ((np = parse (MAJOR)) == NULL)
+         (void) gripe (tp [0], "Unknown major directive.");
+      type = np -> refno;
+      if (type == VERSION)
+      {
+         strncpy (title, tp [1], sizeof (title) - 1);
+         *(title + sizeof (title) - 1) = '\0';
+      }
+      else if (type == AUTHOR)
+      {
+         strncpy (author, tp [1], sizeof (author) - 1);
+         *(author + sizeof (author) - 1) = '\0';
+      }
+      else if (type == STYLE)
+      {
+         if (strcmp (tp[1], "old") == 0 || strcmp (tp[1], "original") == 0)
+            style = 1;
+         else
+         {
+            index = chrtobin (tp[2] ? tp[2] : tp[1]);
+            if (index > 11)
+               (void) gripe ("", 
+                  "Style higher than current maximum of 11!");
+            if (index < 10 && style != 1)
+               (void) gripe ("", "Style values from 2 to 9 are meaningless.");
+            style = index;
+         }
+      }
+      else
+      {
+         strcpy (line, raw_line);
+         line_status = BOL;
+         break;
+      }   
+      line_status = EOL;
+   }
+   if (style == -1)
+      style = *title ? 10 : 1;
+ 
    if ((code_file = openout("adv01.c", "w")) == NULL)
       (void) gripe ("adv01.c", "Unable to open code file.");
    (void) fprintf (code_file, "#include \"adv0.h\"\n");
@@ -253,5 +309,46 @@ void initial()
    if (trace & TRACE_SOURCE)  /* Declarations over - if source output */
       trace |= PRINT_SOURCE;  /* is required, turn it on!             */
 
+#ifdef __50SERIES
+#  define MODE "o"
+#else
+#  define MODE "wb"
+#endif
+
+   if ((text_file = openout ("adv6.h", MODE)) == NULL)
+      (void) gripe ("adv6.h", "Unable to open data file.");
+   fprintf (text_file, "char text [TEXT_BYTES] = {\n");
+   fputc ('0', text_file); 
+   next_addr++;
+
+   tptr = *title ? title : source_file;
+   len = strlen (tptr);
+   if (len > 79) len = 79;
+   (void) strncpy (title, tptr, len);
+   *(title + len) = '\0';
+   title [79] = '\0';
+   key_mask = (rand() & 127) | 'x';
+   if (key_mask == 0 || key_mask == 127) key_mask = 'y';
+   mask = key_mask;
+
+   while (*tptr && *tptr != '\n')
+   {
+      (void) fprintf (text_file, ",%d", *tptr ^ mask);
+      mask = *tptr++;
+      next_addr++;
+   }
+
+   fprintf (text_file, ",%d", mask);
+   next_addr++;
+
+   printf ("GameID: %s\n", title);
+   printf ("Style:  ");
+   if (style == 1)
+      puts ("Dave Platt's original A-code");
+   else
+      printf ("A-code %d\n", style);
+   if (*author)
+      printf ("Author: %s\n", author);
+   
    return;
 }

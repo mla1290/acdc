@@ -1,5 +1,6 @@
 /* finalise.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 06 Mar 03   Stuart Munro  Fix non-ASCII process_proc args declaration.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 02 Jan 03   MLA           bug: removed a redundant arg to fprintf.
@@ -115,7 +116,7 @@ void finalise ()
 #ifdef __STDC__
 void process_proc (struct node *np)
 #else
-void process_proc np
+void process_proc (np)
 struct node *np;
 #endif
 {
@@ -126,14 +127,14 @@ struct node *np;
 
    type = np -> type;
 
-   if (np -> used_count == 0 && *(np -> name) != '.' &&
+   if (no_warn == 0 && np -> used_count == 0 && *(np -> name) != '.' &&
       strcmp (np -> name, "place") && 
       strcmp (np -> name, "verb") && 
       strcmp (np -> name, "variable") && 
       strcmp (np -> name, "object") && 
       strncmp (np -> name, "spare", 5) &&
       strcmp (np -> name, "arg3"))
-         (void) printf ("%-20s symbol defined but not used.\n", np -> name);
+         (void) printf ("   %-22s symbol defined but not used.\n", np -> name);
 
    procno = refno = np -> refno;
 

@@ -1,5 +1,6 @@
 /* const.h (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 03 Mar 03   MLA           Added REST.
  * 15 Sep 90   MLA           Initial coding.
  *
  */
@@ -60,6 +61,10 @@ extern void recase ();
 /* A large number. */
 
 #define ANY_NUMBER 99
+
+/* Rest of the line. */
+
+#define REST -1
 
 /* Size of a code chunk. */
 

@@ -1,5 +1,7 @@
 /* Balanced tree handling on a linear stack.
  *
+ * 06 Mar 03   Stuart Munro      Fix non-ASCII btfind args declaration;
+ *                               include stdlib.h; remove unused variables.
  * 07 Jan 03   MLA               Adapted for use by acdc.
  * 24 Mar 01   MLA               Initial coding.
  */
@@ -7,6 +9,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
+
 #include "text.h"
 #include "const.h"
 #include "symbol.h"
@@ -211,9 +215,7 @@ char *record;
    int *root = roots [type];
    int parent = 0;
    int child = *(root + 1);
-   int sib;
    int dir;
-   char *cptr;
    int *newrec;
    int reclen = BT_PTR  + 1 + (sizeof (record) - 1) / sizeof (int);
 
@@ -268,9 +270,9 @@ char *record;
 #ifdef __STDC__
 struct node *btfind (int type, char *word)
 #else /* ! __STDC__ */
-char *btfind (type, word)
+struct node *btfind (type, word)
 int type;
-char *record;
+char *word;
 #endif /* __STDC__ */
 {
    int node;

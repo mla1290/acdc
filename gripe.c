@@ -1,5 +1,6 @@
 /* gripe.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 06 Mar 03   Stuart Munro  Include string.h.
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 22 Nov 90   MLA           Don't print null file name.
  * 15 Sep 90   MLA           Initial coding.
@@ -7,6 +8,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "const.h"
 #include "line.h"

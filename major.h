@@ -1,5 +1,6 @@
 /* major.h (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 03 Mar 03   MLA           Added AUTHOR.
  * 10 Mar 02   MLA           Added XREF/NOXREF.
  * 21 Dec 01   MLA           Tidied up.
  * 14 Mar 01   MLA           Added STYLE directive.
@@ -38,8 +39,9 @@
 #define XREF      28
 #define NOXREF    29
 #define INCLUDE   30
-#define DBNAME    31
+#define VERSION   31
 #define DEFINE    32
 #define STYLE     33
+#define AUTHOR    34
 
 /*====================================================================*/

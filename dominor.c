@@ -1,5 +1,8 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 06 Mar 03   Stuart Munro  Fix non-ASCII dominor() args declaration;
+ *                           declare addparam(), fndparam() and iniparam().
+ * 01 Mar 03   MLA           Bug: Fake argtyp[2] if faking argval[2] in SAY.
  * 02 Jan 03   MLA           bug: Don't try for CALL args unless PROCEDURE.
  * 21 Dec 02   MLA           Bug: Make itobj...place cater for schizoids!
  * 30 Sep 02   MLA           bug: Fixed gripe argument in RESPOND code.
@@ -75,12 +78,20 @@
 #endif
 
 #ifdef __STDC__
+void addparam (int arg, char *name);
+int fndparam (char *name);
+int iniparam (int varsize);
+
 void dominor (char *prochead, char *proccond)
 #else
+void addparam ();
+int fndparam ();
+int iniparam ();
+
 void dominor (prochead, proccond)
-char *prochead
+char *prochead;
 char *proccond;
-#endif
+#endif /* __STDC__ */
 {
    int minor_type;
    int type;
@@ -972,7 +983,10 @@ char *proccond;
                    type +=4;
             }
             else
+            {
+               argtyp [2] = CONSTANT;
                argval [2] = 0;
+            }
 
             (void) fprintf (code_file, "   say(%d,", type);
 
