@@ -116,7 +116,7 @@ int main (argc, argv)
    extern void finalise ();
    
    (void) printf (
-      "[A-code to C translator, version 11.35; MLA, 07 Jan 03]\n");
+      "[A-code to C translator, version 11.36; MLA, 07 Jan 03]\n");
 #ifdef COPYLEFT
    now = time (NULL);
    (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));

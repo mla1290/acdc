@@ -1,5 +1,6 @@
 /* doswitch.c (acdc) - copyleft Mike Arnautov 1990-2003.
  *
+ * 11 Jan 03   MLA           Allowed nested text to be a proc.
  * 03 Dec 02   MLA           BUG: Allow for nested texts in switches!
  * 02 Oct 02   MLA           Check for single component switches.
  * 04 Nov 01   MLA           Added the "same as" switch notation.

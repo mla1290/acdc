@@ -273,7 +273,7 @@ next_char:
          nest_type = nest_text -> type;
          if (nest_type != TEXT && nest_type != VARIABLE)
             (void) gripe (nest_name, "Not reducible to text.");
-         *text_ptr++ = (nest_type == TEXT ? NEST_TEXT : NEST_VAR);
+         *text_ptr++ = nest_type == TEXT ? NEST_TEXT : NEST_VAR;
          nest_type = nest_text -> refno;
          *text_ptr++ = nest_type / 256;
          *text_ptr++ = nest_type % 256;
