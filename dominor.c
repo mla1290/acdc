@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 27 Aug 05   MLA           bug: Allow SAY <place>.
  * 02 Jan 05   MLA           Added UNDO/REDO.
  * 22 Aug 04   MLA           Made CALL directive optional.
  * 20 Aug 04   MLA           Added IFCGI and IFDOALL.
@@ -501,14 +502,21 @@ char *proccond;
 
          case IFKEY:
          case IFANY:
+            if (argtyp [1] != OBJECT && argtyp [1] != PLACE && 
+                argtyp [1] != VERB && argtyp [1] != VARIABLE &&
+                argtyp [1] != LOCAL)
+                  (void) gripe (tp [index], 
+                     "Unsuitable IFKEY/IFANY argument type!");  
             if (tp [2] == NULL)
             {
-               if (argtyp [1] != OBJECT && argtyp [1] != PLACE && 
-                  argtyp [1] != VERB)
-                    (void) gripe (tp [index], 
-                       "Unsuitable IFKEY/IFANY argument type!");  
-               cond_ptr += SPRINTF4 (cond_ptr, "%sKEY(%d)", 
-                  (not_pending) ? "!" : "", argval [1]);
+               cond_ptr += SPRINTF3 (cond_ptr, "%sKEY(", 
+                  (not_pending) ? "!" : "");
+               if (argtyp [1] == VARIABLE)
+                  cond_ptr += SPRINTF3 (cond_ptr, "value[%d])", argval [1]);
+               else if (argtyp [1] == LOCAL)
+                  cond_ptr += SPRINTF3 (cond_ptr, "lval[%d])", argval [1]);
+               else
+                  cond_ptr += SPRINTF3 (cond_ptr, "%d)", argval [1]);
             }
             else
             {
@@ -517,7 +525,16 @@ char *proccond;
                   (minor_type == IFKEY) ? "keyword" : "anyof");
                index = 0;
                while (tp [++index] != NULL)
-                  cond_ptr += SPRINTF3 (cond_ptr, "%d,", argval [index]);
+               {
+                  if (argtyp [1] == VARIABLE)
+                     cond_ptr += SPRINTF3 (cond_ptr, "value[%d],", 
+                        argval [index]);
+                  else if (argtyp [1] == LOCAL)
+                     cond_ptr += SPRINTF3 (cond_ptr, "lval[%d],", 
+                        argval [index]);
+                  else
+                     cond_ptr += SPRINTF3 (cond_ptr, "%d,", argval [index]);
+               }
                cond_ptr += SPRINTF2 (cond_ptr, "-1)");
             }
             break;
@@ -970,7 +987,8 @@ char *proccond;
                type = 0;
 
             if (argtyp [1] != TEXT && argtyp [1] != VARIABLE &&
-                argtyp [1] != LOCAL&& argtyp [1] != OBJECT)
+                argtyp [1] != LOCAL && argtyp [1] != OBJECT &&
+                argtyp [1] != PLACE)
                    gripe (tp[1], "Argument not reducible to a text!");
             if (argtyp [1] == TEXT &&
                ((*(ap[1])).body.text.text_type & 1024) && tp[2] == NULL)
@@ -1356,13 +1374,18 @@ char *proccond;
             
          case FAKEARG:
          case FAKECOM:
-            if (argtyp [1] != PLACE && argtyp [1] != OBJECT &&
-               argtyp [1] != VERB)
-                  (void) gripe (tp [1], "Not a place, object or verb.");
-            if (argtyp [2] > TEXT && argtyp [2] != LOCAL)
-                  (void) gripe (tp [2], 
+            for (index = 1; index <= 2; index++)
+               if (argtyp [index] > TEXT && argtyp [index] != LOCAL)
+                  (void) gripe (tp [index], 
                      "Not reducible to a place, object or verb");
-            (void) fprintf (code_file, "if (value[ARG1] == %d)", argval [1]);
+            if (argtyp [1] == VARIABLE)
+               (void) fprintf (code_file, "if (value[ARG1] == value[%d])", 
+                  argval [1]);
+            else if (argtyp [1] == LOCAL)
+               (void) fprintf (code_file, "if (value[ARG1] == lval[%d])", 
+                  argval [1]);
+            else
+               (void) fprintf (code_file, "if (value[ARG1] == %d)", argval [1]);
             if (minor_type == FAKECOM)
             {
                (void) fprintf (code_file, " {value[ARG1]=");
@@ -1390,7 +1413,14 @@ char *proccond;
                else
                   (void) fprintf (code_file, "%d;\n", argval [2]);
 	    }
-            (void) fprintf (code_file, "if (value[ARG2] == %d)", argval [1]);
+            if (argtyp [1] == VARIABLE)
+               (void) fprintf (code_file, "if (value[ARG2] == value[%d])", 
+                  argval [1]);
+            else if (argtyp [1] == LOCAL)
+               (void) fprintf (code_file, "if (value[ARG2] == lval[%d])", 
+                  argval [1]);
+            else
+               (void) fprintf (code_file, "if (value[ARG2] == %d)", argval [1]);
             if (minor_type == FAKECOM)
             {
                (void) fprintf (code_file, " {value[ARG2]=");

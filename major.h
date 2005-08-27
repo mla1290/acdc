@@ -1,5 +1,6 @@
 /* major.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 27 Aug 05   MLA           Restored GAMEID for backward compatibility.
  * 20 Feb 05   MLA           Added separate VERSION and DATE.
  * 03 Mar 03   MLA           Added AUTHOR.
  * 10 Mar 02   MLA           Added XREF/NOXREF.
@@ -45,9 +46,11 @@
 #define INCLUDE     30
 #define NAME        31
 #define DEFINE      32
-#define STYLE       33
-#define AUTHOR      34
-#define VERSION     35
-#define DATE        36
+#
+#define GAMEID      40        /* Obsolete */
+#define STYLE       41
+#define AUTHOR      42
+#define VERSION     43
+#define DATE        44
 
 /*====================================================================*/

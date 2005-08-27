@@ -1,6 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2005.
  */
-#define ACDC_VERSION "11.62, MLA - 20 Feb 2005"
+#define ACDC_VERSION "11.63, MLA - 27 Aug 2005"
 /*
  * 15 Jan 05   MLA           Added auto_flag to symbol structure.
  * 11 Jan 05   MLA           Added pre-declarations for UNDO handling.

@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 27 Aug 05   MLA           Retrofitted GAMED for style 10.
  * 20 Feb 05   MLA           Added separate VERSION and DATE.
  * 20 Aug 04   MLA           Added IFCGI.
  * 14 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
@@ -103,6 +104,7 @@ struct directive keywords[] =
    {"dbname",      MAJOR, NAME,        1,   1},           /* Compatibility */
    {"version",     MAJOR, VERSION,     1,   REST},
    {"date",        MAJOR, DATE,        1,   REST},
+   {"gameid",      MAJOR, GAMEID,      1,   REST},        /* Compatibility */
    {"author",      MAJOR, AUTHOR,      1,   REST},
    {"style",       MAJOR, STYLE,       1,   2},
    {"have",        MINOR, HAVE,        1,   ANY_NUMBER},
@@ -344,6 +346,11 @@ void initial()
             style = index;
          }
       }
+      else if (type == GAMEID)
+      {
+        strncpy (gameid, tp [1], 80);
+        *(gameid + 79) = '\0';
+      }
       else
       {
          strcpy (line, raw_line);
@@ -355,6 +362,8 @@ void initial()
    if (style == -1)
       style = *title ? 10 : 1;
  
+   if (style != 10 && *gameid)
+      (void) gripe ("", "The GAMEID directive only valid in A-code style 10!");
    if ((code_file = openout("adv01.c", "w")) == NULL)
       (void) gripe ("adv01.c", "Unable to open code file.");
    (void) fprintf (code_file, "#include \"adv0.h\"\n");
@@ -383,18 +392,21 @@ void initial()
 
 /* Assemble the game ID */
 
-   strcpy (gameid, title);
-   if (*version || *date)
-      strcat (gameid, ", ");
-   if (*version)
+   if (style > 11)
    {
-      strcat (gameid, "version ");
-      strcat (gameid, version);
+      strcpy (gameid, title);
+      if (*version || *date)
+         strcat (gameid, ", ");
+      if (*version)
+      {
+         strcat (gameid, "version ");
+         strcat (gameid, version);
+         if (*date)
+            strcat (gameid, " - ");
+      }
       if (*date)
-         strcat (gameid, " - ");
+         strcat (gameid, date);
    }
-   if (*date)
-      strcat (gameid, date);
       
    if (memory < 3)
       tptr =  dbname;
@@ -425,7 +437,7 @@ void initial()
  * decrypting it!
  */
  
-  if (plain_text == 0)
+   if (plain_text == 0)
    {
       key_mask = (rand() & 127) ^ 'x';
       if (key_mask == 0 || key_mask == 127) key_mask = 'y';
