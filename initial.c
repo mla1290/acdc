@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 08 Sep 05   MLA           IFIS now takes multiple arguments.
  * 27 Aug 05   MLA           Retrofitted GAMED for style 10.
  * 20 Feb 05   MLA           Added separate VERSION and DATE.
  * 20 Aug 04   MLA           Added IFCGI.
@@ -134,7 +135,7 @@ struct directive keywords[] =
    {"ifany",       MINOR, IFANY,       1,   ANY_NUMBER},
    {"query",       MINOR, QUERY,       1,   1},
    {"ifinrange",   MINOR, IFINRANGE,   3,   3},
-   {"ifis",        MINOR, IFIS,        2,   2},
+   {"ifis",        MINOR, IFIS,        2,   ANY_NUMBER},
    {"ifloc",       MINOR, IFLOC,       2,   ANY_NUMBER},
    {"ifcgi",       MINOR, IFCGI,       0,   0},
    {"ifdoall",     MINOR, IFDOALL,     0,   0},
@@ -392,7 +393,7 @@ void initial()
 
 /* Assemble the game ID */
 
-   if (style > 11)
+   if (style >= 11)
    {
       strcpy (gameid, title);
       if (*version || *date)

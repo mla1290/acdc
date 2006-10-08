@@ -1,7 +1,12 @@
-/* btree.h (acdc) copyleft Mike Arnautov 2001 - 2005.
+/* btree.c - balanced tree handling on a linear stack.
+ *           Copyleft Mike Arnautov 2001-2006.
+ *
+ * Warning! This is 32bit code, for use in 32bit executables!
  *
  * Balanced tree handling on a linear stack.
  *
+ * 03 Sep 06   MLA               Bug: longs should be ints.
+ * 23 Dec 05   MLA               Bug: btinit() should be long, not int!
  * 07 Mar 03   Stuart Munro.     Fixed btfind() type for non-ANSI compilers.
  * 07 Jan 03   MLA               Adapted for use by acdc.
  * 24 Mar 01   MLA               Initial coding.

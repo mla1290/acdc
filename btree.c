@@ -1,7 +1,10 @@
-/* btree.c (acdc) - copyleft Mike Arnautov, 2001-2005.
+/* btree.c - balanced tree handling on a linear stack.
+ *           Copyleft Mike Arnautov 2001-2006.
  *
- * Balanced tree handling on a linear stack.
+ * Warning! This is 32bit code, for use in 32bit executables!
  *
+ * 03 Sep 06   MLA               Bug: All longs should be ints!
+ * 23 Dec 05   MLA               roots[] must be long, not int!
  * 06 Mar 03   Stuart Munro      Fix non-ASCII btfind args declaration;
  *                               include stdlib.h; remove unused variables.
  * 07 Jan 03   MLA               Adapted for use by acdc.
@@ -198,7 +201,7 @@ char *text;
          iptr - root, *(iptr + BT_UP), *(iptr + BT_UP + BT_LSIB), 
             *(iptr + BT_UP + BT_RSIB), *(iptr + BT_BAL), 
                nodeptr -> name);
-      iptr += BT_PTR + 1 + (sizeof (int *) - 1) / sizeof (int);
+      iptr += BT_PTR + 1;
    }
 }
 
@@ -219,7 +222,7 @@ char *record;
    int child = *(root + 1);
    int dir;
    int *newrec;
-   int reclen = BT_PTR  + 1 + (sizeof (record) - 1) / sizeof (int);
+   int reclen = BT_PTR  + 1;
 
    if (*(root + 1) > 0)
    {

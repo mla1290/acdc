@@ -1,5 +1,7 @@
 /* symbol.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 03 Sep 06   MLA           Bug: longs should be ints.
+ * 23 Dec 05   MLA           Bug: roots[] should be long, not int!
  * 15 Jan 05   MLA           Added the 'auto' flag.
  * 09 Jan 01   MLA           Allowed for active text types.
  * 13 Mar 94   MLA           Made conditional.

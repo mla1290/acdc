@@ -1,7 +1,9 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2005.
  */
-#define ACDC_VERSION "11.63, MLA - 27 Aug 2005"
+#define ACDC_VERSION "11.66, MLA - 24 Dec 2005"
 /*
+ * 03 Sep 06   MLA           Bug: All longs should be ints!
+ * 23 Dec 05   MLA           Bug: roots[] should be long, not int!
  * 15 Jan 05   MLA           Added auto_flag to symbol structure.
  * 11 Jan 05   MLA           Added pre-declarations for UNDO handling.
  * 01 Jan 05   MLA           Added UNDO/REDO.
@@ -14,7 +16,7 @@
  * 09 Feb 04   MLA           Added ADJECTIVE and PREPOSITION types.
  * 03 Feb 04   MLA           Added NOUN type.
  * 09 Mar 03   MLA           Replaced trace with debug.
- * 03 Mar 03   MLA           Added author.
+ * 03 Mar 03   MLA           Added AUTHOR.
  * 23 Feb 03   MLA           Initialise random number generator.
  * 02 Feb 03   MLA           Count autop chunks form 1 (kernel will be 0).
  * 07 Jan 03   MLA           Use btree instead of tsearch.

@@ -1,5 +1,6 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 23 Dec 05   MLA           bug: Need string.h.
  * 13 Jan 04   MLA           Added UNDO/REDO handling.
  * 06 Mar 03   Stuart Munro  Remove unused variable.
  * 04 Mar 03   MLA           VERSION repaced with GAMEID and DBNAME.
@@ -39,6 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "acdc.h"
 #include "btree.h"

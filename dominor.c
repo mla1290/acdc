@@ -1,5 +1,7 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 15 Oct 05   MLA           BUG: fixed the NOT IFIS logic.
+ * 08 Sep 05   MLA           IFIS now takes multiple args.
  * 27 Aug 05   MLA           bug: Allow SAY <place>.
  * 02 Jan 05   MLA           Added UNDO/REDO.
  * 22 Aug 04   MLA           Made CALL directive optional.
@@ -582,16 +584,24 @@ char *proccond;
             break;
 
          case IFIS:
-            if (argtyp [2] > TEXT)
-               (void) gripe (tp [2], "Not a referrable entity.");
-            if (argtyp [1] == VARIABLE)
-               cond_ptr += SPRINTF5 (cond_ptr, "value[%d]%s%d", argval [1],
-                  (not_pending) ? "!=" : "==", argval [2]);
-            else if (argtyp [1] == LOCAL)
-               cond_ptr += SPRINTF5 (cond_ptr, "lval[%d]%s%d", argval [1],
-                  (not_pending) ? "!=" : "==", argval [2]);
-            else
-               (void) gripe (tp [1], "Not a variable.");
+            cond_ptr += SPRINTF3 (cond_ptr, "%s(", not_pending ? "!" : "");
+            if (argtyp [1] != VARIABLE && argtyp [1] != LOCAL)
+               (void) gripe (tp[1], "not a variable.");
+            index = 1;
+            while (tp [++index] != NULL)
+            {
+               if (argtyp [index] > TEXT)
+                  (void) gripe (tp [index], "Not a referrable entity.");
+               cond_ptr += SPRINTF3 
+                  (cond_ptr, "%s", index > 2 ? "||" : "");
+               if (argtyp [1] == VARIABLE)
+                  cond_ptr += SPRINTF4 (cond_ptr, "value[%d]==%d", argval [1],
+                     argval [index]);
+               else if (argtyp [1] == LOCAL)
+                  cond_ptr += SPRINTF4 (cond_ptr, "lval[%d]==%d", argval [1],
+                     argval [index]);
+            }
+            cond_ptr += SPRINTF2 (cond_ptr, ")");
             break;
 
          case IFCGI:
