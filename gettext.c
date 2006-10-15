@@ -1,5 +1,7 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2006.
  *
+ * 15 Oct 06   MLA           Reinstated HTML tag handling.
+ *                           Also eliminated redundand NEST_VAR.
  * 03 Jan 05   MLA           Added VHOLDER.
  * 24 Mar 03   MLA           Added 4th argument to signal presence of a
  *                           word holder, if requested to do so.
@@ -60,6 +62,7 @@ int *got_holder;
    int nest_len;
    int nest_type;
    int in_block = 0;
+   int html_tag = 0;
    extern void *realloc();
 
    states = 0;
@@ -275,7 +278,6 @@ next_char:
          if ((nest_text = fndsymb (SYMBOL, nest_name)) == NULL)
             (void) gripe (nest_name, "Nested text name not known.");
          nest_type = nest_text -> type;
-/*         if (nest_type != TEXT && nest_type != VARIABLE) */
          *text_ptr++ = NEST_TEXT;
          if (nest_type > TEXT)
             (void) gripe (nest_name, "Not reducible to text.");
@@ -354,7 +356,7 @@ store:
             escaped = 1;
             continue;
          }
-         else if (*text_ptr == NEST_TEXT || *text_ptr == NEST_VAR)
+         else if (*text_ptr == NEST_TEXT)
          {
             (void) storchar (*text_ptr++);
             (void) storchar (*text_ptr++);
@@ -381,14 +383,19 @@ store:
                *text_ptr = '\0';
             else if (*text_ptr == '_' && style >= 10)
                *text_ptr = NBSP;
-            else if (*text_ptr == '<' && style == 9)
+            else if (*text_ptr == '<' && style >= 11)
+            {
                *text_ptr = TAG_START;
-            else if (*text_ptr == '>' && style == 9)
+               html_tag = 1;
+            }
+            else if (*text_ptr == '>' && style >= 11)
+            {
                *text_ptr = TAG_END;
+               html_tag = 0;
+            }
          }
       }
       escaped = 0;
-      
       (void) storchar (*text_ptr);
    }
 

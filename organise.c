@@ -1,5 +1,6 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2006.
  *
+ * 15 Oct 06   MLA           Added PROMPTED.
  * 23 Dec 05   MLA           bug: Need string.h.
  * 13 Jan 04   MLA           Added UNDO/REDO handling.
  * 06 Mar 03   Stuart Munro  Remove unused variable.
@@ -579,6 +580,14 @@ void organise()
          (void) gripe ("DETAILDISPLAY", "Declared as other than a bit constant.");
       else
          (void) fprintf (defs_file, "#define DETAIL %d\n", np -> refno);
+   }
+
+   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "prompted")) != NULL)
+   {
+      if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
+         (void) gripe ("PROMPTED", "Declared as other than a bit constant.");
+      else
+         (void) fprintf (defs_file, "#define PROMPTED %d\n", np -> refno);
    }
 
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "first.special")) != NULL)

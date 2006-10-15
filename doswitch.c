@@ -46,7 +46,7 @@ int *max_states;
             in_tag = 1;
          else if (*text_ptr == '>')
             in_tag = 0;
-         else if (*text_ptr == NEST_TEXT || *text_ptr == NEST_VAR)
+         else if (*text_ptr == NEST_TEXT)
          {
             text_ptr += 2;
             offset += 2;

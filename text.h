@@ -1,5 +1,6 @@
-/* text.h (acdc) - copyleft Mike Arnautov 1990-2005.
+/* text.h (acdc) - copyleft Mike Arnautov 1990-2006.
  *
+ * 15 Oct 06   MLA           Eliminated redundand NEST_VAR.
  * 03 Mar 03   MLA           Adedd memory.
  * 26 Dec 01   MLA           Added text_lines.
  * 25 Nov 01   MLA           Added IGNORE_EOL.
@@ -39,7 +40,7 @@ extern void clsfile ();
 #define SILENCE      '\374'
 #define IGNORE_EOL   '\373'
 #define NEST_TEXT    '\372'
-#define NEST_VAR     '\371'  
+                   /* \371 is spare */
 #define TAG_START    '\370'
 #define TAG_END      '\367'
 #define NBSP         '\366'
