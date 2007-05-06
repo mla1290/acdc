@@ -1,4 +1,4 @@
-/* param.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* param.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 06 Mar 03   Stuart Munro  Include stdlib.h; declare gripe().
  * 13 Jan 02   MLA           Give up -- pass "hidden" type args.

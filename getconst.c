@@ -1,4 +1,4 @@
-/* getconst.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* getconst.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 10 Jan 02   MLA           Disallow LOCAL in constants.
  * 24 Jul 99   MLA           Fixed complier warnings.

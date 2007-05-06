@@ -1,4 +1,4 @@
-/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 06 Mar 03   Stuart Munro  Include string.h.
  * 24 Jul 99   MLA           Fixed complier warnings.
@@ -13,6 +13,7 @@
 #include "const.h"
 #include "line.h"
 #include "source.h"
+#include "text.h"
 
 #ifdef __STDC__
 void gripe(char *error_token, char *error_message)
@@ -36,4 +37,21 @@ char *error_message;
       (void) fprintf (stderr, "%s - ", error_token);
    (void) fprintf (stderr, "%s\n\n", error_message);
    exit(ERROR);
+}
+
+/*====================================================================*/
+
+#ifdef __STDC__
+void deprecate(char *directive, int from, int major)
+#else
+void deprecate(directive, from, major)
+char *directive;
+int from;
+int major;
+#endif
+{
+   if (style >= from)
+   fprintf (stderr, "%s, line %d: deprecated %s directive %s\n", 
+      pathname[level], line_count[level], 
+         major ? "major" : "minor", directive);
 }

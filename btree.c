@@ -1,5 +1,5 @@
 /* btree.c - balanced tree handling on a linear stack.
- *           Copyleft Mike Arnautov 2001-2006.
+ *           Copyleft Mike Arnautov 2001-2007.
  *
  * Warning! This is 32bit code, for use in 32bit executables!
  *

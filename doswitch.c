@@ -1,4 +1,4 @@
-/* doswitch.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* doswitch.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 11 Jan 03   MLA           Allowed nested text to be a proc.
  * 03 Dec 02   MLA           BUG: Allow for nested texts in switches!

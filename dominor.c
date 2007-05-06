@@ -1,5 +1,6 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 06 May 07   MLA           Added deprecated warnings.
  * 15 Oct 05   MLA           BUG: fixed the NOT IFIS logic.
  * 08 Sep 05   MLA           IFIS now takes multiple args.
  * 27 Aug 05   MLA           bug: Allow SAY <place>.
@@ -92,13 +93,11 @@
 void addparam (int arg, char *name);
 int fndparam (char *name);
 int iniparam (int varsize);
-
 void dominor (char *prochead, char *proccond)
 #else
 void addparam ();
 int fndparam ();
 int iniparam ();
-
 void dominor (prochead, proccond)
 char *prochead;
 char *proccond;
@@ -341,6 +340,7 @@ char *proccond;
       {
          case KEYWORD:
          case ANYOF:
+            deprecate ((minor_type == KEYWORD) ? "KEYWORD" : "ANYOF", 11, 0);
             if (multiple_pending != minor_type)
                (void) fprintf (code_file, "   if (!%s(",
                   (minor_type == KEYWORD) ? "keyword" : "anyof");
@@ -366,11 +366,20 @@ char *proccond;
                    argtyp [index] != LOCAL)
                      (void) gripe (tp [index], "not reducible to an object.");
                if (minor_type == HAVE)
+               {
+                  deprecate ("HAVE", 11, 0);
                   (void) fprintf (code_file, "!have");
+               }
                else if (minor_type == NEAR)
+               {
+                  deprecate ("NEAR", 11, 0);
                   (void) fprintf (code_file, "!isnear");
+               }
                else
+               {
+                  deprecate ("HERE", 11, 0);
                   (void) fprintf (code_file, "!ishere");
+               }
                if (argtyp [index] == VARIABLE)
                   (void) fprintf (code_file, "(value[%d],-1,-1)", 
                      argval [index]);
@@ -386,6 +395,7 @@ char *proccond;
             break;
 
          case ATPLACE:
+            deprecate ("ATPLACE", 11, 0);
             (void) fprintf (code_file, "   if (");
             index = 1;
             while (tp [index])
@@ -468,7 +478,7 @@ char *proccond;
          case CHANCE:
             cond_ptr += SPRINTF3 (cond_ptr,
                "irand(100)%s", not_pending ? ">=" : "<");
-            if (argtyp [1] <= VARIABLE)
+            if (argtyp [1] <= TEXT)
                cond_ptr += SPRINTF3 (cond_ptr, "value[%d]", argval [1]);
             else if (argtyp [1] == LOCAL)
                cond_ptr += SPRINTF3 (cond_ptr, "lval[%d]", argval [1]);
@@ -671,9 +681,11 @@ char *proccond;
             brace_count--;
             break;
 
-         case FIN:
          case EOI:
+            deprecate ("EOI", 11, 0);
          case EOT:
+            if (minor_type == EOT) deprecate ("EOT", 11, 0);
+         case FIN:
             if (minor_type != EOT && --brace_count < 0)
             {
                if (style == 1) break;
@@ -981,9 +993,12 @@ char *proccond;
          case QUIP:
          case SAY:
          case VALUE:
-         case DESCRIBE:
+          case DESCRIBE:
             if (minor_type == VALUE)
+            {
+               deprecate ("VALUE", 11, 0);
                type = 1;
+            }
             else if (minor_type == DESCRIBE)
             {
                if (style >= 11)
@@ -1622,3 +1637,5 @@ terminate:
       (void) fputc ('\n', code_file);
    return;
 }
+
+/*********************************************************************/

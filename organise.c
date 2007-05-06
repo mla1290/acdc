@@ -1,5 +1,8 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2006.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 04 May 07   MLA           Change CONTEXT to ADVCONTEXT (bloody MS!!).
+ * 03 May 07   MLA           Cosmetic fix to first elements of text arrays
+ *                           in adv5.h.
  * 15 Oct 06   MLA           Added PROMPTED.
  * 23 Dec 05   MLA           bug: Need string.h.
  * 13 Jan 04   MLA           Added UNDO/REDO handling.
@@ -404,12 +407,23 @@ void organise()
  *  (b) filling in the four address arrays - these then get written out
  *  into the insert file.
  */
-
    btspan(SYMBOL, processsymb);
 
    if ((defs_file = openout("adv5.h","w")) == NULL)
       (void) gripe ("","Unable to open adv5.h (words.h).");
 
+/* A cosmetic fix to avoid worrying people. The relevant array elements
+ * don't get actually referebced by the game. They shouldn't have been
+ * there in the first place, but they do no harm and it is much easier
+ * to leave them there.
+ */
+   *text_base = 0;
+   *text_info = 0;
+   *(text_info + 1) = 0;
+   *brief_base = 0;
+   *int_base = 0;
+   *detail_base = 0;
+   
    (void) fprintf (defs_file, "   int textadr[] = {\n");
    dump_array(text_base, text_count,  " %8ldL,", 7);
    (void) fprintf (defs_file, "        0L};\n char text_info[] = {\n");
@@ -558,7 +572,7 @@ void organise()
          
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "context")) != NULL)
       if (np -> type == VARIABLE)
-         (void) fprintf (defs_file, "#define CONTEXT %d\n", np -> refno);
+         (void) fprintf (defs_file, "#define ADVCONTEXT %d\n", np -> refno);
 
    if ((np = fndsymb(SYMBOL_OR_CONSTANT, "dwarven")) != NULL)
       if (np -> type == VARIABLE)

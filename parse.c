@@ -1,4 +1,4 @@
-/* parse.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* parse.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 19 Aug 04   MLA           Added FREE_ARG.
  * 03 Mar 03   MLA           Use new-style get_token().

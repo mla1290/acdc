@@ -1,4 +1,4 @@
-/* initial.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* initial.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 08 Sep 05   MLA           IFIS now takes multiple arguments.
  * 27 Aug 05   MLA           Retrofitted GAMED for style 10.

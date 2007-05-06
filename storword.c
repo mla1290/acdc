@@ -1,4 +1,4 @@
-/* storword.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* storword.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 14 Feb 04   MLA           Converted longs to ints.
  * 11 Mar 03   MLA           Suppressed "vocabulary buffer enlarged" message.

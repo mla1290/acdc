@@ -1,5 +1,6 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 06 May 07   MLA           Added deprecated warnings.
  * 14 Feb 04   MLA           Converted longs to ints.
  * 24 Mar 03   MLA           Added 4th arg to gettxt().
  * 09 Mar 03   MLA           Replaced trace with debug.
@@ -154,10 +155,12 @@ void domajor ()
          break;
          
       case LIST:
+         deprecate ("LIST", 10, 1);
          listing = TRUE;
          break;
 
       case NOLIST:
+         deprecate ("NOLIST", 10, 1);
          listing = FALSE;
          break;
 
@@ -198,6 +201,7 @@ void domajor ()
          break;
 
       case SYNONYM:
+         deprecate ("SYNONYM", 10, 1);
          if ((np = fndsymb (SYMBOL_OR_CONSTANT, tp [1])) != NULL)
          {
             (void) getnames (np -> type, np);
@@ -464,6 +468,7 @@ void domajor ()
          return;
 
       case DEFINE:
+         deprecate ("DEFINE", 10, 1);
          index = 0;
          while (tp [++index] != NULL)
          {

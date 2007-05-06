@@ -8,6 +8,7 @@ extern int no_warn;
 extern int getline (int key);
 extern int gettxt (int descript, int *max_states, int frag, int *got_holder);
 extern void gripe (char *error_token, char *error_message);
+extern void deprecate (char *directive, int from, int major);
 extern void storchar (int ch);
 extern void doswitch (char *text_ptr, int *max_states);
 extern void write_ref (char *tag, char *token);
@@ -18,6 +19,7 @@ extern void write_ref (char *tag, char *token);
 #else  /* ! __STDC__ */
 extern int getline ();
 extern void gripe ();
+extern void deprecate();
 extern int gettxt ();
 extern void storchar ();
 extern void doswitch ();

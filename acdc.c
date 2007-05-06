@@ -1,6 +1,6 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2006.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2007.
  */
-#define ACDC_VERSION "11.67, MLA - 15 Oct 2006"
+#define ACDC_VERSION "11.68, MLA - 06 May 2007"
 /*
  * 03 Sep 06   MLA           Bug: All longs should be ints!
  * 23 Dec 05   MLA           Bug: roots[] should be long, not int!

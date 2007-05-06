@@ -1,4 +1,4 @@
-/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 15 Jan 05   MLA           Use the auto flag for checking lack of use.
  * 06 Mar 03   Stuart Munro  Fix non-ASCII process_proc args declaration.

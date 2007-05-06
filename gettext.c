@@ -1,5 +1,6 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2006.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 04 May 07   MLA           bug: Suppress qualifier checks for style 1.
  * 15 Oct 06   MLA           Reinstated HTML tag handling.
  *                           Also eliminated redundand NEST_VAR.
  * 03 Jan 05   MLA           Added VHOLDER.
@@ -371,12 +372,13 @@ store:
             }
             if (*text_ptr == '#')
             {
-               if (got_holder) *got_holder |= 1024;
+               if (got_holder && style > 1) 
+                  *got_holder |= 1024;              /* Will need a qualifier */
                *text_ptr = HOLDER;
             }
             if (*text_ptr == '$' && style >= 11)
             {
-               if (got_holder) *got_holder |= 1024;
+               if (got_holder) *got_holder |= 1024; /* Will need a qualifier */
                *text_ptr = VHOLDER;
             }
             else if (*text_ptr == SILENCE)

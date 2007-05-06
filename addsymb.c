@@ -1,4 +1,4 @@
-/* addsymb.c (acdc) - copyleft Mike Arnautov 1990-2005.
+/* addsymb.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
  * 15 Jan 05   MLA           Added AUTOSYMBOL handling.
  * 07 Jan 03   MLA           Use btree instead of tsearch.
