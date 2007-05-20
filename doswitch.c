@@ -11,6 +11,10 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include "acdc.h"
 #include "text.h"
 

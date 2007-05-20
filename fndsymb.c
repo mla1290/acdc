@@ -1,5 +1,6 @@
 /* fndsymb.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 07 May 07   Stuart Munro  bug: declare chksymb before fndsymb.
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 17 Oct 01   MLA           Improved compatibility with Platt's A-code.
  * 28 Jul 99   MLA           Removed superfluous setjmp declaration.
@@ -10,6 +11,10 @@
  *
  */
  
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <string.h>
 #include <setjmp.h>
 
@@ -24,6 +29,26 @@ int type;
 jmp_buf abort_env;
 struct node *result;
 
+/*====================================================================*/
+
+#ifdef __STDC__
+void checksymb (struct node *npp)
+#else
+void checksymb (npp)
+struct node *npp;
+#endif
+{
+      if (npp -> refno == refno && npp -> type == type)
+      {
+         result = npp;
+         longjmp (abort_env, 1);
+      }
+
+   return;
+}
+
+/*====================================================================*/
+
 #ifdef __STDC__
 struct node *fndsymb (int root_type, char *word)
 #else
@@ -33,7 +58,6 @@ char *word;
 #endif
 {
    int real_root;
-   void checksymb ();
 
    if (root_type == SYMBOL_OR_CONSTANT)
       real_root = SYMBOL;
@@ -66,18 +90,4 @@ char *word;
       return (NULL);
 }
 
-#ifdef __STDC__
-void checksymb (struct node *npp)
-#else
-void checksymb (npp)
-struct node *npp;
-#endif
-{
-      if (npp -> refno == refno && npp -> type == type)
-      {
-         result = npp;
-         longjmp (abort_env, 1);
-      }
-
-   return;
-}
+/**********************************************************************/

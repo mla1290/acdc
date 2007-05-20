@@ -9,7 +9,13 @@
  
 /* Change_case keys */
 
+#ifdef __STDC__
+extern void recase (int, char *);
+extern int getconst(char *);
+#else
 extern void recase ();
+extern int getconst ();
+#endif
 
 #define CAPITALISE 1
 #define UPPERCASE 2

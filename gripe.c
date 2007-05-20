@@ -7,6 +7,10 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,7 +46,7 @@ char *error_message;
 /*====================================================================*/
 
 #ifdef __STDC__
-void deprecate(char *directive, int from, int major)
+void deprecate( const char *directive, int from, int major)
 #else
 void deprecate(directive, from, major)
 char *directive;

@@ -17,6 +17,10 @@
  *
  */
  
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
@@ -32,6 +36,72 @@ int *proc_array;
 int *proc_args;
 int *proc_arr_ptr;
 
+/*====================================================================*/
+
+#ifdef __STDC__
+void process_proc (struct node *np)
+#else
+void process_proc (np)
+struct node *np;
+#endif
+{
+   struct proc_list *head;
+   int procno;
+   int refno;
+   int type;
+
+   type = np -> type;
+
+   if (style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
+      (np -> auto_flag) == '\0' && strncmp (np -> name, "spare..", 7))
+/*      strcmp (np -> name, "place") && 
+      strcmp (np -> name, "verb") && 
+      strcmp (np -> name, "variable") && 
+      strcmp (np -> name, "object") && 
+      strncmp (np -> name, "spare", 5) &&
+      strcmp (np -> name, "arg3")) 
+*/
+   
+   if (quiet == 0)
+      (void) printf ("   %-22s symbol defined but not used.\n", np -> name);
+
+   procno = refno = np -> refno;
+
+   if (procno >= type_base [PROCEDURE] && procno < next_procno)
+      *(proc_args + procno - type_base [PROCEDURE]) = np -> state_count;
+   
+   procno = refno;
+   if (type > VERB && type != INIT && type != REPEAT)
+      return;
+
+   if (np -> head == NULL)
+      return;
+
+   head = np -> head;
+
+   if (head -> next != NULL || type > VERB)
+   {
+      if (type <= VERB)
+         procno = next_procno++;
+      else
+         procno = (type == INIT) ? 1 : 2;
+      (void) fprintf (code_file, 
+         "#ifdef __STDC__\nvoid p%d(void)\n#else\nvoid p%d()\n#endif\n{\n", 
+            procno, procno);
+      while (TRUE)
+      {
+         (void) fprintf (code_file, "   p%d();\n", head -> procno);
+         if ((head = head -> next) == NULL)
+            break;
+      }
+      (void) fprintf (code_file, "   return;\n}\n");
+   }
+   *(proc_array + refno) = procno;
+   return;
+}
+
+/*====================================================================*/
+
 #ifdef __STDC__
 void finalise (void)
 #else
@@ -42,9 +112,6 @@ void finalise ()
    int proc_count;
    int count;
    int index;
-
-   void process_proc ();
-   extern void *calloc ();
 
    (void) clsfile (code_file, "Automatic code");
    (void) sprintf (proc_name, "adv%02d.c", ++code_part);
@@ -114,62 +181,4 @@ void finalise ()
    return;
 }
 
-#ifdef __STDC__
-void process_proc (struct node *np)
-#else
-void process_proc (np)
-struct node *np;
-#endif
-{
-   struct proc_list *head;
-   int procno;
-   int refno;
-   int type;
-
-   type = np -> type;
-
-   if (style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
-      (np -> auto_flag) == '\0' && strncmp (np -> name, "spare..", 7))
-/*      strcmp (np -> name, "place") && 
-      strcmp (np -> name, "verb") && 
-      strcmp (np -> name, "variable") && 
-      strcmp (np -> name, "object") && 
-      strncmp (np -> name, "spare", 5) &&
-      strcmp (np -> name, "arg3")) 
-*/
-         (void) printf ("   %-22s symbol defined but not used.\n", np -> name);
-
-   procno = refno = np -> refno;
-
-   if (procno >= type_base [PROCEDURE] && procno < next_procno)
-      *(proc_args + procno - type_base [PROCEDURE]) = np -> state_count;
-   
-   procno = refno;
-   if (type > VERB && type != INIT && type != REPEAT)
-      return;
-
-   if (np -> head == NULL)
-      return;
-
-   head = np -> head;
-
-   if (head -> next != NULL || type > VERB)
-   {
-      if (type <= VERB)
-         procno = next_procno++;
-      else
-         procno = (type == INIT) ? 1 : 2;
-      (void) fprintf (code_file, 
-         "#ifdef __STDC__\nvoid p%d(void)\n#else\nvoid p%d()\n#endif\n{\n", 
-            procno, procno);
-      while (TRUE)
-      {
-         (void) fprintf (code_file, "   p%d();\n", head -> procno);
-         if ((head = head -> next) == NULL)
-            break;
-      }
-      (void) fprintf (code_file, "   return;\n}\n");
-   }
-   *(proc_array + refno) = procno;
-   return;
-}
+/**********************************************************************/

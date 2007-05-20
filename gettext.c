@@ -1,5 +1,6 @@
 /* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 08 May 07   Stuart Munro  bug: correct the seting of description level 3.
  * 04 May 07   MLA           bug: Suppress qualifier checks for style 1.
  * 15 Oct 06   MLA           Reinstated HTML tag handling.
  *                           Also eliminated redundand NEST_VAR.
@@ -26,6 +27,10 @@
  * 15 Sep 90   MLA           Initial coding.
  *
  */
+
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
 
 #include <ctype.h>
 
@@ -64,7 +69,6 @@ int *got_holder;
    int nest_type;
    int in_block = 0;
    int html_tag = 0;
-   extern void *realloc();
 
    states = 0;
    text_count++;
@@ -131,7 +135,7 @@ next_line:
             line_ptr++;
             formatted = TRUE;
          }
-         else if (description == 1 || description == 2);
+         else if (description == 1 || description == 2)
          {
             description = 3;
             *line_ptr = ' ';

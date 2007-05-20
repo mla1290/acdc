@@ -8,6 +8,10 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
@@ -26,7 +30,6 @@ FILE *openout (file, mode)
 {
    char *brk;
    char full_name [128];
-   int try = 0;
    FILE *outfile;
    
    if (*source_stem == '\0')

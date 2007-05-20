@@ -41,8 +41,11 @@
  *
  */
  
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 
@@ -302,13 +305,20 @@ void organise()
    char dbname [80];
    struct node *undo_stat = NULL;
    struct node *undo = NULL;
-   
+
+#ifdef __STDC__   
+   void processsymb(struct node *);
+   void process_voc_refno(struct node *);
+   void process_voc_type(struct node *);
+   void process_voc_addr(struct node *);
+   void process_voc_word(struct node *);
+#else
    void processsymb();
    void process_voc_refno();
    void process_voc_type();
    void process_voc_addr();
    void process_voc_word();
-   extern void *calloc();
+#endif
 
    base_voc_addr = next_addr;
    voc_top = voc_ptr;
@@ -444,6 +454,7 @@ void organise()
    if ((defs_file = openout("adv1.h","w")) == NULL)
       (void) gripe ("","Unable to open adv1.h (defs.h).");
    (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", gameid);
+   (void) fprintf (defs_file, "#ifndef ADV01\n");
    strcpy (dbname, gameid);
    cptr = dbname;
    while (isalnum (*cptr))
@@ -709,7 +720,7 @@ void organise()
    (void) fprintf (defs_file,
       "#define KEY(X) (value[%d]==X || value[%d]==X)\n",
       fndsymb(SYMBOL, "arg1") -> refno, fndsymb(SYMBOL, "arg2") -> refno);
-
+   (void) fprintf (defs_file, "#endif\n");
    (void) clsfile (defs_file, "adv1.h");     /* Ahhh.... done at last! */
 
    if ((defs_file = openout("adv2.h","w")) == NULL)

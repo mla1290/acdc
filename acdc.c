@@ -1,7 +1,9 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2007.
  */
-#define ACDC_VERSION "11.68, MLA - 06 May 2007"
+#define ACDC_VERSION "11.69, MLA - 19 May 2007"
 /*
+ * 19 May 07   MLA           Added "quiet".
+ * 09 May 07   MLA           Code parts now start from 2!
  * 03 Sep 06   MLA           Bug: All longs should be ints!
  * 23 Dec 05   MLA           Bug: roots[] should be long, not int!
  * 15 Jan 05   MLA           Added auto_flag to symbol structure.
@@ -43,8 +45,11 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -53,6 +58,7 @@ char author [40];
 char datbuf [16];
 int memory;
 time_t now;
+int quiet = 0;
 
 #include "const.h"
 #include "line.h"
@@ -105,7 +111,7 @@ FILE *defs_file;
 FILE *code_file;
 FILE *xref_file = NULL;
 
-int code_part = 1;
+int code_part = 2;
 int minor_count = 0;
 int debug = 0;
 int xref = 0;
@@ -171,6 +177,8 @@ int main (argc, argv)
             readin = 1;
          else if (strncmp (arg, "-preload", len) == 0)
             builtin = 1;
+         else if (strncmp (arg, "-quiet", len) == 0)
+            quiet = 1;
          else if (*arg == '-')
          {
             (void) puts ("\n   Usage: acdc [options] [(path)name]") ;
@@ -185,6 +193,8 @@ int main (argc, argv)
             (void) puts ("         Do not create a separate text file.");
             (void) puts ("      -xref (abbreviable to -x)");
             (void) puts ("         Generate the .xrf cross-reference listing.");
+            (void) puts ("      -quiet (abbreviable to -q)");
+            (void) puts ("         Suppressmost of the standard info messages.");
             (void) puts ("      -debug (abbreviable to -d)");
             (void) puts ("         Add A-code source as comments in C source and");
             (void) puts ("         announce entry to distinct A-code chunks.\n");
@@ -250,19 +260,24 @@ int main (argc, argv)
 
    if (xref_file) fclose (xref_file);
    
-   (void) printf (
-      "Finished translating \"%s\":\n", source_file);
-   (void) printf (
-      "   ... Program files: %d\n", file_count);
-   (void) printf (
-      "   ... Program lines: %ld - code %ld, text %ld\n",
-         total_lines, total_lines - text_lines, text_lines);
-   (void) printf (
-      "   ... Vocabulary size: %d vocabulary words\n", vocab_count);
-   (void) printf (
-      "   ... Separate texts: %ld, embedding %d text switches\n", 
-         text_count, switch_count);
-   (void) printf (
-      "   ... Overall data file size: %ld bytes\n", next_addr);
+   if (quiet == 0)
+   {
+      (void) printf (
+         "Finished translating \"%s\":\n", source_file);
+      (void) printf (
+         "   ... Program files: %d\n", file_count);
+      (void) printf (
+         "   ... Program lines: %ld - code %ld, text %ld\n",
+            total_lines, total_lines - text_lines, text_lines);
+      (void) printf (
+         "   ... Vocabulary size: %d vocabulary words\n", vocab_count);
+      (void) printf (
+         "   ... Separate texts: %ld, embedding %d text switches\n", 
+            text_count, switch_count);
+      (void) printf (
+         "   ... Overall data file size: %ld bytes\n", next_addr);
+   }
+   else
+      (void) puts ("done.");
    return (OK);
 }

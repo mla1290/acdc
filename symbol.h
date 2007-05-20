@@ -60,8 +60,13 @@
 
    extern int *roots[];
 
+#ifdef __STDC__
+   extern struct node *fndsymb(int, char *);
+   extern struct node *addsymb(int, char *, int, int);
+#else
    extern struct node *fndsymb();
    extern struct node *addsymb();
+#endif
 
    extern int flag_field_size[];
 

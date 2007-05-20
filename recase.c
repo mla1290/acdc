@@ -7,32 +7,36 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include "const.h"
 
 #define TOLOWER(x) (x >= 'A' && x <= 'Z') ? x += 'a' - 'A' : x
 #define TOUPPER(x) (x >= 'a' && x <= 'z') ? x += 'A' - 'a' : x
 
 #ifdef __STDC__
-void recase(int key, char *string)
+void recase(int key, char *cstring)
 #else
-void recase(key, string)
+void recase(key, cstring)
 int key;
-char *string;
+char *cstring;
 #endif
 {
    if (key == LOWERCASE)
-      *string = TOLOWER(*string);
+      *cstring = TOLOWER(*cstring);
    else
-      *string = TOUPPER(*string);
+      *cstring = TOUPPER(*cstring);
 
    if (key == CAPITALISE) key = LOWERCASE;
 
-   while (*(++string) != '\0')
+   while (*(++cstring) != '\0')
    {
       if (key == UPPERCASE)
-         *string = TOUPPER(*string);
+         *cstring = TOUPPER(*cstring);
       else
-         *string = TOLOWER(*string);
+         *cstring = TOLOWER(*cstring);
    }
    return;
 }

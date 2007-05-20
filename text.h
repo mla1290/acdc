@@ -20,8 +20,10 @@
 #endif
 
 #ifdef __STDC__
+extern void storword (char *, int, int, int);
 extern void clsfile (FILE *outfile, char *text);
 #else
+extern void storword ();
 extern void clsfile ();
 #endif
 

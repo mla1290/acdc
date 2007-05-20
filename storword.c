@@ -9,16 +9,20 @@
  *
  */
  
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include "acdc.h"
 #include "symbol.h"
 #include "text.h"
 #include "const.h"
 
 #ifdef __STDC__
-void storword(char *string, int type, int refno, int addr)
+void storword(char *cstring, int type, int refno, int addr)
 #else
-void storword(string, type, refno, addr)
-char *string;
+void storword(cstring, type, refno, addr)
+char *cstring;
 int type;
 int refno;
 int addr;
@@ -26,10 +30,9 @@ int addr;
 {
    char *old_voc_ptr;
    struct node *np;
-   extern void *realloc();
 
    vocab_count++;
-   np = addsymb (VOCAB, string, type, refno);
+   np = addsymb (VOCAB, cstring, type, refno);
    np -> body.vocab.word_addr = addr;
    np -> body.vocab.voc_addr = next_vocaddr;
 
@@ -46,16 +49,16 @@ int addr;
  */
    }
 
-   while (*string != '\0')
+   while (*cstring != '\0')
    {
       next_vocaddr++;
-      if (*string == '_')
+      if (*cstring == '_')
       {
          *voc_ptr++ = NBSP;
-         string++;
+         cstring++;
       }
       else
-         *voc_ptr++ = *string++;
+         *voc_ptr++ = *cstring++;
    }
    next_vocaddr++;
    *voc_ptr++ = '\0';

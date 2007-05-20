@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 07 May 07   Stuart Munro  bug: need to include string.h (for strcmp).
  * 06 May 07   MLA           Added deprecated warnings.
  * 15 Oct 05   MLA           BUG: fixed the NOT IFIS logic.
  * 08 Sep 05   MLA           IFIS now takes multiple args.
@@ -64,7 +65,12 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 #include "acdc.h"
@@ -127,10 +133,6 @@ char *proccond;
    int argtyp [ANY_NUMBER + 1];
    int argval [ANY_NUMBER + 1];
    struct node *ap [ANY_NUMBER + 1];
-
-   struct node *parse ();
-   int getconst ();
-   extern void *realloc ();
 
    got_code = 0;
    ifs_pending = 0;
@@ -1001,7 +1003,7 @@ char *proccond;
             }
             else if (minor_type == DESCRIBE)
             {
-               if (style >= 11)
+               if (style >= 10)
                   type = 32;
                else
                   gripe (tp [0], "Only valid for STYLE >= 11!");

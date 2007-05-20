@@ -12,6 +12,11 @@
  *
  */
  
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
+#include <stdio.h>
 #include <string.h>
 
 #include "acdc.h"
@@ -22,6 +27,32 @@
 #include "text.h"
 
 #ifdef __STDC__
+char *get_token(char **cstring, char *delims)
+#else
+char *get_token(cstring, delims)
+char **cstring;
+char *delims;
+#endif
+{
+   char *cptr;
+   char *token = *cstring;
+
+   if (! *token)
+      return (NULL);
+
+   while ((cptr = strpbrk(token, delims)) == token)
+      (token)++;
+
+   if (cptr)
+      *cptr++ = 0;
+
+   *cstring = cptr;
+   return(token);
+}
+
+/*====================================================================*/
+
+#ifdef __STDC__
 struct node *parse(int type)
 #else
 struct node *parse(type)
@@ -30,7 +61,6 @@ int type;
 {
    int index = 0;
    struct node *np;
-   extern char *get_token();
    char *cptr = line;
    int minargs;
    int direct_call = 0;

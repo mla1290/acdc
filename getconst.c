@@ -6,6 +6,10 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <ctype.h>
 
 #include "acdc.h"
@@ -16,13 +20,13 @@
 
 #ifdef __STDC__
 int getconst (
-   char *string)
+   char *cstring)
 #else
-int getconst (string)
-   char *string;
+int getconst (cstring)
+   char *cstring;
 #endif
 {
-   char *string_ptr;
+   char *cstring_ptr;
    char token [161];
    char *token_ptr;
    int numbase;
@@ -33,40 +37,40 @@ int getconst (string)
    struct node *np;
 
    value = 0;
-   string_ptr = string;
+   cstring_ptr = cstring;
    oper = '+';
 
-   if (*string_ptr == '+' || *string_ptr == '-')
-      oper = *string_ptr++;
+   if (*cstring_ptr == '+' || *cstring_ptr == '-')
+      oper = *cstring_ptr++;
 
 next_token:
-   if (*string_ptr == '0')
+   if (*cstring_ptr == '0')
       numbase = 8;
-   else if (isdigit (*string_ptr))
+   else if (isdigit (*cstring_ptr))
       numbase = 10;
-   else if (isalpha (*string_ptr))
+   else if (isalpha (*cstring_ptr))
       numbase = 0;
-   else if (*string_ptr == '@' && isalpha (*(++string_ptr)))
+   else if (*cstring_ptr == '@' && isalpha (*(++cstring_ptr)))
       numbase = -1;
    else
-      (void) gripe (string,"Not reducible to a constant value.");
+      (void) gripe (cstring,"Not reducible to a constant value.");
 
    next_value = 0;
    if (numbase > 0)
       while (TRUE)
       {
-         digit = *string_ptr - '0';
+         digit = *cstring_ptr - '0';
          if (digit < 0 || digit >= numbase)
             break;
          next_value = digit + next_value * numbase;
-         string_ptr++;
+         cstring_ptr++;
       }
    else
    {
       token_ptr = token;
-      while (isalnum (*string_ptr) || *string_ptr == '_' || *string_ptr == '.'
-         || *string_ptr == '!' || *string_ptr == '?')
-            *token_ptr++ = *string_ptr++;
+      while (isalnum (*cstring_ptr) || *cstring_ptr == '_' || *cstring_ptr == '.'
+         || *cstring_ptr == '!' || *cstring_ptr == '?')
+            *token_ptr++ = *cstring_ptr++;
       *token_ptr = '\0';
       if (fndparam (token) != -1)
          gripe (token, "cannot use local symbols in constant expressions!");
@@ -79,13 +83,13 @@ next_token:
    else
       value -= next_value;
 
-   if (*string_ptr == '+' || *string_ptr == '-')
+   if (*cstring_ptr == '+' || *cstring_ptr == '-')
    {
-      oper = *string_ptr++;
+      oper = *cstring_ptr++;
       goto next_token;
    }
-   else if (*string_ptr != '\0')
-      (void) gripe (string, "Bad operator in constant expression.");
+   else if (*cstring_ptr != '\0')
+      (void) gripe (cstring, "Bad operator in constant expression.");
 
    return (value);
 }

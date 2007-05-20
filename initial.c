@@ -1,5 +1,8 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 19 May 07   MLA           Added "quiet".
+ * 09 May 07   MLA           Code parts now start from 2!
+ * 07 May 07   Stuart Munro  bug: need stdlib.h (for rand()).
  * 08 Sep 05   MLA           IFIS now takes multiple arguments.
  * 27 Aug 05   MLA           Retrofitted GAMED for style 10.
  * 20 Feb 05   MLA           Added separate VERSION and DATE.
@@ -41,6 +44,10 @@
  * 15 Sep 90   MLA           Initial coding.
  *
  */
+
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -248,10 +255,7 @@ void initial()
    int type;
    int mask;
    struct node *np;
-   struct node *parse ();
    
-   extern void *calloc();
-
    index = 0;
    dp = &keywords[0];
    while (dp -> id != ENDOFLIST)
@@ -365,7 +369,7 @@ void initial()
  
    if (style != 10 && *gameid)
       (void) gripe ("", "The GAMEID directive only valid in A-code style 10!");
-   if ((code_file = openout("adv01.c", "w")) == NULL)
+   if ((code_file = openout("adv02.c", "w")) == NULL)
       (void) gripe ("adv01.c", "Unable to open code file.");
    (void) fprintf (code_file, "#include \"adv0.h\"\n");
    (void) fprintf (code_file, "#include \"adv3.h\"\n");
@@ -477,14 +481,18 @@ void initial()
       storchar(*tptr++);
    storchar ('\0');
    
-   printf ("GameID: %s\n", gameid);
-   printf ("Style:  ");
-   if (style == 1)
-      puts ("Dave Platt's original A-code");
+   if (quiet == 0)
+   {
+      printf ("GameID: %s\n", gameid);
+      printf ("Style:  ");
+      if (style == 1)
+         puts ("Dave Platt's original A-code");
+      else
+         printf ("A-code %d\n", style);
+      if (*author)
+         printf ("Author: %s\n", author);
+   }   
    else
-      printf ("A-code %d\n", style);
-   if (*author)
-      printf ("Author: %s\n", author);
-   
+      printf ("Translating: %s ... ", gameid);
    return;
 }

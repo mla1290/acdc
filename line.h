@@ -10,3 +10,11 @@ extern char line[];
 extern char raw_line[];
 extern char *line_ptr;
 extern char *tp[];
+
+#ifdef __STDC__
+struct node *parse (int);
+int chrtobin (char *);
+#else
+struct node *parse ();
+int chrtobin ();
+#endif

@@ -10,6 +10,10 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

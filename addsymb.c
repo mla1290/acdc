@@ -8,6 +8,10 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <string.h>
 
 #include "acdc.h"
@@ -32,7 +36,6 @@ struct node *addsymb (node_type, word, type, refno)
    struct node *node_ptr;
    int len;
    int auto_flag;
-   extern void *malloc ();
 
    if (node_type == AUTOSYMBOL)
    {

@@ -8,6 +8,10 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include "text.h"
 
 #ifdef __STDC__

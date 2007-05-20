@@ -10,6 +10,10 @@
  *
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include "acdc.h"
 #include "const.h"
 #include "line.h"
@@ -36,7 +40,6 @@ struct node *gp;
    int last_addr;
    char *tag;
    struct node *np;
-   extern void storword ();
 
    if (*tp [1] == '=')
       (void) gripe (tp [1], "No preceding word to equate to!");

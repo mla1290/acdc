@@ -3,14 +3,19 @@
  *
  * Warning! This is 32bit code, for use in 32bit executables!
  *
+ * 07 May 07   Stuart Munro      bug: fix declaration and casting of btact args.
  * 03 Sep 06   MLA               Bug: All longs should be ints!
  * 23 Dec 05   MLA               roots[] must be long, not int!
- * 06 Mar 03   Stuart Munro      Fix non-ASCII btfind args declaration;
+ * 06 Mar 03   Stuart Munro      bug: fix non-ASCII btfind args declaration;
  *                               include stdlib.h; remove unused variables.
  * 07 Jan 03   MLA               Adapted for use by acdc.
  * 24 Mar 01   MLA               Initial coding.
  */
  
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -228,7 +233,7 @@ char *record;
    {
       while (child > 0)
       {
-         if ((dir = btcmpa (record, 
+         if ((dir = btcmpa ((struct node *)record, 
             (struct node *)(*(root + child + BT_PTR)))) == 0)
                return (0);
          parent = child;
@@ -298,7 +303,7 @@ char *word;
 /*====================================================================*/
 
 #ifdef __STDC__
-void btspan (int type, void (*btact)())
+void btspan (int type, void (*btact)(struct node *))
 #else /* ! __STDC__ */
 void btspan (type, btact)
 int type;
@@ -325,14 +330,14 @@ void (*btact)();
             break;
             
          case 1:
-            btact ((char *)(*(root + node + BT_PTR)));
+            btact ((struct node *)(*(root + node + BT_PTR)));
             state = (next = *(root + node + BT_UP + BT_RSIB)) ? 0 : 3;
             if (state == 0)
                node = next;
             break;
 
          case 2:
-            btact ((char *)(*(root + node + BT_PTR)));  
+            btact ((struct node *)(*(root + node + BT_PTR)));  
                /* And just fall through! */
             
          case 3:

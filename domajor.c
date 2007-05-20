@@ -33,10 +33,13 @@
  * 15 Sep 90   MLA           Initial coding.
  */
 
+#if defined(__cplusplus) && !defined(__STDC__)
+#  define __STDC__
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdlib.h>
 
 #include "acdc.h"
 #include "const.h"
@@ -56,7 +59,6 @@ void domajor ()
 {
    int index;
    struct node *np;
-   struct node *parse ();
    int value;
    int flag_type;
    int major_type;
@@ -75,23 +77,17 @@ void domajor ()
    static int got_code = FALSE;
 
 #ifdef __STDC__
-   extern int chrtobin (char *);
    extern void dominor (char *, char *);
    extern void opnsrc (char *);
    extern void organise (void);
-   extern void storword (char *, int, int, int);
    extern void getdesc (struct node *);
    extern struct node *getnames (int, struct node *);
-   extern void *malloc (size_t);
 #else
-   extern int chrtobin ();
    extern void dominor ();
    extern void opnsrc ();
    extern void organise ();
-   extern void storword ();
    extern void getdesc ();
    extern struct node *getnames ();
-   extern void *malloc ();
 #endif
 
    line_ptr = line;
@@ -350,7 +346,8 @@ void domajor ()
          np = addsymb (SYMBOL, tp [1], TEXT, type_counts [TEXT]++);
          np -> body.text.name_addr = next_addr; /* Sort of "name" */
          if (xref && tp [1] != dummy_text)
-            write_ref (major_type == TEXT ? " TXT " : " FRG ", tp [1]);
+            write_ref ((char *)(major_type == TEXT ? " TXT " : " FRG "), 
+               tp [1]);
          line_status = EOL;
          (void) gettxt (0, &(np -> state_count), 
             major_type == FRAGMENT, &type);
