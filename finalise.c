@@ -52,18 +52,9 @@ struct node *np;
 
    type = np -> type;
 
-   if (style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
+   if (quiet == 0 && style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
       (np -> auto_flag) == '\0' && strncmp (np -> name, "spare..", 7))
-/*      strcmp (np -> name, "place") && 
-      strcmp (np -> name, "verb") && 
-      strcmp (np -> name, "variable") && 
-      strcmp (np -> name, "object") && 
-      strncmp (np -> name, "spare", 5) &&
-      strcmp (np -> name, "arg3")) 
-*/
-   
-   if (quiet == 0)
-      (void) printf ("   %-22s symbol defined but not used.\n", np -> name);
+         (void) printf ("   %-22s symbol defined but not used.\n", np -> name);
 
    procno = refno = np -> refno;
 

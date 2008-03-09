@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 10 Nov 07   MLA           Added DUMP.
  * 07 May 07   Stuart Munro  bug: need to include string.h (for strcmp).
  * 06 May 07   MLA           Added deprecated warnings.
  * 15 Oct 05   MLA           BUG: fixed the NOT IFIS logic.
@@ -1568,6 +1569,10 @@ char *proccond;
  *            break;
  */
              
+         case DUMP:
+            (void) fprintf (code_file, " show_data();");
+            break;
+
          case CALL:
             index = 1;        /* Point at proc name and fall through. */
          default:

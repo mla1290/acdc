@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 10 Nov 07   MLA           Added DUMP;
  * 19 May 07   MLA           Added "quiet".
  * 09 May 07   MLA           Code parts now start from 2!
  * 07 May 07   Stuart Munro  bug: need stdlib.h (for rand()).
@@ -232,6 +233,7 @@ struct directive keywords[] =
    {"redo",        MINOR, REDO,        0,   1},
    {"local",       MINOR, LOCAL,       1,   ANY_NUMBER},
    {"checkpoint",  MINOR, CHECKPOINT,  0,   0},
+   {"dump",        MINOR, DUMP,        0,   0},
    {"object",      SYMBOL,OBJFLAG,     0,   0},
    {"place",       SYMBOL,PLACEFLAG,   0,   0},
    {"verb",        SYMBOL,VERBFLAG,    0,   0},

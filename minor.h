@@ -1,5 +1,6 @@
 /* minor.h (acdc) - copyleft Mike Arnautov 1990-2005.
  *
+ * 10 Nov 07   MLA           Added DUMP.
  * 01 Jan 05   MLA           Added UNDO/REDO.
  * 27 Jul 02   MLA           Added CHECKPOINT.
  * 12 Jul 02   MLA           Added IFNE, IFLE, IFGE, DESCRIBE.
@@ -112,6 +113,7 @@
 # define LOCAL      131
 
 # define CHECKPOINT 141
+# define DUMP       142
 
 # define SAVE       151
 # define RESTORE    152
