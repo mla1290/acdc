@@ -1,5 +1,8 @@
 /* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2007.
  *
+ * 20 Mar 08   MLA           BUG: Style 1 feature description  fix.
+ *                           Bug: Line length arg to outline fix.
+ *                           Bug: fixed text and text line counts.
  * 08 May 07   Stuart Munro  bug: correct the seting of description level 3.
  * 04 May 07   MLA           bug: Suppress qualifier checks for style 1.
  * 15 Oct 06   MLA           Reinstated HTML tag handling.
@@ -69,7 +72,8 @@ int *got_holder;
    int nest_type;
    int in_block = 0;
    int html_tag = 0;
-
+   int null_text = 1;
+   
    states = 0;
    text_count++;
    text_ptr = text_buf_ptr + 1;
@@ -86,13 +90,16 @@ next_line:
    if (getline(ACCEPT_BLANK) == EOF)
       (void) gripe ("EOF","Unexpected end of source.");
 
-   text_lines++;
    if (*line_ptr != ' ' && *line_ptr != '\t' && *line_ptr != '\n')
    {
+      if (null_text)
+         text_count--;
       if (description)
          description = -1;              /* End of descriptions */
       goto store;
    }
+   else
+      null_text = 0;
 
    if (lf_pending)
       *text_ptr++ = '\n';
@@ -108,6 +115,11 @@ next_line:
 
    if (description)
    {
+      if (style <= 1 && description == 1 && *line_ptr == '{')
+      {
+         *line_ptr = '\n';
+         goto next_line;
+      }
       if (*line_ptr == '%')
       {
          if (description == 2)
@@ -143,6 +155,8 @@ next_line:
          }
       }
    }
+
+   text_lines++;
 
 /* Check for a signal to leave this line dangling. */
 
@@ -283,6 +297,7 @@ next_char:
          if ((nest_text = fndsymb (SYMBOL, nest_name)) == NULL)
             (void) gripe (nest_name, "Nested text name not known.");
          nest_type = nest_text -> type;
+         (nest_text -> used_count)++;
          *text_ptr++ = NEST_TEXT;
          if (nest_type > TEXT)
             (void) gripe (nest_name, "Not reducible to text.");

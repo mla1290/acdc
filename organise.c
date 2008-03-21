@@ -60,6 +60,7 @@
 
 int node_count;
 int desc_count;
+int txt_count;
 int *text_info;
 int *text_base;
 int *brief_base;
@@ -394,8 +395,8 @@ void organise()
 
 /*  Allocate the space for message addresses and types  */
 
-   text_count = type_base[TEXT + 1];
-   if ((text_base = (int *) calloc (text_count, sizeof(int))) == NULL)
+   txt_count = type_base[TEXT + 1];
+   if ((text_base = (int *) calloc (txt_count, sizeof(int))) == NULL)
       (void) gripe ("", "Unable to allocate text address memory.");
    if ((text_info = (int *) calloc (2 * (type_base[TEXT + 1] - 
       type_base[TEXT]), sizeof(int))) == NULL)
@@ -435,9 +436,9 @@ void organise()
    *detail_base = 0;
    
    (void) fprintf (defs_file, "   int textadr[] = {\n");
-   dump_array(text_base, text_count,  " %8ldL,", 7);
+   dump_array(text_base, txt_count,  " %8ldL,", 7);
    (void) fprintf (defs_file, "        0L};\n char text_info[] = {\n");
-   dump_array(text_info, 2 * (text_count - type_base[TEXT]),  " %4ld,", 12);
+   dump_array(text_info, 2 * (txt_count - type_base[TEXT]),  " %4ld,", 12);
    (void) fprintf (defs_file, "    0};\n int brief_desc[] = {\n");
    dump_array (brief_base, desc_count,  " %8ldL,", 7);
    (void) fprintf (defs_file, "        0L};\n int long_desc[] = {\n");
@@ -603,7 +604,7 @@ void organise()
    {
       if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
          (void) gripe ("DETAILDISPLAY", "Declared as other than a bit constant.");
-      else
+      else if (style == 10)
          (void) fprintf (defs_file, "#define DETAIL %d\n", np -> refno);
    }
 

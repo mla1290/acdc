@@ -1,6 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2007.
  */
-#define ACDC_VERSION "11.70, MLA - 10 Nov 2007"
+#define ACDC_VERSION "11.71, MLA - 21 Mar 2008"
 /*
  * 19 May 07   MLA           Added "quiet".
  * 09 May 07   MLA           Code parts now start from 2!
