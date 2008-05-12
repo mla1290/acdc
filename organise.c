@@ -1,5 +1,8 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 30 Apr 08   MLA           Added PROMPT.
+ * 22 Mar 08   MLA           BADWORD etc now go from -2 down.
+ * 15 Mar 08   MLA           Version 12 changes.
  * 04 May 07   MLA           Change CONTEXT to ADVCONTEXT (bloody MS!!).
  * 03 May 07   MLA           Cosmetic fix to first elements of text arrays
  *                           in adv5.h.
@@ -21,7 +24,7 @@
  *                           Also added automatic definition of PLAIN.
  * 04 Nov 01   MLA           Define old-style display flags.
  * 02 Nov 01   MLA           Added BADSYNTAX.
- * 30 Oct 01   MLA           De-wired value of OBJECT (objflag!) etc in
+ * 30 Oct 01   MLA           De-wired value of OBJ (objflag!) etc in
  *                           style 1.
  * 17 Oct 01   MLA           Improved compatibility with Platt's A-code.
  * 04 Aug 01   MLA           Added definition of IT.
@@ -57,17 +60,22 @@
 #include "text.h"
 #include "output.h"
 #include "source.h"
+#include "game.h"
 
-int node_count;
-int desc_count;
-int txt_count;
-int *text_info;
-int *text_base;
-int *brief_base;
-int *int_base;
-int *detail_base;
-int base_voc_addr;
-int key_mask;
+/*====================================================================*/
+
+#ifdef __STDC__
+static void process_voc_proc (struct node *np)
+#else
+static void process_voc_proc (np)
+struct node *np;
+#endif
+{
+   if (np -> proc_count && np -> symbol)
+      (np -> symbol) -> proc_count += np -> proc_count;
+}
+
+/*======================================================================*/
 
 #ifdef __STDC__
 void define_constant(char *name, char *upname, char *type)
@@ -81,7 +89,7 @@ char *type;
    struct node *np;
    char temp[60];
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, name)) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, name)) != NULL)
    {
       if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
       {
@@ -94,165 +102,20 @@ char *type;
    return;
 }
 
-#ifdef __STDC__
-void processsymb(struct node *np)
-#else
-void processsymb(np)
-struct node *np;
-#endif
-{
-   int refno;
-   int *array_ptr;
-
-   if (np -> type < PROCEDURE)
-   {
-      if (np -> type == TEXT) 
-      {
-         *(text_info + 2 * (np -> refno)) =
-            (np -> body.text.text_type & 1023);   /* Strip off the 1024 flag */
-         *(text_info + 2 * (np -> refno) + 1) =
-            np -> state_count;
-      }
-      refno = np -> refno += type_base[ np -> type ];
-      if (xref_file)
-         fprintf (xref_file, "+ %d %s\n", refno, np -> name);
-      *(text_base + refno) = np -> body.text.name_addr;
-      if (np -> type != TEXT)
-         *(text_base + refno) += base_voc_addr;
-      if (np -> type <= PLACE)
-      {
-         array_ptr = np -> body.text.text_addr;
-         *(brief_base + refno) = *array_ptr++;
-         if ((*(int_base + refno) = *array_ptr++) == -1L)
-            *(int_base + refno) = *(brief_base + refno);
-         if ((*(detail_base + refno) = *array_ptr) == -1L)
-            *(detail_base + refno) = *(int_base + refno);
-      }
-   }
-   return;
-}
+/*======================================================================*/
 
 #ifdef __STDC__
-void process_voc_refno(struct node *np)
+void declare_constant(char *name, char *upname, int value)
 #else
-void process_voc_refno(np)
-struct node *np;
-#endif
-{
-   int refno;
-   int feature;
-   
-   if (np -> type == NOUN)
-   {
-      np -> type = VERB;
-      feature = 1 << 15;
-   }
-   else
-      feature = 1;
-   if (np -> type <= VERB)
-      refno = np -> refno += type_base [np -> type];
-   else
-      refno = 0;
-   (void) fprintf (defs_file, "%4d, ", feature * refno);
-   if (++node_count == 11)
-   {
-      node_count = 0;
-      (void) fputc ('\n', defs_file);
-   }
-   return;
-}
-
-#ifdef __STDC__
-void process_voc_type(struct node *np)
-#else
-void process_voc_type(np)
-struct node *np;
-#endif
-{
-   (void) fprintf (defs_file, "%4d, ", np -> type);
-   if (++node_count == 11)
-   {
-      node_count = 0;
-      (void) fputc ('\n', defs_file);
-   }
-   return;
-}
-
-#ifdef __STDC__
-void process_voc_addr(struct node *np)
-#else
-void process_voc_addr(np)
-struct node *np;
-#endif
-{
-   (void) fprintf (defs_file, "%8ldL, ", 
-      base_voc_addr + np -> body.vocab.voc_addr);
-   if (++node_count == 7)
-   {
-      node_count = 0;
-      (void) fputc ('\n', defs_file);
-   }
-   return;
-}
-
-#ifdef __STDC__
-void process_voc_word(struct node *np)
-#else
-void process_voc_word(np)
-struct node *np;
-#endif
-{
-   (void) fprintf (defs_file, "%8ldL, ", 
-      base_voc_addr + np -> body.vocab.word_addr);
-   if (++node_count == 7)
-   {
-      node_count = 0;
-      (void) fputc ('\n', defs_file);
-   }
-   return;
-}
-
-#ifdef __STDC__
-void dump_array (int *addr, int count, char *pattern, int group)
-#else
-void dump_array (addr, count, pattern, group)
-int *addr;
-int count;
-char *pattern;
-int group;
-#endif
-{
-    int *base;
-    int tokens;
-
-    tokens = 0;
-    base = addr;
-    while(count-- > 0)
-    {
-       (void) fprintf (defs_file, pattern, *addr++);
-       tokens++;
-       if (tokens == group)
-       {
-          tokens=0;
-          (void) fputc ('\n', defs_file);
-       }
-    }
-    free(base);
-    return;
-}
-
-#ifdef __STDC__
-void declare_constant(char *name, char *upname)
-#else
-void declare_constant(name, upname)
+void declare_constant(name, upname, value)
 char *name;
 char *upname;
+int value;
 #endif
 {
    struct node *np;
-   int value;
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, name)) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, name)) != NULL)
    {
       if (np -> type != CONSTANT && (style != 1 || np -> type != SYNONYM))
          (void) gripe (upname, "Declared as other than a constant.");
@@ -260,15 +123,14 @@ char *upname;
          value = np -> refno;
    }
    else
-   {
-      value = next_procno++;
-      (type_base [PROCEDURE])++;
-      (void) addsymb (AUTOSYMBOL, name, CONSTANT, value);
-   }
+      np = addsymb (AUTOSYMBOL, name, CONSTANT, value);
+   
    (void) fprintf (defs_file, "#define %s %d\n", upname, value);
 
    return;
 }
+
+/*======================================================================*/
 
 #ifdef __STDC__
 void declare_flag(char *name, char *upname, int value)
@@ -281,7 +143,7 @@ int   value;
 {
    struct node *np;
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, name)) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, name)) != NULL)
    {
       if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
          (void) gripe (upname, "Declared as other than a flag.");
@@ -289,10 +151,56 @@ int   value;
          value = np -> refno;
    }
    else
-      (void) addsymb (AUTOSYMBOL, name, FLAGS, value);
+      np = addsymb (AUTOSYMBOL, name, FLAGS, value);
+   
    (void) fprintf (defs_file, "#define %s %d\n", upname, value);
    return;
 }
+
+/*======================================================================*/
+
+#ifdef __STDC__
+void process_procnos (struct node *np)
+#else
+void process_procnos (np)
+struct node *np;
+#endif
+{
+   if (np -> proc_count)
+   {
+         np -> proc_base = next_procno++;
+         if (np -> proc_count > 1)
+            next_procno += np -> proc_count;
+   }      
+}
+
+/*======================================================================*/
+
+#ifdef __STDC__
+void process_refnos (struct node *np)
+#else
+void process_refnos (np)
+struct node *np;
+#endif
+{
+   int type = np -> type;
+   switch (type)
+   {
+      case OBJ:
+      case LOC:
+      case VERB:
+      case VAR:
+      case TEXT:
+         np -> refno += type_base [type];
+         break;
+      
+      case AT:
+      case ACTION:
+         gripe (np -> name, "Symbol used, but not defined.");
+   }
+}
+
+/*======================================================================*/
 
 #ifdef __STDC__
 void organise(void)
@@ -301,153 +209,209 @@ void organise()
 #endif
 {
    int index;
+   int next_constant;
+   int mask;
+   int len;
+   char *tptr;
    char *cptr;
    struct node *np;
    char dbname [80];
    struct node *undo_stat = NULL;
    struct node *undo = NULL;
 
-#ifdef __STDC__   
-   void processsymb(struct node *);
-   void process_voc_refno(struct node *);
-   void process_voc_type(struct node *);
-   void process_voc_addr(struct node *);
-   void process_voc_word(struct node *);
-#else
-   void processsymb();
-   void process_voc_refno();
-   void process_voc_type();
-   void process_voc_addr();
-   void process_voc_word();
-#endif
+   stage = -1;         /* Tell gripe we are not reading source file at present */
+/* Deal with the game header info */
 
-   base_voc_addr = next_addr;
-   voc_top = voc_ptr;
-   voc_ptr = voc_buf_ptr;
-   while (voc_ptr < voc_top)
-      storchar(*voc_ptr++);
+   btspan (VOCAB, process_voc_proc);
+
+   if (style == -1)
+      style = *title ? 10 : 1;
+   if (style != 10 && *gameid)
+      (void) gripe ("", "The GAMEID directive only valid in A-code style 10!");
+
+   if ((code_file = openout("adv02.c", "w")) == NULL)
+      (void) gripe ("adv01.c", "Unable to open code file.");
+   (void) fprintf (code_file, "#include \"adv0.h\"\n");
+   (void) fprintf (code_file, "#include \"adv3.h\"\n");
+
+   next_addr = 0;
+   if (debug)     /* Declarations over - if source output */
+      debug = 2;  /* is required, turn it on! */
+
+   if (*title)
+      strcpy (dbname, title);
+   else
+      strcpy (dbname, source_file);
+   if (tptr = strpbrk (dbname, " \t"))
+      *tptr = 0;
+   if (tptr = strrchr (dbname, '.'))
+      *tptr = 0;
+   if (*title == '\0')
+   {
+      strcpy (title, dbname);
+      if (*title >= 'a' && *title <= 'z')
+         *title += 'A' - 'a';
+   }
+   cptr = dbname;
+   while (*cptr)
+   {
+      *cptr = tolower (*cptr);
+      cptr++;
+   }
+   strcat (dbname, ".dat");
+
+/* Assemble the game ID */
+
+   if (style >= 11)
+   {
+      strcpy (gameid, title);
+      if (*version || *date)
+         strcat (gameid, ", ");
+      if (*version)
+      {
+         strcat (gameid, "version ");
+         strcat (gameid, version);
+         if (*date)
+            strcat (gameid, " - ");
+      }
+      if (*date)
+         strcat (gameid, date);
+   }
+      
+   if (memory < 3)
+      tptr =  dbname;
+   else
+      tptr = "adv6.h";
+   
+   if ((text_file = openout (tptr, "wb")) == NULL)
+      (void) gripe (tptr, "Unable to open data file.");
+
+   tptr = *gameid ? gameid : source_file;
+   len = strlen (tptr);
+   if (len > 79) len = 79;
+   (void) strncpy (gameid, tptr, len);
+   *(gameid + len) = '\0';
+   gameid [79] = '\0';
+   tptr = gameid;
    if (memory == 3)
-      fprintf (text_file, "};\n");
-   (void) clsfile (text_file, "Text");
+   {
+      fprintf (text_file, "char text [TEXT_BYTES] = {\n");
+      fputc ('0', text_file); 
+   }
+   else
+      fputc ('\0', text_file);
+   next_addr++;
+
+/* Write off the game ID. Can't use the standard encryption, because that
+ * requires the knowledge of the game ID! I.e. there would be no way of 
+ * decrypting it!
+ */
+ 
+   if (plain_text == 0)
+   {
+      key_mask = (rand() & 127) ^ 'x';
+      if (key_mask == 0 || key_mask == 127) key_mask = 'y';
+   }
+   else
+      key_mask = 0;
+   mask = key_mask;
+
+   while (*tptr && *tptr != '\n')
+   {
+      if (memory == 3)
+         (void) fprintf (text_file, ",%d", *tptr ^ mask);
+      else
+         fputc (*tptr ^ mask, text_file);
+      if (plain_text == 0)
+         mask ^= *tptr;
+      tptr++;
+      next_addr++;
+   }
+
+   if (memory == 3)
+      fprintf (text_file, ",%d", mask);
+   else
+      fputc (mask, text_file);
+   next_addr++;
+
+/* Write off the game ID again, this time using the standard encryption.
+ * This is necessary in order to give the game access to the string as
+ * a standard text.
+ */
+ 
+   np = addsymb (AUTOSYMBOL, "game.id", TEXT, type_counts[TEXT]++);
+   np -> name_addr = next_addr;
+   tptr = gameid;
+   while (*tptr)
+      storchar(*tptr++);
+   storchar ('\0');
+   
+   if (quiet == 0)
+   {
+      printf ("GameID: %s\n", gameid);
+      printf ("Style:  ");
+      if (style <= 1)
+         puts ("Dave Platt's original A-code");
+      else
+         printf ("A-code %d\n", style);
+      if (*author)
+         printf ("Author: %s\n", author);
+   }   
+   else
+      printf ("Translating: %s ... ", gameid);
 
 /* Check for mandatory symbols and add them if missing */
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "inhand")) == NULL)
-      (void) addsymb (AUTOSYMBOL, "inhand", PLACE, type_counts[PLACE]++);
-   else if (np -> type != PLACE)
+   if ((np = fndsymb(TESTSYMBOL, "inhand")) == NULL)
+      (void) addsymb (AUTOSYMBOL, "inhand", LOC, type_counts[LOC]++);
+   else if (np -> type != LOC)
       (void) gripe ("INHAND", "Declared as a non-place!");
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "here")) == NULL)
-      (void) addsymb (AUTOSYMBOL, "here", VARIABLE, type_counts[VARIABLE]++);
-   else if (np -> type != VARIABLE)
+   if ((np = fndsymb(TESTSYMBOL, "here")) == NULL)
+      (void) addsymb (AUTOSYMBOL, "here", VAR, type_counts[VAR]++);
+   else if (np -> type != VAR)
       (void) gripe ("HERE", "Declared as a non-variable!");
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "there")) == NULL)
-      (void) addsymb (AUTOSYMBOL, "there", VARIABLE, type_counts[VARIABLE]++);
-   else if (np -> type != VARIABLE)
+   if ((np = fndsymb(TESTSYMBOL, "there")) == NULL)
+      (void) addsymb (AUTOSYMBOL, "there", VAR, type_counts[VAR]++);
+   else if (np -> type != VAR)
       (void) gripe ("THERE", "Declared as a non-variable!");
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "status")) == NULL)
-      (void) addsymb (AUTOSYMBOL, "status", VARIABLE, type_counts[VARIABLE]++);
-   else if (np -> type != VARIABLE)
+   if ((np = fndsymb(TESTSYMBOL, "status")) == NULL)
+      (void) addsymb (AUTOSYMBOL, "status", VAR, type_counts[VAR]++);
+   else if (np -> type != VAR)
       (void) gripe ("STATUS", "Declared as a non-variable!");
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "arg1")) == NULL)
-      (void) addsymb (AUTOSYMBOL, "arg1", VARIABLE, type_counts[VARIABLE]++);
-   else if (np -> type != VARIABLE)
+   if ((np = fndsymb(TESTSYMBOL, "arg1")) == NULL)
+      (void) addsymb (AUTOSYMBOL, "arg1", VAR, type_counts[VAR]++);
+   else if (np -> type != VAR)
       (void) gripe ("ARG1", "Declared as a non-variable!");
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "arg2")) == NULL)
-      (void) addsymb (AUTOSYMBOL, "arg2", VARIABLE, type_counts[VARIABLE]++);
-   else if (np -> type != VARIABLE)
+   if ((np = fndsymb(TESTSYMBOL, "arg2")) == NULL)
+      (void) addsymb (AUTOSYMBOL, "arg2", VAR, type_counts[VAR]++);
+   else if (np -> type != VAR)
       (void) gripe ("ARG2", "Declared as a non-variable!");
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "arg3")) == NULL)
-      (void) addsymb (AUTOSYMBOL, "arg3", VARIABLE, type_counts[VARIABLE]++);
-   else if (np -> type != VARIABLE)
+   if ((np = fndsymb(TESTSYMBOL, "arg3")) == NULL)
+      (void) addsymb (AUTOSYMBOL, "arg3", VAR, type_counts[VAR]++);
+   else if (np -> type != VAR)
       (void) gripe ("ARG3", "Declared as a non-variable!");
-/*
- *   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "pls.clarify")) == NULL)
- *      (void) addsymb (AUTOSYMBOL, "pls.clarify", FLAGS, 
- *         ++flag_field_size [VARFLAG]);
- *   else if (np -> type != FLAGS)
- *      (void) gripe ("PLS.CLARIFY", "Declared as a non-flag!");
- */
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo")) != NULL &&
+   if ((np = fndsymb(TESTSYMBOL, "undo")) != NULL &&
       np -> type == VERB)
    {
       undo = np;
-      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undo.status")) == NULL)
+      if ((np = fndsymb(TESTSYMBOL, "undo.status")) == NULL)
       {
-         np = addsymb (AUTOSYMBOL, "undo.status", VARIABLE, 
-            type_counts[VARIABLE]++);
+         np = addsymb (AUTOSYMBOL, "undo.status", VAR, type_counts[VAR]++);
       }
-      else if (np -> type != VARIABLE)
+      else if (np -> type != VAR)
          (void) gripe ("UNDO.STATUS", "Declared as a non-variable!");
       undo_stat = np;
    }
 
-/*  Calculate the individual type bases, making sure that the refno numbering
- *  starts from 3. This is done to have two fixed refnos for INIT_PROC and
- *  REPEAT_PROC (1 and two respectively), even though true procs come at the
- *  very end of the sequence (because at this point we still don't know how
- *  many there are going to be).
+/*  Calculate individual type bases, and adjust refnos to their non-relative values.
  */
-   type_base[0] = 3;            /* Skip INIT_PROC and REPEAT_PROC */
+   next_procno = 1;
+   btspan (SYMBOL, process_procnos);
+   type_base[0] = 3;
    for (index = 0; index <= TEXT; index++)
       type_base[index + 1] = type_base[index] + type_counts[index];
-   next_procno = type_base[PROCEDURE];  /* Other procs will start from here */
-
-/*  Allocate the space for message addresses and types  */
-
-   txt_count = type_base[TEXT + 1];
-   if ((text_base = (int *) calloc (txt_count, sizeof(int))) == NULL)
-      (void) gripe ("", "Unable to allocate text address memory.");
-   if ((text_info = (int *) calloc (2 * (type_base[TEXT + 1] - 
-      type_base[TEXT]), sizeof(int))) == NULL)
-        (void) gripe ("", "Unable to allocate text type memory.");
-
-/*  Allocate space for description addresses - brief, int and detailed.  */
-
-   desc_count = type_base[PLACE + 1];
-   if ((brief_base = (int *) calloc (desc_count, sizeof(int))) == NULL)
-      (void) gripe ("", "Unable to allocate brief description address memory.");
-   if ((int_base = (int *) calloc (desc_count, sizeof(int))) == NULL)
-      (void) gripe ("", "Unable to allocate int description address memory.");
-   if ((detail_base = (int *) calloc (desc_count, sizeof(int))) == NULL)
-      (void) gripe ("", "Unable to allocate detailed description address memory.");
-
-/*  Open include file which will initialise respective arrays.  Then
- *  walk through all symbols (a) calculating their correct refnos (by
- *  adding the appropriate type base to their stored relative type refnos),
- *  (b) filling in the four address arrays - these then get written out
- *  into the insert file.
- */
-   btspan(SYMBOL, processsymb);
-
-   if ((defs_file = openout("adv5.h","w")) == NULL)
-      (void) gripe ("","Unable to open adv5.h (words.h).");
-
-/* A cosmetic fix to avoid worrying people. The relevant array elements
- * don't get actually referebced by the game. They shouldn't have been
- * there in the first place, but they do no harm and it is much easier
- * to leave them there.
- */
-   *text_base = 0;
-   *text_info = 0;
-   *(text_info + 1) = 0;
-   *brief_base = 0;
-   *int_base = 0;
-   *detail_base = 0;
-   
-   (void) fprintf (defs_file, "   int textadr[] = {\n");
-   dump_array(text_base, txt_count,  " %8ldL,", 7);
-   (void) fprintf (defs_file, "        0L};\n char text_info[] = {\n");
-   dump_array(text_info, 2 * (txt_count - type_base[TEXT]),  " %4ld,", 12);
-   (void) fprintf (defs_file, "    0};\n int brief_desc[] = {\n");
-   dump_array (brief_base, desc_count,  " %8ldL,", 7);
-   (void) fprintf (defs_file, "        0L};\n int long_desc[] = {\n");
-   dump_array (int_base, desc_count,  " %8ldL,", 7);
-   (void) fprintf (defs_file, "        0L};\n int detail_desc[] = {\n");
-   dump_array (detail_base, desc_count,  " %8ldL,", 7);
-   (void) fprintf (defs_file, "        0L};\n");
-
-   (void) clsfile (defs_file, "adv5.h");      /* Done with this file */
+   btspan (SYMBOL, process_refnos);
 
 /*  Now create the include file which will define various symbolic
  *  constants required by the kernel routines.
@@ -455,38 +419,45 @@ void organise()
    if ((defs_file = openout("adv1.h","w")) == NULL)
       (void) gripe ("","Unable to open adv1.h (defs.h).");
    (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", gameid);
-   (void) fprintf (defs_file, "#ifndef ADV01\n");
-   strcpy (dbname, gameid);
-   cptr = dbname;
-   while (isalnum (*cptr))
+
+/*   if (style <= -1)
    {
-      *cptr = tolower (*cptr);
-      cptr++;
+      strcpy (dbname, gameid);
+      cptr = dbname;
+      while (isalnum (*cptr) || *cptr == '-' || *cptr == '_' || *cptr == '.')
+      {
+         *cptr = tolower (*cptr);
+         cptr++;
+      }
+      *cptr = '\0';
+      strcat (dbname, ".dat");
    }
-   *cptr = '\0';
-   strcat (dbname, ".dat");
+*/
    (void) fprintf (defs_file, 
-      "#ifdef USEDB\n#  define DBNAME \"%s\"\n#endif\n", dbname);
-   (void) fprintf (defs_file, "#define TEXT_BYTES %ld\n", next_addr);
-   (void) fprintf (defs_file, "#define OBJSIZE %d\n", 
-      flag_field_size[OBJFLAG]/16 + 1);
-   (void) fprintf (defs_file, "#define PLACESIZE %d\n", 
-      flag_field_size[PLACEFLAG]/16 + 1);
-   (void) fprintf (defs_file, "#define VARSIZE %d\n", 
-      flag_field_size[VARFLAG]/16 + 1);
-   (void) fprintf (defs_file, "#define FOBJECT %d\n", type_base[OBJECT]);
+      "#ifdef USEDB\n#define DBNAME \"%s\"\n#endif\n", dbname);
+   (void) fprintf (defs_file, "#ifndef ADV1_H\n#define ADV1_H\n");
+   {
+      int offset = style >= 12 ? 3 : 0;
+      (void) fprintf (defs_file, "#define OBJSIZE %d\n", 
+         (flag_field_size[OBJFLAG] - offset)/16 + 1);
+      (void) fprintf (defs_file, "#define LOCSIZE %d\n", 
+         (flag_field_size[LOCFLAG] - offset)/16 + 1);
+      (void) fprintf (defs_file, "#define VARSIZE %d\n", 
+         (flag_field_size[VARFLAG] - offset)/16 + 1);
+   }
+   (void) fprintf (defs_file, "#define FOBJ %d\n", type_base[OBJ]);
    (void) fprintf
-      (defs_file, "#define LOBJECT %d\n", type_base[OBJECT + 1] - 1);
-   (void) fprintf (defs_file, "#define FPLACE %d\n", type_base[PLACE]);
+      (defs_file, "#define LOBJ %d\n", type_base[OBJ + 1] - 1);
+   (void) fprintf (defs_file, "#define FLOC %d\n", type_base[LOC]);
    (void) fprintf
-      (defs_file, "#define LPLACE %d\n", type_base[PLACE + 1] - 1);
+      (defs_file, "#define LLOC %d\n", type_base[LOC + 1] - 1);
    (void) fprintf (defs_file, "#define FVERB %d\n", type_base[VERB]);
    (void) fprintf
       (defs_file, "#define LVERB %d\n", type_base[VERB + 1] - 1);
    (void) fprintf
-      (defs_file, "#define FVARIABLE %d\n", type_base[VARIABLE]);
+      (defs_file, "#define FVAR %d\n", type_base[VAR]);
    (void) fprintf
-      (defs_file, "#define LVARIABLE %d\n", type_base[VARIABLE + 1]);
+      (defs_file, "#define LVAR %d\n", type_base[VAR + 1]);
    (void) fprintf (defs_file, "#define FTEXT %d\n", type_base[TEXT]);
    (void) fprintf (defs_file, "#define LTEXT %d\n", type_base[TEXT + 1]);
    (void) fprintf (defs_file, "#define NOISE %d\n", NOISE);
@@ -512,7 +483,7 @@ void organise()
    if (undo_stat)
    {
       (void) fprintf (defs_file, "#define UNDO %d\n", undo -> refno);
-      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "redo")) != NULL)
+      if ((np = fndsymb(TESTSYMBOL, "redo")) != NULL)
       {
          if (np -> type == VERB)
             (void) fprintf (defs_file, "#define REDO %d\n", np -> refno);
@@ -534,21 +505,14 @@ void organise()
    define_constant ("juggled",    "JUGGLED",    "variable flag");
    define_constant ("moved",      "MOVED",      "variable flag");
 
-/* PLS.CLARIFY is special, 'cause we map it into the PLSCLARIFY macro */
-/*
- *  if ((np = fndsymb(SYMBOL_OR_CONSTANT, "pls.clarify")) == NULL)
- *     (void) gripe ("PLS.CLARIFY",
- *        "Missing mandatory definition of the status bit.");
- *  else
- */
-   if (np = fndsymb(SYMBOL_OR_CONSTANT, "pls.clarify"))
+   if (np = fndsymb(TESTSYMBOL, "pls.clarify"))
    {
       if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
          (void) gripe ("PLS.CLARIFY", "Declared as other than a bit constant.");
       else (void) fprintf (defs_file, "#define PLSCLARIFY %d\n", np -> refno);
    }
    
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "again")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "again")) != NULL)
    {
       if (np -> type != VERB)
          (void) gripe ("AGAIN", "Declared as other than a verb.");
@@ -556,42 +520,50 @@ void organise()
          (void) fprintf (defs_file, "#define AGAIN %d\n", np -> refno);
    }
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "all")) != NULL ||
-       (np = fndsymb(SYMBOL_OR_CONSTANT, "everything")) != NULL)
-      if (np -> type == OBJECT)
+   if ((np = fndsymb(TESTSYMBOL, "all")) != NULL ||
+       (np = fndsymb(TESTSYMBOL, "everything")) != NULL)
+      if (np -> type == OBJ)
          (void) fprintf (defs_file, "#define ALL %d\n", np -> refno);
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "except")) != NULL ||
-       (np = fndsymb(SYMBOL_OR_CONSTANT, "but")) != NULL)
-      if (np -> type == VERB || np -> type == OBJECT)
+   if ((np = fndsymb(TESTSYMBOL, "except")) != NULL ||
+       (np = fndsymb(TESTSYMBOL, "but")) != NULL)
+   {
+      if (np -> type == VERB || np -> type == OBJ)
+      {
          (void) fprintf (defs_file, "#define EXCEPT %d\n", np -> refno);
-
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "typo")) != NULL &&
+         np -> auto_flag = 1;
+      }
+   }
+   if ((np = fndsymb(TESTSYMBOL, "typo")) != NULL &&
       np -> type == TEXT)
          (void) fprintf (defs_file, "#define TYPO %d\n", np -> refno);
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "define")) != NULL &&
+   if ((np = fndsymb(TESTSYMBOL, "define")) != NULL &&
       np -> type == VERB)
          (void) fprintf (defs_file, "#define DEFINE %d\n", np -> refno);
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "undefine")) != NULL &&
+   if ((np = fndsymb(TESTSYMBOL, "undefine")) != NULL &&
       np -> type == VERB)
          (void) fprintf (defs_file, "#define UNDEFINE %d\n", np -> refno);
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "it")) != NULL)
-      if (np -> type == OBJECT)
+   if ((np = fndsymb(TESTSYMBOL, "it")) != NULL)
+      if (np -> type == OBJ)
          (void) fprintf (defs_file, "#define IT %d\n", np -> refno);
          
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "context")) != NULL)
-      if (np -> type == VARIABLE)
+   if ((np = fndsymb(TESTSYMBOL, "context")) != NULL)
+      if (np -> type == VAR)
          (void) fprintf (defs_file, "#define ADVCONTEXT %d\n", np -> refno);
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "dwarven")) != NULL)
-      if (np -> type == VARIABLE)
+   if ((np = fndsymb(TESTSYMBOL, "prompt")) != NULL)
+      if (np -> type == VAR)
+         (void) fprintf (defs_file, "#define PROMPT %d\n", np -> refno);
+
+   if ((np = fndsymb(TESTSYMBOL, "dwarven")) != NULL)
+      if (np -> type == VAR)
          (void) fprintf (defs_file, "#define DWARVEN %d\n", np -> refno);
 
 #ifdef OBSOLETE
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "fulldisplay")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "fulldisplay")) != NULL)
    {
       if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
          (void) gripe ("FULLDISPLAY", "Declared as other than a bit constant.");
@@ -600,7 +572,7 @@ void organise()
    }
 #endif /* OBSOLETE */
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "detaildisplay")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "detaildisplay")) != NULL)
    {
       if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
          (void) gripe ("DETAILDISPLAY", "Declared as other than a bit constant.");
@@ -608,7 +580,7 @@ void organise()
          (void) fprintf (defs_file, "#define DETAIL %d\n", np -> refno);
    }
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "prompted")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "prompted")) != NULL)
    {
       if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
          (void) gripe ("PROMPTED", "Declared as other than a bit constant.");
@@ -616,7 +588,7 @@ void organise()
          (void) fprintf (defs_file, "#define PROMPTED %d\n", np -> refno);
    }
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "first.special")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "first.special")) != NULL)
    {
       if (np -> type != VERB)
          (void) gripe ("first.special", "Declared as other than a verb.");
@@ -624,7 +596,7 @@ void organise()
          (void) fprintf (defs_file, "#define FSPECIAL %d\n", np -> refno);
    }
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "last.special")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "last.special")) != NULL)
    {
       if (np -> type != VERB)
          (void) gripe ("last.special", "Declared as other than a verb.");
@@ -632,7 +604,7 @@ void organise()
          (void) fprintf (defs_file, "#define LSPECIAL %d\n", np -> refno);
    }
    
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "first.magic")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "first.magic")) != NULL)
    {
       if (np -> type != VERB)
          (void) gripe ("first.magic", "Declared as other than a verb.");
@@ -640,7 +612,7 @@ void organise()
          (void) fprintf (defs_file, "#define FACT %d\n", np -> refno);
    }
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "last.magic")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "last.magic")) != NULL)
    {
       if (np -> type != VERB)
          (void) gripe ("last.magic", "Declared as other than a verb.");
@@ -648,7 +620,7 @@ void organise()
          (void) fprintf (defs_file, "#define LACT %d\n", np -> refno);
    }
    
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "first.direction")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "first.direction")) != NULL)
    {
       if (np -> type != VERB)
          (void) gripe ("first.direction", "Declared as other than a verb.");
@@ -656,7 +628,7 @@ void organise()
          (void) fprintf (defs_file, "#define FDIR %d\n", np -> refno);
    }
 
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "last.direction")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "last.direction")) != NULL)
    {
       if (np -> type != VERB)
          (void) gripe ("last.direction", "Declared as other than a verb.");
@@ -664,7 +636,7 @@ void organise()
          (void) fprintf (defs_file, "#define LDIR %d\n", np -> refno);
    }
    
-   if ((np = fndsymb(SYMBOL_OR_CONSTANT, "say")) != NULL)
+   if ((np = fndsymb(TESTSYMBOL, "say")) != NULL)
    {
       if (np -> type != VERB)
          (void) gripe ("say", "Declared as other than a verb.");
@@ -672,35 +644,35 @@ void organise()
          (void) fprintf (defs_file, "#define SAY %d\n", np -> refno);
    }
    
-   (void) declare_constant ("badword", "BADWORD");
+   next_constant = -2;
+   (void) declare_constant ("badword", "BADWORD", next_constant--);
    if (style >= 10)
-      (void) declare_constant ("ambigword", "AMBIGWORD");
+      (void) declare_constant ("ambigword", "AMBIGWORD", next_constant--);
    if (style >= 11)
    {
-      (void) declare_constant ("ambigtypo", "AMBIGTYPO");
-      (void) declare_constant ("sceneword", "SCENEWORD");
+      (void) declare_constant ("ambigtypo", "AMBIGTYPO", next_constant--);
+      (void) declare_constant ("sceneword", "SCENEWORD", next_constant--);
+      (void) declare_constant ("badsyntax", "BADSYNTAX", next_constant--);
    }
-   if (style >= 11)
-      (void) declare_constant ("badsyntax", "BADSYNTAX");
-   if (style == 1)
+   if (style <= 1)
    {
-      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "objflag")) != NULL)
-         (void) fprintf (defs_file, "#define OBJECT %d\n", np -> refno);
+      if ((np = fndsymb(TESTSYMBOL, "objflag")) != NULL)
+         (void) fprintf (defs_file, "#define OBJ %d\n", np -> refno);
       else
-         (void) fprintf (defs_file, "#define OBJECT %d\n", OBJFLAG);
-      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "placeflag")) != NULL)
-         (void) fprintf (defs_file, "#define PLACE %d\n", np -> refno);
+         (void) fprintf (defs_file, "#define OBJ %d\n", OBJFLAG);
+      if ((np = fndsymb(TESTSYMBOL, "placeflag")) != NULL)
+         (void) fprintf (defs_file, "#define LOC %d\n", np -> refno);
       else
-         (void) fprintf (defs_file, "#define PLACE %d\n", PLACEFLAG);
-      if ((np = fndsymb(SYMBOL_OR_CONSTANT, "verbflag")) != NULL)
+         (void) fprintf (defs_file, "#define LOC %d\n", LOCFLAG);
+      if ((np = fndsymb(TESTSYMBOL, "verbflag")) != NULL)
          (void) fprintf (defs_file, "#define VERB %d\n", np -> refno);
       else
          (void) fprintf (defs_file, "#define VERB %d\n", VERBFLAG);
    }
    else
    {
-      (void) fprintf (defs_file, "#define OBJECT %d\n", OBJFLAG);
-      (void) fprintf (defs_file, "#define PLACE %d\n", PLACEFLAG);
+      (void) fprintf (defs_file, "#define OBJ %d\n", OBJFLAG);
+      (void) fprintf (defs_file, "#define LOC %d\n", LOCFLAG);
       (void) fprintf (defs_file, "#define VERB %d\n", VERBFLAG);
    }
 
@@ -717,33 +689,22 @@ void organise()
       (void) fprintf (defs_file, "#define PLAIN\n");
 
    (void) fprintf (defs_file, "#define DBSTATUS %d\n", 3 - memory);
-
+   (void) fprintf (defs_file, "#define LPROC %d\n", type_base [VERB + 1]);
    (void) fprintf (defs_file,
       "#define KEY(X) (value[%d]==X || value[%d]==X)\n",
       fndsymb(SYMBOL, "arg1") -> refno, fndsymb(SYMBOL, "arg2") -> refno);
-   (void) fprintf (defs_file, "#endif\n");
-   (void) clsfile (defs_file, "adv1.h");     /* Ahhh.... done at last! */
 
-   if ((defs_file = openout("adv2.h","w")) == NULL)
-      (void) gripe ("adv2.h","Unable to open (adv2.h).");
+   {
+      int procno = 0;
+      if (np = fndsymb (SYMBOL, "INIT_PROC"))
+         procno = np -> proc_base;
+      (void) fprintf (defs_file, "#define INIT_PROC p%d\n", procno);
+      if ((np = fndsymb (SYMBOL, "REPEAT_PROC")) == NULL)
+         gripe ("", "No REPEAT sections found in the source code.");
+      procno = np -> proc_base;
+      (void) fprintf (defs_file, "#define REPEAT_PROC p%d\n", procno);
+   }
 
-/*  Now for the vocabulary include file */
-
-   (void) fprintf (defs_file, "   short voc_refno[] = {\n");
-   node_count = 0;
-   btspan(VOCAB, process_voc_refno);
-   (void) fprintf (defs_file, "0};\n   short voc_type[] = {\n");
-   node_count = 0;
-   btspan(VOCAB, process_voc_type);
-   (void) fprintf (defs_file, "0};\n   int voc_addr[] = {\n");
-   node_count = 0;
-   btspan(VOCAB, process_voc_addr);
-   (void) fprintf (defs_file, "0};\n   int voc_word[] = {\n");
-   node_count = 0;
-   btspan(VOCAB, process_voc_word);
-   (void) fprintf (defs_file, "0};\n");
-
-   (void) clsfile (defs_file, "adv2.h");      /* Vocabulary done */
-
+   stage = 1;        /* Restore stage value */
    return;
 }

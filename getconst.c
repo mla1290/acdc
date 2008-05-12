@@ -1,4 +1,4 @@
-/* getconst.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* getconst.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
  * 10 Jan 02   MLA           Disallow LOCAL in constants.
  * 24 Jul 99   MLA           Fixed complier warnings.
@@ -76,6 +76,7 @@ next_token:
          gripe (token, "cannot use local symbols in constant expressions!");
       np = fndsymb (SYMBOL, token);
       next_value = (numbase == 0) ? np -> refno : np -> state_count;
+      (np -> used_count)++;
    }
 
    if (oper == '+')

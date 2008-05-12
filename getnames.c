@@ -1,5 +1,6 @@
-/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 14 Feb 04   MLA           Converted longs to ints.
  * 14 Jul 02   MLA           BUG: Report primary names too!
  * 13 Jan 02   MLA           Added xref.
@@ -40,7 +41,8 @@ struct node *gp;
    int last_addr;
    char *tag;
    struct node *np;
-
+   struct node *vp;
+   
    if (*tp [1] == '=')
       (void) gripe (tp [1], "No preceding word to equate to!");
    index = 0;
@@ -48,37 +50,37 @@ struct node *gp;
    if (major_type == NOUN || major_type == ADJECTIVE || 
        major_type == PREPOSITION)  
           current_type = major_type = VERB;
-   np = gp;
 
-   if (np == NULL)
-      refno = type_counts [major_type]++;
-   else
+   if (gp)
    {
       index = 1;
-      refno = np -> refno;
-      last_addr = np -> body.vocab.word_addr;
+      refno = gp -> refno;
+      last_addr = gp -> word_addr;
    }
 
    while (tp [++index] != NULL)
    {
       prefix = *tp [index];
-      if ((used = (prefix == '.')))
-         tp [index]++;
+      used = (prefix == '.');
       if (prefix == '+' ||prefix == '-' || prefix == '=' || prefix == '!')
          tp [index]++;
       else
-         prefix = (major_type == PLACE) ? '-' : '+';
+         prefix = (major_type == LOC) ? '-' : '+';
 
       if (index == 1)
       {
-         np = addsymb (SYMBOL, tp [index], current_type, refno);
+         if ((np = fndsymb (TESTSYMBOL, tp [index])) == NULL)
+            np = addsymb (SYMBOL, tp [index], current_type, -1);
+         else if (np -> type > PROC)
+            np -> type = major_type;
          if (used)
             np -> used_count = 1;
+         
          if (xref)
          {
-            if (real_type == PLACE)
-               tag = "PLACE";
-            else if (real_type == OBJECT)
+            if (real_type == LOC)
+               tag = "LOC";
+            else if (real_type == OBJ)
                tag = " OBJ ";
             else if (real_type == SYNONYM)
                tag = "SYNON";
@@ -92,17 +94,18 @@ struct node *gp;
                tag = "PREP ";
             write_ref (tag, tp [index]);
          }
+         
          if (prefix != '-')
-            np -> body.text.name_addr = next_vocaddr;
+               np -> name_addr = next_vocaddr;
          else
             return (np);
       }
 
       if (xref) 
       {
-         if (real_type == PLACE)
+         if (real_type == LOC)
             tag = "place";
-         else if (real_type == OBJECT)
+         else if (real_type == OBJ)
             tag = " obj ";
          else if (real_type == SYNONYM)
             tag = "synon";
@@ -121,12 +124,13 @@ struct node *gp;
       current_type = SYNONYM;            /* For the next loop! */
 
       if (prefix == '=')
-         (void) storword (tp [index], major_type, refno, last_addr);
+         vp = storword (tp [index], major_type, last_addr);
       else
       {
          last_addr = next_vocaddr;
-         (void) storword (tp [index], major_type, refno, next_vocaddr);
+         vp = storword (tp [index], major_type, next_vocaddr);
       }
+      vp -> symbol = np;
    }
 
    return (np);

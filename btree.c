@@ -1,8 +1,7 @@
 /* btree.c - balanced tree handling on a linear stack.
- *           Copyleft Mike Arnautov 2001-2007.
+ *           Copyleft Mike Arnautov 2001-2008.
  *
- * Warning! This is 32bit code, for use in 32bit executables!
- *
+ * 12 May 08   MLA               Removed 32-bit dependency.
  * 07 May 07   Stuart Munro      bug: fix declaration and casting of btact args.
  * 03 Sep 06   MLA               Bug: All longs should be ints!
  * 23 Dec 05   MLA               roots[] must be long, not int!
@@ -32,6 +31,8 @@
 #define BT_BAL     3
 #define BT_PTR     4
 #define BT_STP  4096
+
+#define PTRLEN sizeof(int *)/sizeof(int);
 
 /*====================================================================*/
 
@@ -150,7 +151,7 @@ struct node *nodeptr;
 
    if (*(name = nodeptr -> name) == '!')
       name++;
-   result =  style == 1 ? strncmp (word, name, 12) : strcmp (word, name);
+   result = strcmp (word, name);
    if (result)
       return (result > 0 ? 1 : -1);
    else
@@ -160,16 +161,20 @@ struct node *nodeptr;
 /*====================================================================*/
 
 #ifdef __STDC__
-int *btinit (int *root)
+void btinit (int type)
 #else /* ! __STDC__ */
-int *btinit (root)
-int *root;
+void btinit (type)
+int type;
 #endif /* __STDC__ */
 {
+   int *root = *(roots + type);
    if (root == NULL)
    {
       if ((root = (int *)malloc(BT_STP * sizeof(int))) == NULL)
-         return (NULL);
+      {
+         fprintf (stderr, "*ERROR* Unable to allocate dictionary root %d!\n", type);
+         exit (1);
+      }
       *root = 3;
       *(root + 1) = 0;
       *(root + 2) = BT_STP;
@@ -178,10 +183,13 @@ int *root;
    {
       if ((root = (int *)realloc 
          (root, (*(root + 2) + BT_STP) * sizeof(int))) == NULL)
-            return (NULL);
+      {
+         fprintf (stderr, "*ERROR* Unable to re-allocate dictionary root %d!\n", type);
+         exit (1);
+      }
       *(root + 2) += BT_STP;
    }
-   return (root);
+   *(roots + type) = root;
 }
 
 /*--------------------------------------------------------------------*/
@@ -206,7 +214,7 @@ char *text;
          iptr - root, *(iptr + BT_UP), *(iptr + BT_UP + BT_LSIB), 
             *(iptr + BT_UP + BT_RSIB), *(iptr + BT_BAL), 
                nodeptr -> name);
-      iptr += BT_PTR + 1;
+      iptr += BT_PTR + PTRLEN;
    }
 }
 
@@ -219,7 +227,7 @@ int btadd (int type, void *record)
 #else /* ! __STDC__ */
 int btadd (type, record)
 int type;
-char *record;
+struct node *record;
 #endif /* __STDC__ */
 {
    int *root = roots [type];
@@ -227,27 +235,31 @@ char *record;
    int child = *(root + 1);
    int dir;
    int *newrec;
-   int reclen = BT_PTR  + 1;
+   int reclen = BT_PTR  + PTRLEN;
 
    if (*(root + 1) > 0)
    {
       while (child > 0)
       {
-         if ((dir = btcmpa ((struct node *)record, 
-            (struct node *)(*(root + child + BT_PTR)))) == 0)
-               return (0);
+         struct node *np;
+         memcpy (&np, root + child + BT_PTR, sizeof (np));
+         if ((dir = btcmpa (record, np)) == 0)
+            return (0);
          parent = child;
          child = *(root + child + BT_UP + dir);
       }
    }
-   if (*root + reclen > *(root + 2) && 
-      (root = roots [type] = btinit (root)) == NULL)
+   if (*root + reclen > *(root + 2))
+   {
+      btinit (type);
+      if ((root = roots [type]) == NULL)
          return (-1);
+   }
    newrec = root + (child = *root);
    *(newrec + BT_UP) = parent;
    *(newrec + BT_UP + BT_LSIB) = *(newrec + BT_UP + BT_RSIB) = 0;
    *(newrec + BT_BAL) = 0;
-   memcpy ((char *)(newrec + BT_PTR), &record, sizeof (record));
+   memcpy ((struct node *)(newrec + BT_PTR), &record, sizeof (record));
    *root += reclen;
    if (parent)
    {
@@ -293,8 +305,10 @@ char *word;
       return (NULL);
    while (node)
    {
-      if ((dir = btcmpf (word, (struct node *)(*(root + node + BT_PTR)))) == 0)
-            return ((struct node *)(*(root + node + BT_PTR)));
+      struct node *np;
+      memcpy (&np, root + node + BT_PTR, sizeof (np));
+      if ((dir = btcmpf (word, np)) == 0)
+         return (np);
       node = *(root + node + BT_UP + dir);
    }
    return (NULL);
@@ -310,6 +324,7 @@ int type;
 void (*btact)();
 #endif /* __STDC__ */
 {
+   struct node *np;
    int state = 0;
    int *root = roots [type];
    int node = *(root + 1);
@@ -330,14 +345,16 @@ void (*btact)();
             break;
             
          case 1:
-            btact ((struct node *)(*(root + node + BT_PTR)));
+            memcpy (&np, root + node + BT_PTR, sizeof (np));
+            btact (np);
             state = (next = *(root + node + BT_UP + BT_RSIB)) ? 0 : 3;
             if (state == 0)
                node = next;
             break;
 
          case 2:
-            btact ((struct node *)(*(root + node + BT_PTR)));  
+            memcpy (&np, root + node + BT_PTR, sizeof (np));
+            btact (np);
                /* And just fall through! */
             
          case 3:

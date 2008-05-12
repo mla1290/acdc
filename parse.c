@@ -1,5 +1,6 @@
-/* parse.c (acdc) - copyleft Mike Arnautov 1990-2007.
+ /* parse.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 19 Aug 04   MLA           Added FREE_ARG.
  * 03 Mar 03   MLA           Use new-style get_token().
  * 06 Nov 01   MLA           Fiddle FULLDISP for Platt-style A-code.
@@ -47,6 +48,7 @@ char *delims;
       *cptr++ = 0;
 
    *cstring = cptr;
+
    return(token);
 }
 
@@ -66,7 +68,7 @@ int type;
    int direct_call = 0;
 
    (void) strcpy (raw_line, line);
-   recase(LOWERCASE, line);
+   recase (LOWERCASE, line);
    tp [1] = NULL;
    if ((tp[0] = get_token(&cptr, " ,\n\0")) == NULL)
       (void) gripe ("","Null directive???");
@@ -75,11 +77,11 @@ int type;
       if ((np = fndsymb(type, tp[0])) == NULL)
       {
          if (type != MINOR || 
-            (np = fndsymb(SYMBOL_OR_CONSTANT, tp[0])) == NULL)
+            (np = fndsymb(TESTSYMBOL, tp[0])) == NULL)
                return (NULL);
          direct_call = 1;
       }
-      if (direct_call == 0 && np -> body.directive.max_args == REST)
+      if (direct_call == 0 && np -> max_args == REST)
       {
          cptr = raw_line + (cptr - line);
          cptr += strspn (cptr, " ,\n\0");
@@ -93,7 +95,7 @@ int type;
    }
    while (cptr && (tp[++index] = get_token(&cptr," ,\n\0\r")) != NULL)
    {
-      if (style == 1)
+      if (style <= 1)
       {
          if (strcmp (tp[index], "object") == 0) 
             tp[index] = "objflag";
@@ -106,12 +108,27 @@ int type;
          else if (strcmp (tp[index], "fulldisp") == 0) 
             tp[index] = "fulldisplay";
       }
+
       if (index > ANY_NUMBER)
           (void) gripe ("","*Far* too many arguments!");
+
       if (! *tp[index] || *tp[index] == '{' || *tp[index] == '#')
       {
          tp[index] = NULL;
          break;
+      }
+      
+      if (*tp[index] == '"')
+      {
+/*
+         stash away the parsed line so far, including the breaks.
+         check for C:, R: or F: and if present, remember them and point beyond.
+         allocate the new text name and point it at spare text addr.
+         fudge the line to start at that point (after a leafing blank) and call
+            gettext with the type of 'e' (embedded).
+         return value will give offset into current line just beyond closing "
+         fudge new line from splicing the saved bit with the rest of this one.
+*/
       }
    }
 
@@ -120,12 +137,12 @@ int type;
    if (direct_call == 0)
    {
       index--;
-      minargs = np -> body.directive.min_args;
+      minargs = np -> min_args;
       if (minargs >= FREE_ARG)
          minargs -= FREE_ARG - 1;
       if (index < minargs)
          (void) gripe (tp[0],"Not enough arguments.");
-      if (index > np -> body.directive.max_args)
+      if (index > np -> max_args)
          (void) gripe (tp[0],"Too many arguments.");
    }
    return (np);

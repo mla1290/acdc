@@ -1,5 +1,6 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 06 May 07   MLA           Added deprecated warnings.
  * 14 Feb 04   MLA           Converted longs to ints.
  * 24 Mar 03   MLA           Added 4th arg to gettxt().
@@ -50,6 +51,54 @@
 #include "text.h"
 #include "output.h"
 #include "param.h"
+#include "game.h"
+
+#ifdef __STDC__
+int skip (int check_text)
+#else
+int skip (check_text)
+int check_text;
+#endif
+{
+   int need_qualifier = 0;
+   int embedded_text = 0;
+   
+   line_status = EOL;
+
+   while (1)
+   {
+      if (getline (IGNORE_BLANK) == EOF || (*line != ' ' && *line != '\t'))
+         break;
+      if (check_text == 1 && need_qualifier == 0)
+      {
+         char *cptr = line;
+         char lc = '\0';
+         while (*cptr)
+         {
+            if (lc != '\\')
+            {
+               if (*cptr == '$' || *cptr == '#')
+                  need_qualifier |= 1;    /* Qualifier required */
+               if (*cptr == '[' || *cptr == '{')
+                  need_qualifier |= 2;    /* Qualifier allowed (may be implicit) */
+               lc = *cptr;
+            }
+            else
+               lc = '\0';
+            cptr++;
+         }
+      }
+      if (check_text == 2)
+      {
+         char *cptr = line + 1;           /* We *know* first one is a blank! */
+         while (*cptr == ' ' || *cptr == '\t')
+            cptr++;
+/* ............................... */
+      }
+      line_status = EOL;
+   }
+   return (need_qualifier);
+}
 
 #ifdef __STDC__
 void domajor (void)
@@ -59,6 +108,7 @@ void domajor ()
 {
    int index;
    struct node *np;
+   int refno;
    int value;
    int flag_type;
    int major_type;
@@ -69,16 +119,17 @@ void domajor ()
    char *tag;
    char dummy_text [10];
    char proc_name [10];
-   struct proc_list *temp_list;
+   struct proc_member *proc_id;
    char prochead [MAXLINE];
    char proccond [MAXLINE];
    char proctemp [MAXLINE];
 
-   static int got_code = FALSE;
-
+   static int next_dummy;
+   static int last_stage = -1;
+   
 #ifdef __STDC__
    extern void dominor (char *, char *);
-   extern void opnsrc (char *);
+   extern void opnsrc (char *, int);
    extern void organise (void);
    extern void getdesc (struct node *);
    extern struct node *getnames (int, struct node *);
@@ -100,81 +151,86 @@ void domajor ()
    index = 0;
    major_type = np -> refno;
 
-   switch (major_type)
+   if (stage != last_stage)
    {
-      case INCLUDE:
-      case LIST:
-      case NOLIST:
-      case XREF:
-      case NOXREF:
-         break;
+      last_stage = stage;
+      next_dummy = 0;
+      if (stage == 1)
+         organise ();
+   }
+   
+   if (stage == 1)
+   {
+      switch (major_type)
+      {
+         case STYLE:
+         case NAME:
+         case VERSION:
+         case DATE:
+         case AUTHOR:
+         case GAMEID:
+         case NOUN:
+         case ADJECTIVE:
+         case PREPOSITION:
+         case VERB:
+         case NOISE:
+         case VAR:
+         case ARRAY:
+         case SYNONYM:
+         case DEFINE:
+            line_status = EOL;
+            return;
 
-      case PROCEDURE:
-      case ACTION:
-      case AT:
-      case INIT:
-      case REPEAT:
-         if (got_code == FALSE)
-         {
-            got_code = TRUE;
-            organise ();
-         }
-         zapparam ();
-         if (minor_count >= CODE_CHUNK)
-         {
-            (void) clsfile (code_file, "Automatic code");
-            (void) sprintf (proc_name, "adv%02d.c", ++code_part);
-            if ((code_file = openout (proc_name, "w")) == NULL)
-               (void) gripe (proc_name, "Unable to open new code chunk.");
-            (void) fprintf (code_file, "#include \"adv0.h\"\n");
-            (void) fprintf (code_file, "#include \"adv3.h\"\n");
-            minor_count = 0;
-         }
-         break;
-
-      default:
-         if (got_code)
-            (void) gripe (tp [0],
-               "All declarations must precede any code sections!");
+         case INCLUDE:
+         case CONCLUDE:
+            break;
+            
+         case STATE:
+         case CONSTANT:
+         case FLAGS:
+            (void) skip (0);
+            return;              /* Preserving line status as BOL! */
+            
+         case PROCEDURE:
+         case ACTION:
+         case AT:
+         case INIT:
+         case REPEAT:
+            zapparam ();
+            if (minor_count >= CODE_CHUNK)
+            {
+               (void) clsfile (code_file, "Automatic code");
+               (void) sprintf (proc_name, "adv%02d.c", ++code_part);
+               if ((code_file = openout (proc_name, "w")) == NULL)
+                  (void) gripe (proc_name, "Unable to open new code chunk.");
+               (void) fprintf (code_file, "#include \"adv0.h\"\n");
+               (void) fprintf (code_file, "#include \"adv3.h\"\n");
+               minor_count = 0;
+            }
+            break;
+   
+         default:
+            break;
+      }
    }
 
    switch (major_type)
    {
-      case XREF:
-         if (xref == FALSE)
-            xref = TRUE;
-         break;
-
-      case NOXREF:
-         if (xref == TRUE)
-            xref = FALSE;
-         break;
-         
-      case LIST:
-         deprecate ("LIST", 10, 1);
-         listing = TRUE;
-         break;
-
-      case NOLIST:
-         deprecate ("NOLIST", 10, 1);
-         listing = FALSE;
-         break;
-
       case INCLUDE:
+      case CONCLUDE:
          recase (LOWERCASE, tp [1]);
          if (level == MAXLEVEL - 1)
             (void) gripe ("", "Includes nested too deeply.");
-         opnsrc (tp [1]);
+         opnsrc (tp [1], major_type == INCLUDE ? 1 : 0);
          break;
 
       case NOISE:
          while (tp [++index] != NULL)
-            storword (tp [index], NOISE, -1, next_vocaddr);
+            storword (tp [index], NOISE, next_vocaddr);
          break;
 
       case ARRAY:
-         (void) addsymb (SYMBOL, tp [++index], VARIABLE, 
-            type_counts [VARIABLE]);
+         np = addsymb (SYMBOL, tp [++index], VAR, type_counts[VAR]);
          if (xref)
             write_ref ("ARRAY", tp [index]);
          if (tp [++index] == NULL)
@@ -183,14 +239,14 @@ void domajor ()
             (void) gripe (tp [index], "Invalid array size specification.");
          if (tp [++index] != NULL)
             (void) gripe ("", "Invalid array declaration.");
-         type_counts [VARIABLE] += value;
+         np -> state_count = value;
+         type_counts[VAR] += value;
          break;
          
-      case VARIABLE:
+      case VAR:
          while (tp [++index] != NULL)
          {
-            (void) addsymb (SYMBOL, tp [index], VARIABLE,
-               type_counts [VARIABLE]++);
+            np = addsymb (SYMBOL, tp [index], VAR, type_counts[VAR]++);
             if (xref)
                write_ref (" VAR ", tp [index]);
          }
@@ -198,12 +254,12 @@ void domajor ()
 
       case SYNONYM:
          deprecate ("SYNONYM", 10, 1);
-         if ((np = fndsymb (SYMBOL_OR_CONSTANT, tp [1])) != NULL)
+         if ((np = fndsymb (TESTSYMBOL, tp [1])) != NULL)
          {
             (void) getnames (np -> type, np);
             break;
          }           /* Otherwise assume a constant and fall through! */
-
+            
       case STATE:
       case CONSTANT:
       case FLAGS:
@@ -219,7 +275,7 @@ void domajor ()
                if ((np = fndsymb (SYMBOL, tp [1])) == NULL)
                   (void) gripe (tp [1], "Unknown symbol used as a flag type.");
                flag_type = np -> refno;
-               if (flag_type != OBJFLAG && flag_type != PLACEFLAG && 
+               if (flag_type != OBJFLAG && flag_type != LOCFLAG && 
                   flag_type != VARFLAG)
                      (void) gripe (tp [1], "Illegal flag type.");
                if (flag_type != VARFLAG)
@@ -244,7 +300,7 @@ void domajor ()
             if (*chr == '+')
             {
                if (major_type != FLAGS && flag_type != OBJFLAG && 
-                  flag_type != PLACEFLAG)
+                  flag_type != LOCFLAG)
                      (void) gripe ("", 
                         "Only object and place flags may have vocab entries.");
 
@@ -275,7 +331,7 @@ void domajor ()
 
             while (tp [++index] != NULL)
             {
-               (void) addsymb (SYMBOL, tp [index], major_type, value);
+               np = addsymb (SYMBOL, tp [index], major_type, value);
                if (xref)
                {
                   if (major_type == FLAGS)
@@ -296,73 +352,189 @@ void domajor ()
             index = 0;
          }
          return;          /* Preserve line_status as BOL ! */
-
+	 
       case STYLE:
-      case NAME:
-      case VERSION:
-      case DATE:
-      case AUTHOR:
-         (void) gripe (tp[0], "Descriptive keyword too late.");
+         if (style > 0)
+            gripe ("", "Repeated STYLE directive.");
+         if (strcmp (tp[1], "old") == 0 || strcmp (tp[1], "original") == 0)
+               style = 1;
+         else
+         {
+            index = chrtobin (tp[2] ? tp[2] : tp[1]);
+            if (index > 12)
+               (void) gripe ("",
+                  "Style higher than current maximum of 12!");
+            if (index < 10 && style != 1)
+               (void) gripe ("", "Style values from 2 to 9 are meaningless.");
+            style = index;
+         }
          break;
+         
+      case NAME:
+         if (*title)
+            gripe ("", "Repeated NAME directive.");
+         strncpy (title, tp [1], sizeof (title) - 1);
+         *(title + sizeof (title) - 1) = '\0';
+         break;
+
+      case VERSION:
+         if (*version)
+            gripe ("", "Repeated VERSION directive.");
+         strncpy (version, tp [1], sizeof (version) - 1);
+         *(version + sizeof (version) - 1) = '\0';
+         break;
+
+      case DATE:
+        if (*date)
+           gripe ("", "Repeated DATE directive.");
+        strncpy (date, tp [1], sizeof (date) - 1);
+         if (tp [2])
+         {
+            strncat (date, " ", sizeof (date) - strlen (date) - 1);
+            strncat (date, tp [2], sizeof (date) - strlen (date) - 1);
+         }
+         if (tp [3])
+         {
+            strncat (date, " ", sizeof (date) - strlen (date) - 1);
+            strncat (date, tp [3], sizeof (date) - strlen (date) - 1);
+         }
+         *(date + sizeof (date) - 1) = '\0';
+         break;
+
+      case AUTHOR:
+         if (*author)
+            gripe ("", "Repeated AUTHOR directive.");
+         strncpy (author, tp [1], sizeof (author) - 1);
+         *(author + sizeof (author) - 1) = '\0';
+         break;
+
+      case GAMEID:
+         if (*gameid)
+            gripe ("", "Repeated GAMEID directive.");
+         strncpy (gameid, tp [1], 80);
+         *(gameid + 79) = '\0';
+          break;
 
       case NOUN:
       case ADJECTIVE:
       case PREPOSITION:
       case VERB:
          np = getnames (major_type, NULL);
+         if (np -> type == ACTION)
+            np -> type = major_type;
+         else if (np -> type != VERB)
+            gripe (tp [1], "Already declared as other than a command word.");
+         np -> refno = type_counts[VERB]++;
          break;
 
-      case OBJECT:
-      case PLACE:
-         np = getnames (major_type, NULL);
+      case OBJ:
+      case LOC:
          line_status = EOL;
-         getdesc (np);
+         if (stage == 0)
+         {
+            np = getnames (major_type, NULL);
+            if (np -> type == AT || np -> type == ACTION || np -> type == WORD)
+               np -> type = major_type;
+            else if (np -> type != major_type)
+               gripe (tp [1], "Alreday declared as other than a place or an object.");
+            np -> refno = type_counts[major_type]++;
+            (void) skip (0);
+	 }
+         else
+         {
+            char ch = *tp[1];
+            if (ch == '-' || ch == '+' || ch == '!')
+               tp[1]++;
+            np = fndsymb (SYMBOL, tp[1]);
+            getdesc (np);
+         }
          return;          /* Preserve line_status as BOL ! */
 
       case TEXT:
       case FRAGMENT:
-         type = 0;
-         if (tp [1])
+         line_status = EOL;
+         type = texttyp();
+
+         if (type & 16)
          {
-            if (strcmp (tp [1], "random") == 0) type = 1;
-            if (strcmp (tp [1], "increment") == 0) type = 2;
-            if (strcmp (tp [1], "cycle") == 0) type = 3;
-            if (strcmp (tp [1], "cyclic") == 0) type = 3;
-            if (strcmp (tp [1], "assigned") == 0) type = 4;
-            if (type)
-            {
-               tp [1] = tp [2];
-               if (tp [2]) tp [2] = NULL;
-            }
-            else if (tp [2])
-               (void) gripe (tp [1], "Illegal typifier.");
+            major_type = FRAGMENT;
+            type &= 15;
          }
-            
-         if (tp [1] == NULL)
+         
+         if (tp[1] == NULL) /* Might have changed! */
          {
-            (void) sprintf (dummy_text, ".t%d", type_counts [TEXT]);
+            (void) sprintf (dummy_text, ".t%d", next_dummy++);
             tp [1] = dummy_text;
          }
-         np = addsymb (SYMBOL, tp [1], TEXT, type_counts [TEXT]++);
-         np -> body.text.name_addr = next_addr; /* Sort of "name" */
-         if (xref && tp [1] != dummy_text)
-            write_ref ((char *)(major_type == TEXT ? " TXT " : " FRG "), 
-               tp [1]);
-         line_status = EOL;
-         (void) gettxt (0, &(np -> state_count), 
-            major_type == FRAGMENT, &type);
-         np -> body.text.text_type = type;
+      
+         if (stage == 0)
+         {
+            np = addsymb (SYMBOL, tp [1], TEXT, type_counts[TEXT]++);
+            if (xref && tp [1] != dummy_text)
+               write_ref ((char *)(major_type == TEXT ? " TXT " : " FRG "), 
+                  tp [1]);
+            np -> needs_qualifier = skip (1);
+            np -> text_type = type;
+         }
+         else
+         {
+            np = fndsymb (SYMBOL, tp[2] ? tp[2] : tp[1]);
+            np -> name_addr = next_addr; /* Sort of "name" */
+            type = np -> text_type;
+            (void) gettxt (0, &(np -> state_count), 
+               major_type == FRAGMENT ? 'f' : 0, &type);
+         }
          return;          /* preserve the BOL line_status! */
 
+      case INIT:
+      case REPEAT:
+         tp [2] = NULL;
+         tp [1] = major_type == INIT ? "INIT_PROC" : "REPEAT_PROC";
+
+      case AT:
+      case ACTION:
       case PROCEDURE:
-         np = addsymb (SYMBOL, tp [1], PROCEDURE, next_procno);
-         if (xref)
-            write_ref (" PRC ", tp [1]);
+         if (stage == 0)
+         {
+            if ((np = fndsymb (TESTSYMBOL, tp [1])) == NULL)
+               np = addsymb (SYMBOL, tp [1], major_type, -1);
+            else if (major_type == AT && np -> type != AT && 
+               np -> type != OBJ && np -> type != LOC)
+                  gripe (tp[1], "Already defined as other than a place or an object.");
+            else if (major_type == ACTION && np -> type != ACTION &&
+               np -> type != VERB && np -> type != OBJ && np -> type != LOC && 
+                  np -> type != NOUN && np -> type != PREP && np -> type != ADJ)
+                     gripe (tp[1], "Already defined as other than a command word.");
+
+            if (major_type == PROCEDURE)
+            {
+               int args = 0;
+               index = 2;
+               while (tp [index++]) args++;
+               if (np -> arg_count < 0)
+                  np -> arg_count = args;
+               else if (np -> arg_count != args)
+                  gripe (tp[1], "Inconsistent procedure argument count!");
+	    }
+
+            (np -> proc_count)++;
+            if (xref)
+               write_ref (" PRC ", tp [1]);
+            skip (2);
+            return;
+         }
+
+         np = fndsymb (SYMBOL, tp[1]);
+         if (major_type != PROCEDURE)
+            (np -> used_count)++;
          if (debug)
             (void) fprintf (code_file, "/* %s */\n", tp [1]);
-         (void) fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", next_procno);
+         if (np -> proc_count > 1)
+            (np -> proc_done)++;
+         refno = np -> proc_base + (np -> proc_done);
+         (void) fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", refno);
          next_arg = 0;
-         if (tp [2] == NULL)
+         if (tp [2] == NULL || major_type != PROCEDURE)
             (void) fprintf (code_file, "void");
          else
          {
@@ -375,8 +547,7 @@ void domajor ()
                   write_ref (" ARG ", tp [index]);
             }
          }
-         np -> state_count = -next_arg;
-         (void) fprintf (code_file, ")\n#else\nvoid p%d(", next_procno);
+         (void) fprintf (code_file, ")\n#else\nvoid p%d(", refno);
          if (tp [2])
          {
             for (index = 2; tp [index]; index++)
@@ -390,7 +561,6 @@ void domajor ()
          else
             (void) fprintf (code_file, ")\n");
          (void) fprintf (code_file, "#endif\n{\n");
-         next_procno++;
          if (debug)
          {
             strcpy (prochead, tp [0]);
@@ -402,64 +572,21 @@ void domajor ()
          }
          else
             *prochead = '\0';
-         dominor (prochead, NULL);
-         (void) fprintf (code_file, "}\n");
-         return;
-
-      case INIT:
-      case REPEAT:
-         tp [2] = NULL;
-         tp [1] = "REPEAT_PROC";
-         if (major_type == INIT) tp [1] = "INIT_PROC";
-         major_type = INIT;       /* Simplifies the test below */
-
-      case ACTION:
-      case AT:
-         np = fndsymb (SYMBOL, tp [1]);
-         if ((temp_list =
-            (struct proc_list *) malloc (sizeof (struct proc_list))) == NULL)
-               (void) gripe (tp [1], "Unable to allocate proc list element.");
-         if (np -> head == NULL && major_type != INIT) /* && != REPEAT */
-            proc = np -> refno;
-         else
-            proc = next_procno++;
-         temp_list -> procno = proc;
-         temp_list -> next = NULL;
-         if (np -> head == NULL)
-            np -> head = temp_list;
-         else
-            (np -> tail) -> next = temp_list;
-         np -> tail = temp_list;
-
-         if (debug)
-            (void) fprintf (code_file, "/* %s %s */\n", tp [1],
-               (tp [2] == NULL) ? "" : tp [2]);
-         (void) fprintf (code_file,
-            "#ifdef __STDC__\nvoid p%d(void)\n#else\nvoid p%d()\n#endif\n{\n",
-               proc, proc);
-         if (debug)
-         {
-            strcpy (prochead, tp [0]);
-            for (index = 1; tp [index]; index++)
-            {
-               strcat (prochead, " ");
-               strcat (prochead, tp [index]);
-            }
-         }
-         else
-            *prochead = '\0';
-         index = 1;
+         
          *proccond = '\0';
-         while (tp [++index] != NULL)
+         index = 1;
+         if (major_type == ACTION)
          {
-            np = fndsymb (SYMBOL, tp [index]);
-            if (np -> type > VERB)
-               (void) gripe (tp [index], "Not a verb, place or object.");
-            (void) sprintf (proctemp, 
-               "if (!KEY(%d)) return;\n", np -> refno);
-            strcat (proccond, proctemp);
-         }
-
+            while (tp [++index] != NULL)
+            {
+               np = fndsymb (SYMBOL, tp [index]);
+               if (np -> type > VERB)
+                  (void) gripe (tp [index], "Not a verb, place or object.");
+               (void) sprintf (proctemp, 
+                  "if (!KEY(%d)) return;\n", np -> refno);
+               strcat (proccond, proctemp);
+            }
+	 }
          dominor (prochead, proccond);
          (void) fprintf (code_file, "}\n");
          return;
@@ -470,22 +597,24 @@ void domajor ()
          while (tp [++index] != NULL)
          {
             np = fndsymb (SYMBOL, tp [index]);
-            if (np -> type != VARIABLE)
+            if (np -> type != VAR)
             {
-               if (np -> type != PLACE)
+               if (np -> type != LOC)
                   (void) gripe (tp [index], "Only places can be defined!");
                if (fndsymb (VOCAB, tp [index]) == NULL)
-                  storword (tp [index], PLACE, np -> refno, next_vocaddr);
+               {
+                  struct node *vp = storword (tp [index], LOC, next_vocaddr);
+                  vp -> symbol = np;
+               }
                if (xref)
-                  write_ref ("(PLACE)", tp [index]);
+                  write_ref ("(LOC)", tp [index]);
             }
          }
          break;
+
       default:
          (void) gripe (tp [0], "Unimplemented major directive.");
    }
-
    line_status = EOL;
    return;
 }
-

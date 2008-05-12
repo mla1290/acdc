@@ -1,5 +1,6 @@
-/* getline.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* getline.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 25 Feb 01   MLA           Don't count comment or blank lines towards total.
  * 03 Dec 00   MLA           Allowed '#' as a comment delimiter.                
@@ -36,6 +37,7 @@ next_line:
       {
          if (fgets (line, MAXLINE, infile [level]) != NULL) break;
          (void) fclose (infile [level]);
+         infile [level] = NULL;
          if (--level < 0)
          {
             line_status = EOF;
@@ -51,7 +53,6 @@ next_line:
          fprintf (code_file, "/* %s */\n", line);
          *(line + len) = '\n';
       }
-      if (listing) (void) printf ("%d:%d %s", level, line_count [level], line);
       if (*line_ptr == '*' || *line_ptr == '#')
          goto next_line;   /* Ignore comment lines */
       if (*line_ptr == '\n' && key == IGNORE_BLANK) goto next_line;

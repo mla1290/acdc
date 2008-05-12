@@ -1,5 +1,8 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 01 May 08   MLA           Bug: Must check proc offset to be >= 0!
+ * 15 Mar 08   MLA           Version 12 changes.
+ * 10 Mar 08   MLA           Added redundant qualifier check.
  * 10 Nov 07   MLA           Added DUMP.
  * 07 May 07   Stuart Munro  bug: need to include string.h (for strcmp).
  * 06 May 07   MLA           Added deprecated warnings.
@@ -50,7 +53,7 @@
  * 08 Aug 00   MLA           Added code for OTHERWISE.
  * 24 Jul 99   MLA           Fixed compiler warnings.
  * 24 Mar 99   MLA           Allowed IFFLAG's second arg to be a variable.
- * 01 Apr 94   MLA           Allowed range specification with ITOBJ/ITPLACE.
+ * 01 Apr 94   MLA           Allowed range specification with ITOBJ/ITLOC.
  * 12 Dec 91   MLA           Allowed optional argument to INPUT.
  * 10 Mar 91   MLA           Changed STOPALL to FLUSH - flushes command
  *                           line as well as aborting ALL processing.
@@ -285,7 +288,7 @@ char *proccond;
             ap [index] = NULL;        
          else
          {
-            if (index == 1 && np -> body.directive.min_args >= FREE_ARG)
+            if (index == 1 && np -> min_args >= FREE_ARG)
             {
                argtyp [index] = FREE_ARG;
                argval [index] = 0;
@@ -296,20 +299,24 @@ char *proccond;
                argtyp [index] = LOCAL;
                ap [index] = NULL;
             }
-            else if (ap [index] = fndsymb (SYMBOL_OR_CONSTANT, tp [index]))
+            else if (ap [index] = fndsymb (TESTSYMBOL, tp [index]))
             {
-               argval [index] = ap [index] -> refno;
+               (ap [index] -> used_count)++;
                argtyp [index] = ap [index] -> type;
+               if (argtyp [index] == PROCEDURE)
+                  argval [index] = ap [index] -> proc_base;
+               else
+                  argval [index] = ap [index] -> refno;
             }
             if (xref)
             {
                char *tname;
                switch (argtyp [index])
                {
-                  case OBJECT:    tname = " obj "; break;
-                  case PLACE:     tname = "place"; break;
+                  case OBJ:    tname = " obj "; break;
+                  case LOC:     tname = "place"; break;
                   case VERB:      tname = " vrb "; break;
-                  case VARIABLE:  tname = " var "; break;
+                  case VAR:  tname = " var "; break;
                   case TEXT:      tname = " txt "; break;
                   case PROCEDURE: tname = " prc "; break;
                   case CONSTANT:  tname = " cns "; break;
@@ -351,7 +358,7 @@ char *proccond;
             while (tp [++index] != NULL)
             {
                type = argtyp [index];
-               if (type != OBJECT && type != PLACE && type != VERB)
+               if (type != OBJ && type != LOC && type != VERB)
                   (void) gripe (tp [index], "Bad multiple choice argument!");
                (void) fprintf (code_file, "%d,", argval [index]);
             }
@@ -364,8 +371,8 @@ char *proccond;
             index = 1;
             while (tp [index])
             {
-               if (argtyp [index] != OBJECT && 
-                   argtyp [index] != VARIABLE &&
+               if (argtyp [index] != OBJ && 
+                   argtyp [index] != VAR &&
                    argtyp [index] != LOCAL)
                      (void) gripe (tp [index], "not reducible to an object.");
                if (minor_type == HAVE)
@@ -383,7 +390,7 @@ char *proccond;
                   deprecate ("HERE", 11, 0);
                   (void) fprintf (code_file, "!ishere");
                }
-               if (argtyp [index] == VARIABLE)
+               if (argtyp [index] == VAR)
                   (void) fprintf (code_file, "(value[%d],-1,-1)", 
                      argval [index]);
                else if (argtyp [index] == LOCAL)
@@ -397,16 +404,16 @@ char *proccond;
             (void) fprintf (code_file, ") return;\n");
             break;
 
-         case ATPLACE:
-            deprecate ("ATPLACE", 11, 0);
+         case ATLOC:
+            deprecate ("ATLOC", 11, 0);
             (void) fprintf (code_file, "   if (");
             index = 1;
             while (tp [index])
             {
-               if ((argtyp [index] > VARIABLE && argtyp [index] != LOCAL)
+               if ((argtyp [index] > VAR && argtyp [index] != LOCAL)
                   || argtyp [index] == VERB)
                {
-                  if (style == 1) 
+                  if (style <= 1) 
                   {
                      index++;
                      continue;
@@ -414,7 +421,7 @@ char *proccond;
                   (void) gripe (tp [index], "not reducible to a place or object.");
                }
                (void) fprintf (code_file, "value[HERE]!=");
-               if (argtyp [index] == VARIABLE)
+               if (argtyp [index] == VAR)
                   (void) fprintf (code_file, "value[%d]", 
                      argval [index]);
                else if (argtyp [index] == LOCAL)
@@ -461,12 +468,12 @@ char *proccond;
             cond_ptr += SPRINTF3 (cond_ptr, "%s(", not_pending ? "!" : "");
             while (tp [++index] != NULL)
             {
-               if (argtyp [index] != OBJECT && argtyp [index] != PLACE &&
-                   argtyp [index] != VARIABLE && argtyp [index] != LOCAL)
+               if (argtyp [index] != OBJ && argtyp [index] != LOC &&
+                   argtyp [index] != VAR && argtyp [index] != LOCAL)
                       (void) gripe (tp [index], "not reducible to a location.");
                cond_ptr += SPRINTF3 
                   (cond_ptr, "%svalue[HERE]==", index > 1 ? "||" : "");
-               if (argtyp [index] == VARIABLE)
+               if (argtyp [index] == VAR)
                   cond_ptr += SPRINTF3 (cond_ptr, "value[%d]", 
                      argval [index]);
                else if (argtyp [index] == LOCAL)
@@ -490,21 +497,21 @@ char *proccond;
             break;
 
          case IFFLAG:
-            if (argtyp [1] > VERB && argtyp [1] != VARIABLE &&
+            if (argtyp [1] > VERB && argtyp [1] != VAR &&
                argtyp [1] != LOCAL)
                   (void) gripe (tp [1],"Wrong type for bit operation.");
-            if ((argtyp [2] < CONSTANT && argtyp [2] != VARIABLE) &&
+            if ((argtyp [2] < CONSTANT && argtyp [2] != VAR) &&
                argtyp [2] != LOCAL || argtyp [2] == STATE)
                   (void) gripe (tp [2],
                      "Not reducible to a flag.");
             if (not_pending) cond_ptr += SPRINTF2 (cond_ptr, "!(");
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                cond_ptr += SPRINTF3 (cond_ptr, "bitest(evar(%d),", argval [1]);
             else if (argtyp [1] == LOCAL)
                cond_ptr += SPRINTF3 (cond_ptr, "lbitest(%d,", argval [1]);
             else
                cond_ptr += SPRINTF3 (cond_ptr, "bitest(%d,", argval [1]);
-            if (argtyp [2] == VARIABLE)
+            if (argtyp [2] == VAR)
                cond_ptr += SPRINTF3 (cond_ptr, "value[%d]", argval [2]);
             else if (argtyp [2] == LOCAL)
                cond_ptr += SPRINTF3 (cond_ptr, "lval[%d]", argval [2]);
@@ -517,8 +524,8 @@ char *proccond;
 
          case IFKEY:
          case IFANY:
-            if (argtyp [1] != OBJECT && argtyp [1] != PLACE && 
-                argtyp [1] != VERB && argtyp [1] != VARIABLE &&
+            if (argtyp [1] != OBJ && argtyp [1] != LOC && 
+                argtyp [1] != VERB && argtyp [1] != VAR &&
                 argtyp [1] != LOCAL)
                   (void) gripe (tp [index], 
                      "Unsuitable IFKEY/IFANY argument type!");  
@@ -526,7 +533,7 @@ char *proccond;
             {
                cond_ptr += SPRINTF3 (cond_ptr, "%sKEY(", 
                   (not_pending) ? "!" : "");
-               if (argtyp [1] == VARIABLE)
+               if (argtyp [1] == VAR)
                   cond_ptr += SPRINTF3 (cond_ptr, "value[%d])", argval [1]);
                else if (argtyp [1] == LOCAL)
                   cond_ptr += SPRINTF3 (cond_ptr, "lval[%d])", argval [1]);
@@ -541,7 +548,7 @@ char *proccond;
                index = 0;
                while (tp [++index] != NULL)
                {
-                  if (argtyp [1] == VARIABLE)
+                  if (argtyp [1] == VAR)
                      cond_ptr += SPRINTF3 (cond_ptr, "value[%d],", 
                         argval [index]);
                   else if (argtyp [1] == LOCAL)
@@ -555,12 +562,12 @@ char *proccond;
             break;
 
          case QUERY:
-            if (argtyp [1] != TEXT && argtyp [1] != VARIABLE &&
+            if (argtyp [1] != TEXT && argtyp [1] != VAR &&
                argtyp [1] != LOCAL)
                   (void) gripe (tp [1], "Not reducible to text.");
             cond_ptr += SPRINTF3 (cond_ptr, "%squery(", 
                (not_pending) ? "!" : "");
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                cond_ptr += SPRINTF3 (cond_ptr, "value[%d]", argval [1]);
             else if (argtyp [1] == LOCAL)
                cond_ptr += SPRINTF3 (cond_ptr, "lval[%d]", argval [1]);
@@ -572,13 +579,13 @@ char *proccond;
          case IFINRANGE:
             if (not_pending) *cond_ptr++ = '!';
             *cond_ptr++ = '(';
-            if (argtyp [2] == VARIABLE)
+            if (argtyp [2] == VAR)
                cond_ptr += SPRINTF3 (cond_ptr, "value[%d]", argval [2]);
             else if (argtyp [2] == LOCAL)
                cond_ptr += SPRINTF3 (cond_ptr, "lval[%d]", argval [2]);
             else
                cond_ptr += SPRINTF3 (cond_ptr, "%d", argval [2]);
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                cond_ptr += SPRINTF4 (cond_ptr, "<=value[%d] && value[%d]<=",
                   argval [1], argval [1]);
             else if (argtyp [1] == LOCAL)
@@ -587,7 +594,7 @@ char *proccond;
             else
                cond_ptr += SPRINTF4 (cond_ptr,
                   "<=%d && %d<=", argval [1], argval [1]);
-            if (argtyp [3] == VARIABLE)
+            if (argtyp [3] == VAR)
                cond_ptr += SPRINTF3 (cond_ptr, "value[%d]", argval [3]);
             else if (argtyp [3] == LOCAL)
                cond_ptr += SPRINTF3 (cond_ptr, "lval[%d]", argval [3]);
@@ -598,7 +605,7 @@ char *proccond;
 
          case IFIS:
             cond_ptr += SPRINTF3 (cond_ptr, "%s(", not_pending ? "!" : "");
-            if (argtyp [1] != VARIABLE && argtyp [1] != LOCAL)
+            if (argtyp [1] != VAR && argtyp [1] != LOCAL)
                (void) gripe (tp[1], "not a variable.");
             index = 1;
             while (tp [++index] != NULL)
@@ -607,7 +614,7 @@ char *proccond;
                   (void) gripe (tp [index], "Not a referrable entity.");
                cond_ptr += SPRINTF3 
                   (cond_ptr, "%s", index > 2 ? "||" : "");
-               if (argtyp [1] == VARIABLE)
+               if (argtyp [1] == VAR)
                   cond_ptr += SPRINTF4 (cond_ptr, "value[%d]==%d", argval [1],
                      argval [index]);
                else if (argtyp [1] == LOCAL)
@@ -625,25 +632,25 @@ char *proccond;
             break;
             
          case IFLOC:
-            if (argtyp [1] != OBJECT && argtyp [1] != VARIABLE &&
+            if (argtyp [1] != OBJ && argtyp [1] != VAR &&
                argtyp [1] != LOCAL)
                   (void) gripe (tp [1], "Not reducible to an object.");
             cond_ptr += SPRINTF3 (cond_ptr, "%s(", not_pending ? "!" : "");
             index = 1;
             while (tp [++index] != NULL)
             {
-               if (argtyp [index] != OBJECT && argtyp [index] != PLACE &&
-                   argtyp [index] != VARIABLE && argtyp [index] != LOCAL)
+               if (argtyp [index] != OBJ && argtyp [index] != LOC &&
+                   argtyp [index] != VAR && argtyp [index] != LOCAL)
                       (void) gripe (tp [index], "not reducible to a location.");
                cond_ptr += SPRINTF3 (cond_ptr, "%slocation[", 
                   index > 2 ? "||" : "");
-               if (argtyp [1] == VARIABLE)
+               if (argtyp [1] == VAR)
                   cond_ptr += SPRINTF3 (cond_ptr, "value[%d]]==", argval [1]);
                else if (argtyp [1] == LOCAL)
                   cond_ptr += SPRINTF3 (cond_ptr, "lval[%d]]==", argval [1]);
                else
                   cond_ptr += SPRINTF3 (cond_ptr, "%d]==", argval [1]);
-               if (argtyp [index] == VARIABLE)
+               if (argtyp [index] == VAR)
                   cond_ptr += SPRINTF3 (cond_ptr, "value[%d]", 
                      argval [index]);
                else if (argtyp [index] == LOCAL)
@@ -691,7 +698,7 @@ char *proccond;
          case FIN:
             if (minor_type != EOT && --brace_count < 0)
             {
-               if (style == 1) break;
+               if (style <= 1) break;
                (void) gripe (tp [0], "Too many code closures.");
             }
             if (!brace_pending)
@@ -715,32 +722,32 @@ char *proccond;
             break;
 
          case ITOBJ:
-            if (argtyp [1] != VARIABLE && argtyp [1] != LOCAL)
+            if (argtyp [1] != VAR && argtyp [1] != LOCAL)
                (void) gripe (tp [1], "Not a variable.");
             brace_count++;
             loop_count++;
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "   *bitword(%d)= -1; value[%d]=",
                   argval [1], argval [1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "   lbts[%d*VARSIZE]=-1; lval[%d]=",
                   argval [1], argval [1]);
-            (void) fprintf (code_file, "FOBJECT-1; while (++");
-            if (argtyp [1] == VARIABLE)
+            (void) fprintf (code_file, "FOBJ-1; while (++");
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "value[%d]", argval [1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "lval[%d]", argval [1]);
-            (void) fprintf (code_file, "<=LOBJECT) {\n");
+            (void) fprintf (code_file, "<=LOBJ) {\n");
             index = 1;
             while (tp [++index] != NULL)
             {
-               if (argtyp [index] != PLACE && argtyp [index] != FLAGS &&
-                   argtyp [index] != VARIABLE && argtyp [index] != LOCAL)
+               if (argtyp [index] != LOC && argtyp [index] != FLAGS &&
+                   argtyp [index] != VAR && argtyp [index] != LOCAL)
                      gripe (tp [index], "Not reducible to a place or a flag!");
                (void) fprintf (code_file, "   if (");
                if (argtyp [index] == FLAGS)
                {
-                  if (argtyp [1] == VARIABLE)
+                  if (argtyp [1] == VAR)
                      (void) fprintf (code_file, "!bitest(value[%d],%d)",
                         argval [1], argval [index]);
                   else if (argtyp [1] == LOCAL)
@@ -753,7 +760,7 @@ char *proccond;
                else
                {
                   fprintf (code_file, "!isat(");
-                  if (argtyp [1] == VARIABLE)
+                  if (argtyp [1] == VAR)
                      (void) fprintf (code_file, "value[%d]", 
                         argval [1]);
                   else if (argtyp [1] == LOCAL)
@@ -762,7 +769,7 @@ char *proccond;
                   else
                      (void) fprintf (code_file, "%d", argval [1]);
                   fprintf (code_file, ",-1,-1,");
-                  if (argtyp [index] == VARIABLE)
+                  if (argtyp [index] == VAR)
                      (void) fprintf (code_file, "value[%d])", 
                         argval [index]);
                   else if (argtyp [index] == LOCAL)
@@ -775,19 +782,19 @@ char *proccond;
             }
             break;
 
-         case ITPLACE:
-            if (argtyp [1] != VARIABLE && argtyp [1] != LOCAL)
+         case ITLOC:
+            if (argtyp [1] != VAR && argtyp [1] != LOCAL)
                (void) gripe (tp [1], "Not a variable.");
             if (tp [2] && !tp [3])
                (void) gripe (tp [0], 
                   "Wrong parameter count - should be 1 or 3.");
-            if (tp [2] && argtyp [2] != PLACE)
+            if (tp [2] && argtyp [2] != LOC)
                (void) gripe (tp [2], "Not a place!");
-            if (tp[2] && tp [3] && argtyp [3] != PLACE)
+            if (tp[2] && tp [3] && argtyp [3] != LOC)
                (void) gripe (tp [3], "Not a place!");
             brace_count++;
             loop_count++;
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "   *bitword(%d)= -1; value[%d]=",
                   argval [1], argval [1]);
             else if (argtyp [1] == LOCAL)
@@ -796,37 +803,37 @@ char *proccond;
             if (tp [2])
                (void) fprintf (code_file, "%d", argval [2] - 1);
             else
-               (void) fprintf (code_file, "FPLACE-1");
-            if (argtyp [1] == VARIABLE)
+               (void) fprintf (code_file, "FLOC-1");
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "; while (++value[%d]<=", argval [1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "; while (++lval[%d]<=", argval [1]);
             if (tp [2] && tp [3])
                (void) fprintf (code_file, "%d) {\n", argval [3]);
             else
-               (void) fprintf (code_file, "LPLACE) {\n");
+               (void) fprintf (code_file, "LLOC) {\n");
             break;
 
          case ITERATE:
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "   value[%d]=", argval [1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "   lval[%d]=", argval [1]);
             else
                (void) gripe (tp [1], "Not a variable.");
-            if (argtyp [2] == VARIABLE)
+            if (argtyp [2] == VAR)
                (void) fprintf (code_file, "value[%d]", argval [2]);
             else if (argtyp [2] == LOCAL)
                (void) fprintf (code_file, "lval[%d]", argval [2]);
             else
                (void) fprintf (code_file, "%d", argval [2]);
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "-1; while(++value[%d]<=",
                   argval [1]);
             else
                (void) fprintf (code_file, "-1; while(++lval[%d]<=",
                   argval [1]);
-            if (argtyp [3] == VARIABLE)
+            if (argtyp [3] == VAR)
                (void) fprintf (code_file, "value[%d]", argval [3]);
             else if (argtyp [3] == LOCAL)
                (void) fprintf (code_file, "lval[%d]", argval [3]);
@@ -862,14 +869,14 @@ char *proccond;
          case GET:
          case DROP:
          case APPORT:
-            if (argtyp [1] != OBJECT && argtyp [1] != VARIABLE &&
+            if (argtyp [1] != OBJ && argtyp [1] != VAR &&
                argtyp [1] != LOCAL)
                   (void) gripe (tp [1], "Not reducible to an object.");
-            if (minor_type == APPORT && argtyp [2] != PLACE &&
-               argtyp [2] != VARIABLE && argtyp [2] != LOCAL)
+            if (minor_type == APPORT && argtyp [2] != LOC &&
+               argtyp [2] != VAR && argtyp [2] != LOCAL)
                   (void) gripe (tp [2], "Not reducible to a place.");
             (void) fprintf (code_file, "   apport(");
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "value[%d]", argval [1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "lval[%d]", argval [1]);
@@ -879,7 +886,7 @@ char *proccond;
             if (minor_type != APPORT)
                (void) fprintf (code_file, "%s",
                   (minor_type == GET) ? "INHAND" : "HERE");
-            else if (argtyp [2] == VARIABLE)
+            else if (argtyp [2] == VAR)
                (void) fprintf (code_file, "value[%d]", argval [2]);
             else if (argtyp [2] == LOCAL)
                (void) fprintf (code_file, "lval[%d]", argval [2]);
@@ -889,13 +896,13 @@ char *proccond;
             break;
 
          case GOTO:
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "   move(value[%d],-1);\n",
                   argval [1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "   move(lval[%d],-1);\n",
                   argval [1]);
-            else if (argtyp [1] == PLACE)
+            else if (argtyp [1] == LOC)
                (void) fprintf (code_file, "   move(%d,-1);\n", argval [1]);
             else
                (void) gripe (tp [1], "Not reducible to a place.");
@@ -911,9 +918,9 @@ char *proccond;
             end_index = 1;
             while (tp [++end_index] != NULL);
             end_index -= (minor_type == MOVE) ? 1 : 2;
-            if (argtyp [end_index] == PLACE)
+            if (argtyp [end_index] == LOC)
                (void) fprintf (code_file, "   move(%d", argval [end_index]);
-            else if (argtyp [end_index] == VARIABLE)
+            else if (argtyp [end_index] == VAR)
                (void) fprintf (code_file,
                   "   move(value[%d]", argval [end_index]);
             else if (argtyp [end_index] == LOCAL)
@@ -927,7 +934,7 @@ char *proccond;
                if (argtyp [index] == TEXT)
                   (void) fprintf (code_file, ",%s%d",
                      (index == 2) ? "-" : "", argval [index]);
-               else if (argtyp [index] == VARIABLE)
+               else if (argtyp [index] == VAR)
                   (void) fprintf (code_file, ",%svalue[%d]",
                      (index == 2) ? "-" : "", argval [index]);
                else if (argtyp [index] == LOCAL)
@@ -950,7 +957,7 @@ char *proccond;
             if (argtyp [1] > VERB &&
                (argtyp [1] != CONSTANT || argval [1] != 0))
                   (void) gripe (tp [1], "Not verb, place or object.");
-            if (argtyp [2] > PLACE &&
+            if (argtyp [2] > LOC &&
                (argtyp [2] != CONSTANT || argval [2] != 0))
                   (void) gripe (tp [2], "Not a place, object or zero.");
             if (argtyp [3] != FLAGS &&
@@ -970,14 +977,14 @@ char *proccond;
             break;
             
          case RESPOND:
-            if (argtyp [1] != OBJECT && argtyp [1] != PLACE && 
+            if (argtyp [1] != OBJ && argtyp [1] != LOC && 
                argtyp [1] != VERB)
                   (void) gripe (tp [1], 
                      "Not an object, place or verb!");
             (void) fprintf (code_file, "   if (anyof(%d,", argval[1]);
             index = 2;
             while (tp [index] && argtyp [index] < TEXT && 
-               argtyp [index] != VARIABLE)
+               argtyp [index] != VAR)
             {
                (void) fprintf (code_file, "%d,", argval [index]);
                index++;
@@ -1014,28 +1021,28 @@ char *proccond;
             else
                type = 0;
 
-            if (argtyp [1] != TEXT && argtyp [1] != VARIABLE &&
-                argtyp [1] != LOCAL && argtyp [1] != OBJECT &&
-                argtyp [1] != PLACE)
+            if (argtyp [1] != TEXT && argtyp [1] != VAR &&
+                argtyp [1] != LOCAL && argtyp [1] != OBJ &&
+                argtyp [1] != LOC)
                    gripe (tp[1], "Argument not reducible to a text!");
-            if (argtyp [1] == TEXT &&
-               ((*(ap[1])).body.text.text_type & 1024) && tp[2] == NULL)
+            if (argtyp [1] == TEXT && style >= 11)
             {
-               printf ("Text %s: max states %d, type %o\n",ap[1]->name,
-                  ap[1] -> state_count, (*(ap[1])).body.text.text_type);
+               if (ap[1] -> needs_qualifier == 0 && tp[2])
+                  gripe (tp[1], "Redundant word qualifier.");
+               else if (((ap[1] -> needs_qualifier) & 1) != 0 && tp[2] == NULL)
                   gripe (tp[1], "Missing required word qualifier.");
 	    }
             if (minor_type == DESCRIBE && 
                (argtyp [1] == VERB || argtyp [1] == TEXT ||
-                argtyp [1] == PLACE))
+                argtyp [1] == LOC))
                   gripe (tp [1], "Not reducible to a detailed description!");
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                type += 2;
                
             if (tp [2] != NULL)
             {
                 type += 8;
-                if (argtyp [2] <= PLACE || argtyp [2] == VARIABLE ||
+                if (argtyp [2] <= LOC || argtyp [2] == VAR ||
                    (argtyp [2] == TEXT && minor_type == VALUE))
                    type +=4;
             }
@@ -1061,21 +1068,21 @@ char *proccond;
             break;
 
          case SET:
-            if      (argtyp [1] == VARIABLE) ctype = 'V';
+            if      (argtyp [1] == VAR) ctype = 'V';
             else if (argtyp [1] == LOCAL)    ctype = 'L';
             else if (argtyp [1] == TEXT)     ctype = 'T';
-            else if (argtyp [1] == OBJECT ||
-                     argtyp [1] == PLACE)    ctype = 'E'; /* All else */
+            else if (argtyp [1] == OBJ ||
+                     argtyp [1] == LOC)    ctype = 'E'; /* All else */
             else (void) gripe (tp [1], "Not a value holder.");
 
             (void) fprintf (code_file, "   set('%c',%d,", ctype, argval [1]);
             if      (argtyp [2] == CONSTANT || 
                      argtyp [2] == SYNONYM ||
                      argtyp [2] == STATE)    ctype = 'c';
-            else if (argtyp [2] == VARIABLE) ctype = 'v';
+            else if (argtyp [2] == VAR) ctype = 'v';
             else if (argtyp [2] == LOCAL)    ctype = 'l';
-            else if (argtyp [2] == OBJECT ||
-                     argtyp [2] == PLACE ||
+            else if (argtyp [2] == OBJ ||
+                     argtyp [2] == LOC ||
                      argtyp [2] == TEXT)     ctype = 'e'; /* All else */
             else (void) gripe (tp [2], "Not reducible to a value!");
 
@@ -1125,13 +1132,13 @@ char *proccond;
             break;
 
          case RANDOM:
-            if (argtyp [1] > VARIABLE && argtyp [1] != LOCAL)
+            if (argtyp [1] > VAR && argtyp [1] != LOCAL)
                (void) gripe (tp [1], "Not a randomisable holder.");
             if (argtyp [1] != LOCAL)
                (void) fprintf (code_file, "   value[%d] = irand(", argval [1]);
             else
                (void) fprintf (code_file, "   lval[%d] = irand(", argval [1]);
-            if (argtyp [2] <= VARIABLE)
+            if (argtyp [2] <= VAR)
                (void) fprintf (code_file, "value[%d]", argval [2]);
             else if (argtyp [2] == LOCAL)
                (void) fprintf (code_file, "lval[%d]", argval [2]);
@@ -1141,19 +1148,19 @@ char *proccond;
             break;
 
          case CHOOSE:
-            if (argtyp [1] > VARIABLE && argtyp [1] != LOCAL)
+            if (argtyp [1] > VAR && argtyp [1] != LOCAL)
                (void) gripe (tp [1], "Not a value holder.");
             if (argtyp [1] != LOCAL)
                (void) fprintf (code_file, "   value[%d] = irand(", argval [1]);
             else
                (void) fprintf (code_file, "   lval[%d] = irand(", argval [1]);
-            if (argtyp [3] == VARIABLE)
+            if (argtyp [3] == VAR)
                (void) fprintf (code_file, "value[%d]-", argval [3]);
             else if (argtyp [3] == LOCAL)
                (void) fprintf (code_file, "lval[%d]-", argval [3]);
             else
                (void) fprintf (code_file, "%d-", argval [3]);
-            if (argtyp [2] == VARIABLE)
+            if (argtyp [2] == VAR)
                (void) fprintf (code_file, "value[%d]+1)+value[%d];\n",
                   argval [2], argval [2]);
             else if (argtyp [2] == LOCAL)
@@ -1164,9 +1171,9 @@ char *proccond;
             break;
 
          case DEPOSIT:       /* DEPOSIT variable {objptr|placeptr} */
-            if (argtyp [1] != VARIABLE && argtyp [1] != LOCAL)
+            if (argtyp [1] != VAR && argtyp [1] != LOCAL)
                (void) gripe (tp [1], "Not a variable.");
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "value[value[%d]]=", argval [1]);
             else
                (void) fprintf (code_file, "value[lval[%d]]=", argval [1]);
@@ -1183,7 +1190,7 @@ char *proccond;
          case LDA:           /* LDA variable refno */
          case EVAL:          /* EVAL variable refno */
          case LOCATE:        /* LOCATE variable {objptr} */
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "   value[%d]=", argval[1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "   lval[%d]=", argval[1]);
@@ -1201,9 +1208,9 @@ char *proccond;
             }
             else if (minor_type == EVAL)
             {
-               if (argtyp [2] != VARIABLE && argtyp [2] != LOCAL)
+               if (argtyp [2] != VAR && argtyp [2] != LOCAL)
                   (void) gripe (tp [2], "Not a variable.");
-               if (argtyp [2] == VARIABLE)
+               if (argtyp [2] == VAR)
                   (void) fprintf (code_file, "value[value[%d]];",
                      argval [2]);
                else
@@ -1213,10 +1220,10 @@ char *proccond;
             }
             else if (minor_type == LOCATE)
             {
-               if (argtyp [2] != VARIABLE && argtyp [2] != LOCAL &&
-                  argtyp [2] != OBJECT)
+               if (argtyp [2] != VAR && argtyp [2] != LOCAL &&
+                  argtyp [2] != OBJ)
                      (void) gripe (tp [2], "Not reducible to an object.");
-               if (argtyp [2] == VARIABLE)
+               if (argtyp [2] == VAR)
                   (void) fprintf (code_file, "location[value[%d]];",
                      argval [2]);
                else if (argtyp [2] == LOCAL)
@@ -1227,7 +1234,7 @@ char *proccond;
                      argval [2]);
                type = -1;
             }
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "*bitword(%d)=%d;\n",
                   argval [1], type);
             else
@@ -1237,9 +1244,9 @@ char *proccond;
 
          case FLAG:      /* FLAG/UNFLAG {variable|place|obj} {flag} */
          case UNFLAG:
-            if (argtyp [1] > VARIABLE && argtyp [1] != LOCAL)
+            if (argtyp [1] > VAR && argtyp [1] != LOCAL)
                (void) gripe (tp [1], "Not a bit mask holder.");
-            if ((argtyp [2] < CONSTANT && argtyp [2] != VARIABLE) || 
+            if ((argtyp [2] < CONSTANT && argtyp [2] != VAR) || 
                argtyp [2] == STATE)
                   (void) gripe (tp [2],"Bit mask not a flag or constant.");
             if (argtyp [1] == LOCAL)
@@ -1248,11 +1255,11 @@ char *proccond;
             else
                (void) fprintf (code_file, "   bitmod('%c',", 
                   (minor_type == FLAG) ? 's' : 'c');
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "evar(%d)", argval [1]);
             else
                (void) fprintf (code_file, "%d", argval [1]);
-            if (argtyp [2] == VARIABLE)            
+            if (argtyp [2] == VAR)            
                (void) fprintf (code_file, ",value[%d]", argval [2]);
             else if (argtyp [2] == LOCAL)            
                (void) fprintf (code_file, ",lval[%d]", argval [2]);
@@ -1264,36 +1271,36 @@ char *proccond;
 
          case SVAR:  /* EXEC/SVAR {constant | variable} variable */
          case EXEC:
-            if (argtyp [1] != VARIABLE && argtyp [1] != CONSTANT &&
+            if (argtyp [1] != VAR && argtyp [1] != CONSTANT &&
                argtyp [1] != LOCAL)
                (void) gripe (tp [1], "Not a constant or variable.");
             if (tp [2] == NULL)
             {
                argval [2] = 0;         /* value[0] not actually in use! */
-               argtyp [2] = VARIABLE;
+               argtyp [2] = VAR;
             }
-            else if (argtyp [2] != VARIABLE && argtyp [2] != LOCAL)
+            else if (argtyp [2] != VAR && argtyp [2] != LOCAL)
                (void) gripe (tp [2], "Not a variable.");
             (void) fprintf (code_file, "   %s(",
                (minor_type == SVAR) ? "svar" : "special");
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "value[%d]", argval [1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "lval[%d]", argval [1]);
             else
                (void) fprintf (code_file, "%d", argval [1]);
             (void) fprintf (code_file, ",&%s[%d]);\n",
-               argtyp [2] == VARIABLE ? "value" : "lval", argval [2]);
+               argtyp [2] == VAR ? "value" : "lval", argval [2]);
             break;
 
          case INPUT:
             if (tp [1] != NULL)
             {
-               if (argtyp [1] != TEXT && argtyp [1] != VARIABLE &&
+               if (argtyp [1] != TEXT && argtyp [1] != VAR &&
                   argtyp [1] != LOCAL)
                   (void) gripe (tp [1], "Not a text or variable.");
                (void) fprintf (code_file, "   input(");
-               if (argtyp [1] == VARIABLE)
+               if (argtyp [1] == VAR)
                   (void) fprintf (code_file, "value[%d]);\n", argval [1]);
                else if (argtyp [1] == LOCAL)
                   (void) fprintf (code_file, "lval[%d]);\n", argval [1]);
@@ -1306,7 +1313,7 @@ char *proccond;
 
          case DEFAULT:      /* DEFAULT/DOALL {place | placeptr} [flag] */
          case DOALL:        /* DEFAULT/DOALL flag */
-            if (argtyp [1] != PLACE && argtyp [1] != VARIABLE &&
+            if (argtyp [1] != LOC && argtyp [1] != VAR &&
                argtyp [1] != LOCAL && argtyp [1] != FLAGS &&
                   (style != 1 || argtyp [1] != SYNONYM))
                   (void) gripe (tp [1], "Not a place, bit flag or variable.");
@@ -1320,9 +1327,9 @@ char *proccond;
             }
             (void) fprintf (code_file, "   default_to(%d,",
                (minor_type == DEFAULT) ? 0 : 1);
-            if (argtyp [1] == PLACE)
+            if (argtyp [1] == LOC)
                (void) fprintf (code_file, "%d,", argval [1]);
-            else if (argtyp [1] == VARIABLE)
+            else if (argtyp [1] == VAR)
                (void) fprintf (code_file, "value[%d],", argval [1]);
             else if (argtyp [1] == LOCAL)
                (void) fprintf (code_file, "lval[%d],", argval [1]);
@@ -1341,7 +1348,7 @@ char *proccond;
          case IFHAVE:   /* IFHAVE/IFHERE/IFNEAR {obj|objptr} [{flag|state}] */
          case IFNEAR:
          case IFHERE:
-            if (argtyp [1] != OBJECT && argtyp [1] != VARIABLE &&
+            if (argtyp [1] != OBJ && argtyp [1] != VAR &&
                argtyp [1] != LOCAL)
                   (void) gripe (tp [1], "Not reducible to an object.");
             if (not_pending) *cond_ptr++ = '!';
@@ -1351,7 +1358,7 @@ char *proccond;
                cond_ptr += SPRINTF2 (cond_ptr, "isnear");
             else
                cond_ptr += SPRINTF2 (cond_ptr, "ishere");
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                cond_ptr += SPRINTF3 (cond_ptr, "(value[%d],",
                   argval [1]);
             else if (argtyp [1] == LOCAL)
@@ -1373,7 +1380,7 @@ char *proccond;
             break;
 
          case RANDOMISE:
-            if (argtyp [1] != OBJECT && argtyp [1] != PLACE && 
+            if (argtyp [1] != OBJ && argtyp [1] != LOC && 
                 argtyp [1] != TEXT)
                   (void) gripe (tp [1], "Not a place, object or text.");
             if (argtyp [2] != CONSTANT)
@@ -1406,7 +1413,7 @@ char *proccond;
                if (argtyp [index] > TEXT && argtyp [index] != LOCAL)
                   (void) gripe (tp [index], 
                      "Not reducible to a place, object or verb");
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "if (value[ARG1] == value[%d])", 
                   argval [1]);
             else if (argtyp [1] == LOCAL)
@@ -1417,14 +1424,14 @@ char *proccond;
             if (minor_type == FAKECOM)
             {
                (void) fprintf (code_file, " {value[ARG1]=");
-               if (argtyp [2] == VARIABLE)
+               if (argtyp [2] == VAR)
                   (void) fprintf (code_file, "value[%d]", argval [2]);
                else if (argtyp [2] == LOCAL)
                   (void) fprintf (code_file, "lval[%d]", argval [2]);
                else
                   (void) fprintf (code_file, "%d", argval [2]);
                (void) fprintf (code_file, "; (void)fake(1,");
-               if (argtyp [2] == VARIABLE)
+               if (argtyp [2] == VAR)
                   (void) fprintf (code_file, "value[%d]);}\n", argval [2]);
                else if (argtyp [2] == LOCAL)
                   (void) fprintf (code_file, "lval[%d]);}\n", argval [2]);
@@ -1434,14 +1441,14 @@ char *proccond;
             else
             {
                (void) fprintf (code_file, " value[ARG1]=");
-               if (argtyp [2] == VARIABLE)
+               if (argtyp [2] == VAR)
                   (void) fprintf (code_file, "value[%d];\n", argval [2]);
                else if (argtyp [2] == LOCAL)
                   (void) fprintf (code_file, "lval[%d];\n", argval [2]);
                else
                   (void) fprintf (code_file, "%d;\n", argval [2]);
 	    }
-            if (argtyp [1] == VARIABLE)
+            if (argtyp [1] == VAR)
                (void) fprintf (code_file, "if (value[ARG2] == value[%d])", 
                   argval [1]);
             else if (argtyp [1] == LOCAL)
@@ -1452,14 +1459,14 @@ char *proccond;
             if (minor_type == FAKECOM)
             {
                (void) fprintf (code_file, " {value[ARG2]=");
-               if (argtyp [2] == VARIABLE)
+               if (argtyp [2] == VAR)
                   (void) fprintf (code_file, "value[%d]", argval [2]);
                else if (argtyp [2] == LOCAL)
                   (void) fprintf (code_file, "lval[%d]", argval [2]);
                else
                   (void) fprintf (code_file, "%d", argval [2]);
                (void) fprintf (code_file, "; (void)fake(2,");
-               if (argtyp [2] == VARIABLE)
+               if (argtyp [2] == VAR)
                   (void) fprintf (code_file, "value[%d]);}\n", argval [2]);
                else if (argtyp [2] == LOCAL)
                   (void) fprintf (code_file, "lval[%d]);}\n", argval [2]);
@@ -1469,7 +1476,7 @@ char *proccond;
             else
             {
                (void) fprintf (code_file, " value[ARG2]=");
-               if (argtyp [2] == VARIABLE)
+               if (argtyp [2] == VAR)
                   (void) fprintf (code_file, "value[%d];\n", argval [2]);
                else if (argtyp [2] == LOCAL)
                   (void) fprintf (code_file, "lval[%d];\n", argval [2]);
@@ -1495,7 +1502,7 @@ char *proccond;
                tp[3] = NULL;
                argval[2] = 0;
             }
-            else if (argtyp[2] != VARIABLE && argtyp[2] != LOCAL)
+            else if (argtyp[2] != VAR && argtyp[2] != LOCAL)
             {
                (void) gripe (tp [2], "Not a variable.");
             }
@@ -1584,22 +1591,24 @@ char *proccond;
             }
             proc_index = index;
             if (argtyp [index] != PROCEDURE && argtyp [index] > VERB &&
-               argtyp [index] != VARIABLE && argtyp [index] != LOCAL)
+               argtyp [index] != VAR && argtyp [index] != LOCAL)
                   (void) gripe (tp [index], 
                      "Not a minor directive or a callable symbol.");
             if (argtyp [index] == PROCEDURE)
                (void) fprintf (code_file, "   p%d(", argval [index]);
-            else if (argtyp [index] == VARIABLE)
+            else if (argtyp [index] == VAR)
                (void) fprintf (code_file, 
-                  "   (*procs[value[%d]])(", argval [index]);
+                  "   if (value[%d]<LPROC && value[%d]>= 0) (*procs[value[%d]])(", 
+                     argval [index], argval [index], argval[index]);
             else if (argtyp [index] == LOCAL)
                (void) fprintf (code_file, 
-                  "   (*procs[lval[%d]])(", argval [index]);
+                  "   if (lval[%d]<LPROC && lval[%d] >= 0) (*procs[lval[%d]])(",
+                     argval [index], argval [index], argval[index]);
             else
                (void) fprintf (code_file, "   (*procs[%d])(", argval [index]);
             if (argtyp [index] == PROCEDURE)
             {
-               args_count = -(ap [index] -> state_count);
+               args_count = (ap [index] -> arg_count);
                for (++index; tp [index]; index++)
                { 
                   if (args_count == 0)
@@ -1608,13 +1617,13 @@ char *proccond;
                       argtyp [index] != LOCAL)
                         (void) gripe (tp [index], "illegal argument type!");
                   (void) fprintf (code_file, "%s", index == 2 ? "" : ",");
-                  if (argtyp [index] != VARIABLE)
+                  if (argtyp [index] != VAR)
                      (void) fprintf (code_file, "%d,", 
                         argtyp [index] == CONSTANT ? 0 : -1);
                   else
                      (void) fprintf (code_file, "*bitword(%d),", 
                         argval [index]);
-                  if (argtyp [index] == VARIABLE)
+                  if (argtyp [index] == VAR)
                      (void) fprintf (code_file, "value[%d]", argval [index]);
                   else if (argtyp [index] == LOCAL)
                      (void) fprintf (code_file, "lval[%d]", argval [index]);
@@ -1625,7 +1634,12 @@ char *proccond;
                if (args_count)
                   (void) gripe (tp [proc_index], "too few arguments!");
 	    }
-            (void) fprintf (code_file, ");\n");
+            if (argtyp [proc_index] == VAR)
+               (void) fprintf (code_file, "); else pcall(value[%d]);\n", argval [proc_index]);
+            else if (argtyp [proc_index] == LOCAL)
+               (void) fprintf (code_file, "); else pcall(lval[%d]);\n", argval [proc_index]);
+	    else
+               (void) fprintf (code_file, ");\n");
             break;
       }
       if (minor_type < NOT) not_pending = FALSE;
@@ -1634,7 +1648,7 @@ char *proccond;
 terminate:
    if (brace_count > 0)
    {
-      if (style == 1)
+      if (style <= 1)
          while (brace_count--)
             (void) fputc('}', code_file);
       else

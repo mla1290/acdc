@@ -1,7 +1,9 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2008.
  */
-#define ACDC_VERSION "11.71, MLA - 21 Mar 2008"
+#define ACDC_VERSION "12.5, MLA - 12 May 2008"
 /*
+ * 12 May 08   MLA           Call btinit() using the new calling sequence.
+ * 12 Mar 08   MLA           Version 12 (two-pass).
  * 19 May 07   MLA           Added "quiet".
  * 09 May 07   MLA           Code parts now start from 2!
  * 03 Sep 06   MLA           Bug: All longs should be ints!
@@ -59,11 +61,11 @@ char datbuf [16];
 int memory;
 time_t now;
 int quiet = 0;
+int stage = 0;
 
 #include "const.h"
-#include "line.h"
 
-int listing;
+#include "line.h"
 int line_status;
 char line [MAXLINE + 1];
 char raw_line [MAXLINE + 1];
@@ -73,12 +75,20 @@ char *tp [ANY_NUMBER + 1];
 #include "source.h"
 int level = -1;
 int file_count;
-int total_lines = 0;
-int text_lines = 0;
+int total_lines;
+int text_lines;
 int line_count [MAXLEVEL];
 char pathname [MAXLEVEL] [MAXLINE + 1];
 FILE *infile [MAXLEVEL];
-int style = 10;                  /* Default to A-code 10.* style */
+
+#include "game.h"
+int style = -1;
+char dbname [80];
+char title [80];
+char date [80];
+char version [80];
+char gameid [250];
+char *gameid_ptr;
 
 #include "major.h"           /* Pick up the MAXTYPES value! */
 #include "symbol.h"
@@ -89,13 +99,14 @@ int type_base [MAXTYPES];
 int flag_field_size [VARFLAG + 1];
 int *used_counts;
 int *roots [] = {NULL, NULL, NULL, NULL};
+int ref_redo = 0;
 
 #include "text.h"
 int next_addr;
 char *text_buf_ptr;
 int text_buf_len = TEXT_INIT_LEN;
-int switch_count = 0;
-int text_count = 0;
+int switch_count;
+int text_count;
 int next_vocaddr;
 char *voc_buf_ptr;
 char *voc_ptr;
@@ -151,7 +162,7 @@ int main (argc, argv)
 /* Initialise the search stacks.
  */
    for (i = 0; i < sizeof (roots) / sizeof (roots [0]); i++)
-      roots [i] = btinit (NULL);
+      btinit (i);
       
 /* Obtain the name of the program to process. This may be present on
  * the command line or prompted for.
@@ -241,16 +252,25 @@ int main (argc, argv)
  * case and appends .acd, if not present.
  */
    openfrst (source_path);
-   file_count = 1;
 
 /* Initialise search trees and other things */
 
    (void) initial ();
-   while (line_status != EOF)
+   
+   while (line_status != EOF || stage == 0)
    {
+      if (line_status == EOF)
+      {
+         stage++;
+         openfrst (source_path);
+      }
       if ((line_status = getline (IGNORE_BLANK)) == EOF)
-         break;
-      (void) domajor ();     /* line_status changes here! */
+      {
+         if (stage)
+            break;
+         continue;
+      }
+      (void) domajor ();    /* line_status changes here! */
    }
 
    (void) finalise ();

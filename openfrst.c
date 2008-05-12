@@ -1,5 +1,6 @@
-/* openfrst.c (acdc) - copyleft Mike Arnautov 2002 - 2007.
+/* openfrst.c (acdc) - copyleft Mike Arnautov 2002 - 2008.
  *
+ * 12 Mar 08   MLA           Varsion 12 changes.
  * 24 Jan 03   MLA           Allowed the .acode variant of the suffix.
  * 10 Mar 02   MLA           Moved opening of xref file to writeref.c
  * 31 Dec 01   MLA           Added cross-referencing code.
@@ -23,6 +24,8 @@
 
 #include "output.h"
 #include "source.h"
+#include "line.h"
+
 char source_stem [MAXLINE + 1];
 char source_file [80];
 
@@ -69,6 +72,13 @@ void openfrst (file_spec)
 
    strncpy (xref_path, fullname, strlen (fullname) - 3);
    strcat (xref_path, "xrf");
+
+   file_count = 1;
+   line_status = EOL;
+   total_lines = 0;
+   text_lines = 0;
+   text_count = 0;
+   switch_count = 0;
    return;
 
 }

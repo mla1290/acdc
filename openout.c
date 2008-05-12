@@ -1,4 +1,4 @@
-/* openout.c (acdc) - copyleft Mike Arnautov 2002 - 2007.
+/* openout.c (acdc) - copyleft Mike Arnautov 2002 - 2008.
  *
  * 06 Mar 03   Stuart Munro  Remove unused variables.
  * 04 Mar 03   MLA           Changed copyleft code to be unconditional.
@@ -46,8 +46,8 @@ FILE *openout (file, mode)
 
       if ((outfile = fopen (full_name, mode)) == NULL)
       {
-         gripe (file, "Unable to find.");
-         return (NULL);
+         fprintf (stderr, "%s -- unable to open file!\n", full_name);
+         exit (1);
       }
    }
 

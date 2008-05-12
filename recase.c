@@ -1,4 +1,4 @@
-/* recase.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* recase.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 06 Mar 91   MLA           Provide own tolower/upper, to guard against

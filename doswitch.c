@@ -1,6 +1,7 @@
-/* doswitch.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* doswitch.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
- * 14 Mar 08   MLA           Fixed doswitch offsets.
+ * 15 Mar 08   MLA           Version 12 changes.
+ * 14 Mar 08   MLA           Fixed switch offsets!
  * 11 Jan 03   MLA           Allowed nested text to be a proc.
  * 03 Dec 02   MLA           BUG: Allow for nested texts in switches!
  * 02 Oct 02   MLA           Check for single component switches.

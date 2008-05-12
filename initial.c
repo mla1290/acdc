@@ -1,6 +1,9 @@
-/* initial.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* initial.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
- * 10 Nov 07   MLA           Added DUMP;
+ * 02 May 08   MLA           Allow for global flags instead of var flags.
+ * 15 Mar 08   MLA           Version 12 changes.
+ * 07 Mar 08   MLA           Removed LIST, NOLIST, XREF and NOXREF.
+ * 10 Nov 07   MLA           Added DUMP.
  * 19 May 07   MLA           Added "quiet".
  * 09 May 07   MLA           Code parts now start from 2!
  * 07 May 07   Stuart Munro  bug: need stdlib.h (for rand()).
@@ -11,7 +14,6 @@
  * 14 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
  * 09 Feb 04   MLA           Added ADJECTIVE and PREPOSITION types.
  * 03 Feb 04   MLA           Added FEATURE.
- * 09 Mar 03   MLA           Replaced trace with debug.
  * 03 Mar 03   MLA           Added AUTHOR.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 27 Jul 02   MLA           Added CHECKPOINT.
@@ -31,7 +33,7 @@
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 05 Apr 99   MLA           Added the DICT directive.
  * 27 Mar 99   MLA           Added the INTERSECT directive.
- * 01 Apr 94   MLA           Allowed range specification with ITOBJ/ITPLACE.
+ * 01 Apr 94   MLA           Allowed range specification with ITOBJ/ITLOC.
  * 20 Mar 94   MLA           Suppressed source tracing of declarations.
  * 12 Dec 91   MLA           FRAGMENT major directive. Optional arg to INPUT.
  * 10 Mar 91   MLA           Changed STOPALL to FLUSH.
@@ -58,7 +60,7 @@
 #include "minor.h"
 #include "major.h"
 #include "line.h"
-#include "source.h"
+#include "game.h"
 #include "symbol.h"
 #include "text.h"
 #include "output.h"
@@ -76,15 +78,17 @@ struct directive *dp;
 struct node *np;
 struct directive keywords[] =
 {
-   {"object",      MAJOR, OBJECT,      1,   ANY_NUMBER},
-   {"place",       MAJOR, PLACE,       1,   ANY_NUMBER},
-   {"variable",    MAJOR, VARIABLE,    1,   ANY_NUMBER},
+   {"object",      MAJOR, OBJ,         1,   ANY_NUMBER},
+   {"location",    MAJOR, LOC,         1,   ANY_NUMBER},
+   {"place",       MAJOR, LOC,         1,   ANY_NUMBER}, /* Synonym */
+   {"variable",    MAJOR, VAR,         1,   ANY_NUMBER},
+   {"var",         MAJOR, VAR,         1,   ANY_NUMBER},
    {"array",       MAJOR, ARRAY,       2,   2},
    {"verb",        MAJOR, VERB,        1,   ANY_NUMBER},
    {"noun",        MAJOR, NOUN,        1,   ANY_NUMBER},
    {"adjective",   MAJOR, ADJECTIVE,   1,   ANY_NUMBER},
    {"preposition", MAJOR, PREPOSITION, 1,   ANY_NUMBER},
-   {"text",        MAJOR, TEXT,        0,   2},
+   {"text",        MAJOR, TEXT,        0,   3},
    {"fragment",    MAJOR, FRAGMENT,    0,   2},
    {"procedure",   MAJOR, PROCEDURE,   1,   ANY_NUMBER},
    {"proc",        MAJOR, PROCEDURE,   1,   ANY_NUMBER},
@@ -96,15 +100,12 @@ struct directive keywords[] =
    {"initialise",  MAJOR, INIT,        0,   0},
    {"repeat",      MAJOR, REPEAT,      0,   0},
    {"constant",    MAJOR, CONSTANT,    1,   ANY_NUMBER},
-   {"flags",       MAJOR, FLAGS,       1,   1},
+   {"flags",       MAJOR, FLAGS,       0,   1},
    {"state",       MAJOR, STATE,       1,   ANY_NUMBER},
    {"noise",       MAJOR, NOISE,       1,   ANY_NUMBER},
    {"null",        MAJOR, NOISE,       1,   ANY_NUMBER},
-   {"list",        MAJOR, LIST,        0,   0},
-   {"nolist",      MAJOR, NOLIST,      0,   0},
-   {"xref",        MAJOR, XREF,        0,   0},
-   {"noxref",      MAJOR, NOXREF,      0,   0},
    {"include",     MAJOR, INCLUDE,     1,   1},
+   {"include?",    MAJOR, CONCLUDE,    1,   1},
    {"synonym",     MAJOR, SYNONYM,     1,   ANY_NUMBER},  /* Compatibility */
    {"synon",       MAJOR, SYNONYM,     1,   ANY_NUMBER},  /* Compatibility */
    {"define",      MAJOR, DEFINE,      1,   ANY_NUMBER},  /* Compatibility */
@@ -119,7 +120,7 @@ struct directive keywords[] =
    {"have",        MINOR, HAVE,        1,   ANY_NUMBER},
    {"near",        MINOR, NEAR,        1,   ANY_NUMBER},
    {"here",        MINOR, HERE,        1,   ANY_NUMBER},
-   {"at",          MINOR, ATPLACE,     1,   ANY_NUMBER},
+   {"at",          MINOR, ATLOC,     1,   ANY_NUMBER},
 #ifndef NOVARARGS
    {"anyof",       MINOR, ANYOF,       1,   ANY_NUMBER},
    {"keyword",     MINOR, KEYWORD,     1,   ANY_NUMBER},
@@ -158,7 +159,7 @@ struct directive keywords[] =
    {"eof",         MINOR, EOT,         0,   0},
    {"itobj",       MINOR, ITOBJ,       1,   ANY_NUMBER},
    {"itlist",      MINOR, ITOBJ,       1,   3},     /* For compatibility */
-   {"itplace",     MINOR, ITPLACE,     1,   3},
+   {"itplace",     MINOR, ITLOC,     1,   3},
    {"iterate",     MINOR, ITERATE,     3,   3},
    {"next",        MINOR, NEXT,        0,   0},
    {"continue",    MINOR, NEXT,        0,   0},
@@ -235,9 +236,11 @@ struct directive keywords[] =
    {"checkpoint",  MINOR, CHECKPOINT,  0,   0},
    {"dump",        MINOR, DUMP,        0,   0},
    {"object",      SYMBOL,OBJFLAG,     0,   0},
-   {"place",       SYMBOL,PLACEFLAG,   0,   0},
+   {"location",    SYMBOL,LOCFLAG,     0,   0},
+   {"place",       SYMBOL,LOCFLAG,     0,   0},
    {"verb",        SYMBOL,VERBFLAG,    0,   0},
    {"variable",    SYMBOL,VARFLAG,     0,   0},
+   {"var",         SYMBOL,VARFLAG,     0,   0},
    {"",            0,     ENDOFLIST,   0,   0}
 } ;
 
@@ -249,10 +252,6 @@ void initial()
 {
    int index;
    char *tptr;
-   char dbname [80];
-   char title [80];
-   char date [80];
-   char version [80];
    int len;
    int type;
    int mask;
@@ -263,238 +262,34 @@ void initial()
    while (dp -> id != ENDOFLIST)
    {
       if (dp -> type == SYMBOL)
-      {
-         if (style != 1)
-            (void) addsymb(AUTOSYMBOL, dp -> name, FLAGS, dp -> id);
-      }
+            np = addsymb(AUTOSYMBOL, dp -> name, FLAGS, dp -> id);
       else
       {
          np = addsymb(dp -> type, dp -> name, dp -> type, dp -> id);
-         np -> body.directive.min_args = dp -> min_args;
-         np -> body.directive.max_args = dp -> max_args;
+         np -> min_args = dp -> min_args;
+         np -> max_args = dp -> max_args;
       }
       dp = &keywords[ (++index) ];
    }
 
-   listing = FALSE;
    line_status = EOL;
 
-   (void) addsymb (AUTOSYMBOL, "INIT_PROC", INIT, 1);
-   (void) addsymb (AUTOSYMBOL, "REPEAT_PROC", REPEAT, 2);
-
    if ((text_buf_ptr = (char *) calloc (text_buf_len, sizeof(char))) == NULL)
-      (void) gripe ("text_buf", "Unable to allocate space.");
+      (void) gripe ("text_buf", "Unable to allocate text buffer.");
    if ((cond_buf_ptr = (char *) calloc (cond_buf_len, sizeof(char))) == NULL)
-      (void) gripe ("cond_buf", "unable to allocate space.");
+      (void) gripe ("cond_buf", "unable to allocate condition buffer.");
    if ((voc_buf_ptr = (char *) calloc (voc_buf_len, sizeof(char))) == NULL)
-      (void) gripe ("voc_buf", "unable to allocate space.");
+      (void) gripe ("voc_buf", "unable to allocate vocabulary buffer.");
    voc_ptr = voc_buf_ptr;
    voc_top = voc_buf_ptr + VOC_INIT_LEN - 20;
 
-/* Now see whether we have any game info lines (style, author, name, 
- * version, date). 
- */
-   
    *gameid = '\0';
    *author = '\0';
    *date = '\0';
    *version = '\0';
    *title = '\0';
    style = -1;
-   while (1)
-   {
-      if ((line_status = getline (IGNORE_BLANK)) == EOF)
-         (void) gripe ("", "Unexpected end of file!");
-      if ((np = parse (MAJOR)) == NULL)
-         (void) gripe (tp [0], "Unknown major directive.");
-      type = np -> refno;
-      if (type == NAME)
-      {
-         strncpy (title, tp [1], sizeof (title) - 1);
-         *(title + sizeof (title) - 1) = '\0';
-      }
-      else if (type == VERSION)
-      {
-         strncpy (version, tp [1], sizeof (version) - 1);
-         *(version + sizeof (version) - 1) = '\0';
-      }
-      else if (type == DATE)
-      {
-         strncpy (date, tp [1], sizeof (date) - 1);
-         if (tp [2])
-         {
-            strncat (date, " ", sizeof (date) - strlen (date) - 1);
-            strncat (date, tp [2], sizeof (date) - strlen (date) - 1);
-         }
-         if (tp [3])
-         {
-            strncat (date, " ", sizeof (date) - strlen (date) - 1);
-            strncat (date, tp [3], sizeof (date) - strlen (date) - 1);
-         }
-         *(date + sizeof (date) - 1) = '\0';
-      }
-      else if (type == AUTHOR)
-      {
-         strncpy (author, tp [1], sizeof (author) - 1);
-         *(author + sizeof (author) - 1) = '\0';
-      }
-      else if (type == STYLE)
-      {
-         if (strcmp (tp[1], "old") == 0 || strcmp (tp[1], "original") == 0)
-            style = 1;
-         else
-         {
-            index = chrtobin (tp[2] ? tp[2] : tp[1]);
-            if (index > 11)
-               (void) gripe ("", 
-                  "Style higher than current maximum of 11!");
-            if (index < 10 && style != 1)
-               (void) gripe ("", "Style values from 2 to 9 are meaningless.");
-            style = index;
-         }
-      }
-      else if (type == GAMEID)
-      {
-        strncpy (gameid, tp [1], 80);
-        *(gameid + 79) = '\0';
-      }
-      else
-      {
-         strcpy (line, raw_line);
-         line_status = BOL;
-         break;
-      }   
-      line_status = EOL;
-   }
-   if (style == -1)
-      style = *title ? 10 : 1;
- 
-   if (style != 10 && *gameid)
-      (void) gripe ("", "The GAMEID directive only valid in A-code style 10!");
-   if ((code_file = openout("adv02.c", "w")) == NULL)
-      (void) gripe ("adv01.c", "Unable to open code file.");
-   (void) fprintf (code_file, "#include \"adv0.h\"\n");
-   (void) fprintf (code_file, "#include \"adv3.h\"\n");
-
    next_addr = 0;
-   if (debug)     /* Declarations over - if source output */
-      debug = 2;  /* is required, turn it on!             */
 
-#ifdef __50SERIES
-#  define MODE "o"
-#else
-#  define MODE "wb"
-#endif
-
-   strcpy (dbname, source_file);
-   if (tptr = strrchr (dbname, '.'))
-      *tptr = 0;
-   if (*title == '\0')
-   {
-      strcpy (title, dbname);
-      if (*title >= 'a' && *title <= 'z')
-         *title += 'A' - 'a';
-   }
-   strcat (dbname, ".dat");
-
-/* Assemble the game ID */
-
-   if (style >= 11)
-   {
-      strcpy (gameid, title);
-      if (*version || *date)
-         strcat (gameid, ", ");
-      if (*version)
-      {
-         strcat (gameid, "version ");
-         strcat (gameid, version);
-         if (*date)
-            strcat (gameid, " - ");
-      }
-      if (*date)
-         strcat (gameid, date);
-   }
-      
-   if (memory < 3)
-      tptr =  dbname;
-   else
-      tptr = "adv6.h";
-   
-   if ((text_file = openout (tptr, MODE)) == NULL)
-      (void) gripe (tptr, "Unable to open data file.");
-
-   tptr = *gameid ? gameid : source_file;
-   len = strlen (tptr);
-   if (len > 79) len = 79;
-   (void) strncpy (gameid, tptr, len);
-   *(gameid + len) = '\0';
-   gameid [79] = '\0';
-   tptr = gameid;
-   if (memory == 3)
-   {
-      fprintf (text_file, "char text [TEXT_BYTES] = {\n");
-      fputc ('0', text_file); 
-   }
-   else
-      fputc ('\0', text_file);
-   next_addr++;
-
-/* Write off the game ID. Can't use the standard encryption, because that
- * requires the knowledge of the game ID! I.e. there would be no way of 
- * decrypting it!
- */
- 
-   if (plain_text == 0)
-   {
-      key_mask = (rand() & 127) ^ 'x';
-      if (key_mask == 0 || key_mask == 127) key_mask = 'y';
-   }
-   else
-      key_mask = 0;
-   mask = key_mask;
-
-   while (*tptr && *tptr != '\n')
-   {
-      if (memory == 3)
-         (void) fprintf (text_file, ",%d", *tptr ^ mask);
-      else
-         fputc (*tptr ^ mask, text_file);
-      if (plain_text == 0)
-         mask ^= *tptr;
-      tptr++;
-      next_addr++;
-   }
-
-   if (memory == 3)
-      fprintf (text_file, ",%d", mask);
-   else
-      fputc (mask, text_file);
-   next_addr++;
-
-/* Write off the game ID again, this time using the standard encryption.
- * This is necessary in order to give the game access to the string as
- * a standard text.
- */
- 
-   np = addsymb (AUTOSYMBOL, "game.id", TEXT, type_counts [TEXT]++);
-   np -> body.text.name_addr = next_addr;
-   tptr = gameid;
-   while (*tptr)
-      storchar(*tptr++);
-   storchar ('\0');
-   
-   if (quiet == 0)
-   {
-      printf ("GameID: %s\n", gameid);
-      printf ("Style:  ");
-      if (style == 1)
-         puts ("Dave Platt's original A-code");
-      else
-         printf ("A-code %d\n", style);
-      if (*author)
-         printf ("Author: %s\n", author);
-   }   
-   else
-      printf ("Translating: %s ... ", gameid);
    return;
 }

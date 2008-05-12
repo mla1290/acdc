@@ -1,5 +1,6 @@
-/* const.h (acdc) - copyleft Mike Arnautov 1990-2005.
+/* const.h (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 15 Jan 05   MLA           Added AUTOSYMBOL.
  * 19 Aug 04   MLA           Added FREE_ARG.
  * 03 Mar 03   MLA           Added REST.
@@ -56,17 +57,6 @@ extern int getconst ();
 
 #define MAXLEVEL 10
 
-/* Symbol searching stuff. */
-
-#define NONE                -1
-#define MAJOR                0
-#define MINOR                1
-#define SYMBOL               2
-#define AUTOSYMBOL          20
-#define SYMBOL_OR_CONSTANT 100
-#define VOCAB                3
-#define ROOTS_COUNT          4
-
 /* A large number of args. */
 
 #define ANY_NUMBER 99
@@ -88,7 +78,7 @@ extern int getconst ();
  */
 
 #define OBJFLAG 0
-#define PLACEFLAG 1
+#define LOCFLAG 1
 #define VERBFLAG 2
 #define VARFLAG 3
 #define LAST_DEFAULT_FLAG 2

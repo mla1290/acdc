@@ -1,5 +1,6 @@
-/* text.h (acdc) - copyleft Mike Arnautov 1990-2006.
+/* text.h (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 15 Oct 06   MLA           Eliminated redundand NEST_VAR.
  * 03 Mar 03   MLA           Adedd memory.
  * 26 Dec 01   MLA           Added text_lines.
@@ -20,10 +21,10 @@
 #endif
 
 #ifdef __STDC__
-extern void storword (char *, int, int, int);
+extern struct node *storword (char *, int, int);
 extern void clsfile (FILE *outfile, char *text);
 #else
-extern void storword ();
+extern struct node *storword ();
 extern void clsfile ();
 #endif
 
@@ -62,8 +63,6 @@ extern int next_addr;
 extern char *text_buf_ptr;
 extern int text_buf_len;
 extern FILE *text_file;
-extern char gameid [250];
-extern char *gameid_ptr;
 extern int plain_text;
 extern int memory;
 extern int style;

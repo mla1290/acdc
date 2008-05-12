@@ -1,5 +1,6 @@
-/* getdesc.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* getdesc.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 12 Mar 08   MLA           Version 12 changes.
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 12 Dec 91   MLA           Added third arg to gettxt ().
  * 30 Sep 90   MLA           Intialise states!!!
@@ -34,8 +35,8 @@ struct node *np;
 
    while (description > 0)
    {
-      np -> body.text.text_addr [description - 1] = next_addr;
-      description = gettxt (description, &states, FALSE, NULL);
+      np -> text_addr [description - 1] = next_addr;
+      description = gettxt (description, &states, 0, NULL);
       if (max_states < states) max_states = states;
    }
    np -> state_count = max_states;

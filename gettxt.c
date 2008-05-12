@@ -1,8 +1,8 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
- * 20 Mar 08   MLA           BUG: Style 1 feature description  fix.
- *                           Bug: Line length arg to outline fix.
- *                           Bug: fixed text and text line counts.
+ * 20 Mar 08   MLA           Bug: fixed text and text line counts.
+ *                           BUG: Style 1 feature description fix.
+ * 15 Mar 08   MLA           Version 12 changes.
  * 08 May 07   Stuart Munro  bug: correct the seting of description level 3.
  * 04 May 07   MLA           bug: Suppress qualifier checks for style 1.
  * 15 Oct 06   MLA           Reinstated HTML tag handling.
@@ -45,12 +45,12 @@
 #include "text.h"
 
 #ifdef __STDC__
-int gettxt (int description, int *max_states, int fragment, int *got_holder)
+int gettxt (int description, int *max_states, int type, int *got_holder)
 #else
-int gettxt (description, max_states, fragment, got_holder)
+int gettxt (description, max_states, type, got_holder)
 int description;
 int *max_states;
-int fragment;
+int type;
 int *got_holder;
 #endif
 {
@@ -65,6 +65,7 @@ int *got_holder;
    int  explicit_switch;
    int  implicit_switch;
    int escaped;
+   int frag;
    struct node *nest_text;
    char nest_name [33];
    char *nest_ptr;
@@ -73,8 +74,9 @@ int *got_holder;
    int in_block = 0;
    int html_tag = 0;
    int null_text = 1;
-   
+
    states = 0;
+   frag = (type == 'f');      /* It's a fragment */
    text_count++;
    text_ptr = text_buf_ptr + 1;
    text_top = text_ptr + text_buf_len - 15;
@@ -87,10 +89,8 @@ int *got_holder;
 
 next_line:
 
-   if (getline(ACCEPT_BLANK) == EOF)
-      (void) gripe ("EOF","Unexpected end of source.");
-
-   if (*line_ptr != ' ' && *line_ptr != '\t' && *line_ptr != '\n')
+   if (getline(ACCEPT_BLANK) == EOF ||
+       (*line_ptr != ' ' && *line_ptr != '\t' && *line_ptr != '\n'))
    {
       if (null_text)
          text_count--;
@@ -115,7 +115,7 @@ next_line:
 
    if (description)
    {
-      if (style <= 1 && description == 1 && *line_ptr == '{')
+      if (style == 1 && description == 1 && *line_ptr == '{')
       {
          *line_ptr = '\n';
          goto next_line;
@@ -180,7 +180,7 @@ next_line:
  * as completly blank. The !@ combination is an obsolete equivalent of '/'.*/
 
    if (*line_ptr == '/' || 
-      (style == 1 &&  *line_ptr == '!' && *(line_ptr + 1) == '@') ||
+      (style <= 1 &&  *line_ptr == '!' && *(line_ptr + 1) == '@') ||
       (style >= 10 && (*line_ptr == '=' || *line_ptr == '+')))
    {
       if (*line_ptr == '!')
@@ -263,7 +263,7 @@ next_char:
    {
       if (*line_ptr == LOGICAL_ESCAPE)
          escaped = 1;
-      else if (style == 1 && *line_ptr == '!' && *(line_ptr + 1) == '`')
+      else if (style <= 1 && *line_ptr == '!' && *(line_ptr + 1) == '`')
       {
          *text_ptr++ = IGNORE_EOL;
          line_ptr += 2;
@@ -301,13 +301,13 @@ next_char:
          *text_ptr++ = NEST_TEXT;
          if (nest_type > TEXT)
             (void) gripe (nest_name, "Not reducible to text.");
-         if (nest_type == OBJECT)
+         if (nest_type == OBJ)
             *text_ptr++ = 0;
-         else if (nest_type == PLACE)
+         else if (nest_type == LOC)
             *text_ptr++ = 1;
          else if (nest_type == VERB)
             *text_ptr++ = 2;
-         else if (nest_type == VARIABLE)
+         else if (nest_type == VAR)
             *text_ptr++ = 3;
          else
             *text_ptr++ = 4;
@@ -348,7 +348,7 @@ store:
    if (text_ptr <= text_buf_ptr + 1)  /* Special case of null message */
    {
       if (!lf_pending)
-         fragment = TRUE;
+         frag = 1;
       goto end_of_text;         /* Null text */
    }
 
@@ -367,6 +367,7 @@ store:
    }
 
    escaped = 0;
+
    while (*(++text_ptr) != '\0')
    {
       if (escaped == 0)
@@ -421,7 +422,7 @@ store:
    }
 
 end_of_text:
-   if (!fragment)
+   if (!frag)
       (void) storchar ('\n');
    if (in_block)
    {

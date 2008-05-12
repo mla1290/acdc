@@ -1,4 +1,4 @@
-/* storchar.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* storchar.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
  * 09 Mar 03   MLA           Store as binary or ASCII data depending on 
  *                           value of memory. 
@@ -13,6 +13,7 @@
 #endif
 
 #include "text.h"
+#include "game.h"
 
 #ifdef __STDC__
 void storchar (int ch)

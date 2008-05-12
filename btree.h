@@ -1,10 +1,9 @@
 /* btree.c - balanced tree handling on a linear stack.
- *           Copyleft Mike Arnautov 2001-2006.
- *
- * Warning! This is 32bit code, for use in 32bit executables!
+ *           Copyleft Mike Arnautov 2001-2008.
  *
  * Balanced tree handling on a linear stack.
  *
+ * 12 May 08   MLA               Removed 32-bit dependency.
  * 07 May 07   Stuart Munro      bug: give *full* STDC template for btspan!
  * 03 Sep 06   MLA               Bug: longs should be ints.
  * 23 Dec 05   MLA               Bug: btinit() should be long, not int!
@@ -19,14 +18,14 @@
 
 #  ifdef __STDC__
 
-      int *btinit (int *root);
+      void btinit (int type);
       int btadd (int type, void *record);
       struct node *btfind (int type, char *word);
       void btspan (int type, void (*btact)(struct node *));
 
 #  else /* ! __STDC__ */
 
-      int *btinit ();
+      void btinit ();
       int btadd ();
       struct node *btfind ();
       void btspan ();

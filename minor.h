@@ -1,5 +1,6 @@
-/* minor.h (acdc) - copyleft Mike Arnautov 1990-2005.
+/* minor.h (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 10 Nov 07   MLA           Added DUMP.
  * 01 Jan 05   MLA           Added UNDO/REDO.
  * 27 Jul 02   MLA           Added CHECKPOINT.
@@ -51,11 +52,11 @@
 # define HAVE        41
 # define NEAR        42
 # define HERE        43
-# define ATPLACE     44
+# define ATLOC       44
 # define ANYOF       45
 
 # define ITOBJ       51
-# define ITPLACE     52
+# define ITLOC       52
 # define ITERATE     53
 # define NEXT        54
 # define BREAK       55

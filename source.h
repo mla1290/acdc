@@ -1,5 +1,6 @@
-/* source.h (acdc) - copyleft Mike Arnautov 1990-2005.
+/* source.h (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 17 Nov 01   MLA           Added the source_* buffers.
  * 14 Mar 01   MLA           Replaced old_style with style and moved to text.h.
  * 06 Mar 94   MLA           Made INCLUDEs relative to umbrella source.
@@ -33,6 +34,9 @@ extern int file_count;
 extern int level;
 extern int line_count [];
 extern int total_lines;
+extern int text_lines;
+extern int text_count;
+extern int switch_count;
 extern char pathname [MAXLEVEL] [MAXLINE + 1];
 extern FILE *infile [];
 extern char source_stem [];

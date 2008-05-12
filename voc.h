@@ -1,4 +1,4 @@
-/* voc.h (acdc) - copyleft Mike Arnautov 1990-2005.
+/* voc.h (acdc) - copyleft Mike Arnautov 1993-2008.
  *
  * 02 Feb 03   MLA            Initial coding.
  */
@@ -15,8 +15,8 @@
 #define V_ALL          000200
 #define V_EXCEPT       000400
 #define V_REPEAT       001000
-#define V_PLACE        002000
-#define V_OBJECT       004000
+#define V_LOC        002000
+#define V_OBJ          004000
 #define V_SHARED       010000
 #define V_UNIQUE       020000
 

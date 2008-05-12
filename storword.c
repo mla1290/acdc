@@ -1,5 +1,6 @@
-/* storword.c (acdc) - copyleft Mike Arnautov 1990-2007.
+/* storword.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 15 Mar 08   MLA           Version 12 changes.
  * 14 Feb 04   MLA           Converted longs to ints.
  * 11 Mar 03   MLA           Suppressed "vocabulary buffer enlarged" message.
  * 14 Sep 00   MLA           Replace'_'s with NBSP.
@@ -19,12 +20,11 @@
 #include "const.h"
 
 #ifdef __STDC__
-void storword(char *cstring, int type, int refno, int addr)
+struct node *storword(char *cstring, int type, int addr)
 #else
-void storword(cstring, type, refno, addr)
+void storword(cstring, type, addr)
 char *cstring;
 int type;
-int refno;
 int addr;
 #endif
 {
@@ -32,9 +32,9 @@ int addr;
    struct node *np;
 
    vocab_count++;
-   np = addsymb (VOCAB, cstring, type, refno);
-   np -> body.vocab.word_addr = addr;
-   np -> body.vocab.voc_addr = next_vocaddr;
+   np = addsymb (VOCAB, cstring, type, -1);
+   np -> word_addr = addr;
+   np -> voc_addr = next_vocaddr;
 
    if (voc_ptr >= voc_top)
    {
@@ -44,9 +44,6 @@ int addr;
          (void) gripe ("","Unable to extend vocabulary buffer.");
       voc_ptr = voc_buf_ptr + (voc_ptr - old_voc_ptr);
       voc_top = voc_buf_ptr + voc_buf_len - 20;
-/*
- *      (void) printf ("Vocabulary buffer size increased to %d.\n", voc_buf_len);
- */
    }
 
    while (*cstring != '\0')
@@ -63,5 +60,5 @@ int addr;
    next_vocaddr++;
    *voc_ptr++ = '\0';
 
-   return;
+   return (np);
 }

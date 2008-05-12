@@ -1,9 +1,10 @@
-/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2007.
+/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2008.
  */
 
 extern char author [40];
 extern char datbuf [];
 extern int quiet;
+extern int stage;
 #ifdef __STDC__
 #include <malloc.h>
 #include <stdlib.h>
