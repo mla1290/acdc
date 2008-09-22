@@ -1,5 +1,6 @@
 /* doswitch.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 21 Sep 08   MLA           Use LCM max states for cycled texts.
  * 15 Mar 08   MLA           Version 12 changes.
  * 14 Mar 08   MLA           Fixed switch offsets!
  * 11 Jan 03   MLA           Allowed nested text to be a proc.
@@ -21,11 +22,12 @@
 #include "text.h"
 
 #ifdef __STDC__
-void doswitch (char *text_ptr, int *max_states)
+void doswitch (char *text_ptr, int *max_states, int cycle)
 #else
-void doswitch (text_ptr, max_states)
+void doswitch (text_ptr, max_states, cycle)
 char *text_ptr;
 int *max_states;
+int cycle;
 #endif
 {
    int breaks [MAX_BREAKS];
@@ -96,6 +98,18 @@ int *max_states;
    
    if (states == 1)
       gripe ("", "Single component text switch!");
+
+   if (cycle && max_states && *max_states && *max_states != states)
+   {
+      int a = *max_states;
+      int b = states;
+      while (a != b)
+      {
+         if (a < b) a += *max_states;
+         else       b += states;
+      }
+      *max_states = a;
+   }
 
    if (*max_states < states) *max_states = states;
 

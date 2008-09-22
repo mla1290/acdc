@@ -13,7 +13,7 @@ extern int gettxt (int descript, int *max_states, int frag, int *got_holder);
 extern void gripe (char *error_token, char *error_message);
 extern void deprecate (const char *directive, int from, int major);
 extern void storchar (int ch);
-extern void doswitch (char *text_ptr, int *max_states);
+extern void doswitch (char *text_ptr, int *max_states, int cycle);
 extern void write_ref (char *tag, char *token);
 #ifdef EOF
    extern FILE *openout(char *name, char *mode);

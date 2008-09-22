@@ -1,5 +1,6 @@
 /* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 21 Sep 08   MLA           Signal cyclic texts to doswitch().
  * 20 Mar 08   MLA           Bug: fixed text and text line counts.
  *                           BUG: Style 1 feature description fix.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -74,6 +75,7 @@ int *got_holder;
    int in_block = 0;
    int html_tag = 0;
    int null_text = 1;
+   int cycle = (got_holder && *got_holder == 3);   /* A cycling text (a bad hack!) */
 
    states = 0;
    frag = (type == 'f');      /* It's a fragment */
@@ -387,7 +389,7 @@ store:
          {
             if (*text_ptr == SWITCH_START)
             {
-               doswitch(text_ptr, &states);
+               doswitch(text_ptr, &states, cycle);
                continue;
             }
             if (*text_ptr == '#')

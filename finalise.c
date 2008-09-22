@@ -1,5 +1,6 @@
 /* finalise.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 23 May 08   MLA           bug: fixed dcount value.
  * 15 Mar 08   MLA           Version 12 changes.
  * 15 Jan 05   MLA           Use the auto flag for checking lack of use.
  * 06 Mar 03   Stuart Munro  Fix non-ASCII process_proc args declaration.
@@ -355,7 +356,7 @@ fflush (stdout);
 
 /*  Allocate space for description addresses - brief, int and detailed.  */
 
-   dcount = type_base[LOC + 1];
+   dcount = type_base[LOC + 1] - 1;
    if ((brief_base = (int *) calloc (dcount, sizeof(int))) == NULL)
       (void) gripe ("", "Unable to allocate brief description address memory.");
    if ((int_base = (int *) calloc (dcount, sizeof(int))) == NULL)

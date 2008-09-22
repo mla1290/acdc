@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 23 May 08   MLA           Added IFTYPED.
  * 02 May 08   MLA           Allow for global flags instead of var flags.
  * 15 Mar 08   MLA           Version 12 changes.
  * 07 Mar 08   MLA           Removed LIST, NOLIST, XREF and NOXREF.
@@ -120,7 +121,7 @@ struct directive keywords[] =
    {"have",        MINOR, HAVE,        1,   ANY_NUMBER},
    {"near",        MINOR, NEAR,        1,   ANY_NUMBER},
    {"here",        MINOR, HERE,        1,   ANY_NUMBER},
-   {"at",          MINOR, ATLOC,     1,   ANY_NUMBER},
+   {"at",          MINOR, ATLOC,       1,   ANY_NUMBER},
 #ifndef NOVARARGS
    {"anyof",       MINOR, ANYOF,       1,   ANY_NUMBER},
    {"keyword",     MINOR, KEYWORD,     1,   ANY_NUMBER},
@@ -148,6 +149,7 @@ struct directive keywords[] =
    {"ifloc",       MINOR, IFLOC,       2,   ANY_NUMBER},
    {"ifcgi",       MINOR, IFCGI,       0,   0},
    {"ifdoall",     MINOR, IFDOALL,     0,   0},
+   {"iftyped",     MINOR, IFTYPED,     FREE_ARG,   1},
    {"and",         MINOR, AND,         0,   0},
    {"or",          MINOR, OR,          0,   0},
    {"xor",         MINOR, XOR,         0,   0},
@@ -159,7 +161,7 @@ struct directive keywords[] =
    {"eof",         MINOR, EOT,         0,   0},
    {"itobj",       MINOR, ITOBJ,       1,   ANY_NUMBER},
    {"itlist",      MINOR, ITOBJ,       1,   3},     /* For compatibility */
-   {"itplace",     MINOR, ITLOC,     1,   3},
+   {"itplace",     MINOR, ITLOC,       1,   3},
    {"iterate",     MINOR, ITERATE,     3,   3},
    {"next",        MINOR, NEXT,        0,   0},
    {"continue",    MINOR, NEXT,        0,   0},
@@ -228,7 +230,7 @@ struct directive keywords[] =
    {"save",        MINOR, SAVE,        FREE_ARG,   2},
    {"restore",     MINOR, RESTORE,     FREE_ARG,   2},
    {"delete",      MINOR, DELETE,      1,   1},
-   {"savedlist",   MINOR, SAVEDLIST,   FREE_ARG + 1,   2},
+   {"savedlist",   MINOR, SAVEDLIST,   FREE_ARG,   2},
    {"verbatim",    MINOR, VERBATIM,    1,   1},
    {"undo",        MINOR, UNDO,        0,   1},
    {"redo",        MINOR, REDO,        0,   1},

@@ -1,6 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2008.
  */
-#define ACDC_VERSION "12.5, MLA - 12 May 2008"
+#define ACDC_VERSION "12.7, MLA - 22 Sep 2008"
 /*
  * 12 May 08   MLA           Call btinit() using the new calling sequence.
  * 12 Mar 08   MLA           Version 12 (two-pass).

@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 23 May 08   MLA           Added IFTYPED.
  * 01 May 08   MLA           Bug: Must check proc offset to be >= 0!
  * 15 Mar 08   MLA           Version 12 changes.
  * 10 Mar 08   MLA           Added redundant qualifier check.
@@ -631,6 +632,11 @@ char *proccond;
                   minor_type == IFCGI ? "cgi" : "doall");
             break;
             
+         case IFTYPED:
+            cond_ptr += SPRINTF4 (cond_ptr, "%styped(\"%s\")",
+               (not_pending) ? "!" : "", tp [1]);
+            break;
+            
          case IFLOC:
             if (argtyp [1] != OBJ && argtyp [1] != VAR &&
                argtyp [1] != LOCAL)
@@ -1003,7 +1009,7 @@ char *proccond;
          case QUIP:
          case SAY:
          case VALUE:
-          case DESCRIBE:
+         case DESCRIBE:
             if (minor_type == VALUE)
             {
                deprecate ("VALUE", 11, 0);
@@ -1547,7 +1553,7 @@ char *proccond;
 /*         case DELETE:
  *            if (tp[1])
  *            {
- *               if (strcmp (tp[1], "value)
+ *               if (strcmp (tp[1], "value")
  *               {
  *               }
  *               else

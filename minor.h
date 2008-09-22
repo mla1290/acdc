@@ -35,8 +35,9 @@
 # define IFFLAG      16
 # define IFCGI       17
 # define IFDOALL     18
-# define CHANCE      19
-# define QUERY       20
+# define IFTYPED     19
+# define CHANCE      20
+# define QUERY       21
 
 # define NOT         25
 # define AND         26
