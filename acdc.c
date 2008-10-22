@@ -1,7 +1,8 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2008.
  */
-#define ACDC_VERSION "12.7, MLA - 22 Sep 2008"
+#define ACDC_VERSION "12.8, MLA - 22 Oct 2008"
 /*
+ * 22 Oct 08   MLA           Bug: Re-initialise line counts after 1st pass!
  * 12 May 08   MLA           Call btinit() using the new calling sequence.
  * 12 Mar 08   MLA           Version 12 (two-pass).
  * 19 May 07   MLA           Added "quiet".
@@ -268,6 +269,8 @@ int main (argc, argv)
       {
          if (stage)
             break;
+         for (i=0; i<10; i++)
+            line_count[i] = 0;
          continue;
       }
       (void) domajor ();    /* line_status changes here! */

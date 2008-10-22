@@ -1,5 +1,6 @@
 /* domajor.c (acdc) - copyleft Mike Arnautov 1990-2008.
  *
+ * 22 Oct 08   MLA           Bug: fixed handling of the DATE directive.
  * 15 Mar 08   MLA           Version 12 changes.
  * 06 May 07   MLA           Added deprecated warnings.
  * 14 Feb 04   MLA           Converted longs to ints.
@@ -388,16 +389,17 @@ void domajor ()
         if (*date)
            gripe ("", "Repeated DATE directive.");
         strncpy (date, tp [1], sizeof (date) - 1);
-         if (tp [2])
-         {
-            strncat (date, " ", sizeof (date) - strlen (date) - 1);
-            strncat (date, tp [2], sizeof (date) - strlen (date) - 1);
-         }
-         if (tp [3])
-         {
-            strncat (date, " ", sizeof (date) - strlen (date) - 1);
-            strncat (date, tp [3], sizeof (date) - strlen (date) - 1);
-         }
+/*         if (tp [2])
+ *         {
+ *            strncat (date, " ", sizeof (date) - strlen (date) - 1);
+ *            strncat (date, tp [2], sizeof (date) - strlen (date) - 1);
+ *         }
+ *         if (tp [3])
+ *         {
+ *            strncat (date, " ", sizeof (date) - strlen (date) - 1);
+ *            strncat (date, tp [3], sizeof (date) - strlen (date) - 1);
+ *         }
+ */
          *(date + sizeof (date) - 1) = '\0';
          break;
 
