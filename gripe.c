@@ -1,4 +1,4 @@
-/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 06 Mar 03   Stuart Munro  Include string.h.
@@ -16,10 +16,10 @@
 #include <string.h>
 
 #include "acdc.h"
+#include "game.h"
 #include "const.h"
 #include "line.h"
 #include "source.h"
-#include "text.h"
 
 #ifdef __STDC__
 void gripe(char *error_token, char *error_message)

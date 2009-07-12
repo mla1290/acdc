@@ -1,4 +1,4 @@
- /* parse.c (acdc) - copyleft Mike Arnautov 1990-2008.
+ /* parse.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 19 Aug 04   MLA           Added FREE_ARG.
@@ -21,11 +21,13 @@
 #include <string.h>
 
 #include "acdc.h"
+#include "game.h"
 #include "const.h"
 #include "line.h"
 #include "symbol.h"
 #include "major.h"
 #include "text.h"
+#include "source.h"
 
 #ifdef __STDC__
 char *get_token(char **cstring, char *delims)
@@ -118,17 +120,59 @@ int type;
          break;
       }
       
-      if (*tp[index] == '"')
+      if (*tp[index] == '"' && style >= 12)
       {
-/*
-         stash away the parsed line so far, including the breaks.
-         check for C:, R: or F: and if present, remember them and point beyond.
-         allocate the new text name and point it at spare text addr.
-         fudge the line to start at that point (after a leafing blank) and call
-            gettext with the type of 'e' (embedded).
-         return value will give offset into current line just beyond closing "
-         fudge new line from splicing the saved bit with the rest of this one.
-*/
+         struct node *np;
+         char autoname [32];
+         char tmpline [MAXLINE];
+         char *aptr;
+         int frag = 'e';
+         int offset;
+         int tail;
+         int got_holder;
+         
+         sprintf (autoname, "_auto_text_%d_", ++inline_count);
+         np = fndsymb (SYMBOL, autoname);
+         np -> text_type = 0;
+         np -> name_addr = next_addr;
+         offset = tp[index] - line;
+         memcpy (tmpline, line, offset);
+         strcpy (tmpline + offset, autoname);
+         aptr = tp[index] + 1;
+         while (
+            (*aptr == 'c' || *aptr == 'i' || *aptr == 'r' || *aptr == 'f') &&
+               *(aptr + 1) == ':')
+         {
+            if (*aptr == 'f')
+            {
+               if (np -> text_type & FRAGMENT_TEXT)
+                  gripe("", "Repeated 'f:' in inline text definition.");
+               np -> text_type |= FRAGMENT_TEXT;
+            }
+            else
+            {
+               if ( np -> text_type & MORPHING_TEXT)
+                  gripe ("", "Multiple inline text typifiers.");
+               if (*aptr == 'r')
+                  np -> text_type |= RANDOM_TEXT;
+               else if (*aptr == 'c')
+                  np -> text_type |= CYCLIC_TEXT;
+               else if (*aptr == 'i')
+                  np -> text_type |= INCREMENTING_TEXT;
+            }
+            aptr += 2;
+         }
+         memcpy (line + 1, raw_line + (aptr - line), MAXLINE - offset);
+         *line = ' ';
+         line_status = BOL;
+         np -> text_type |= INLINE_TEXT;
+         tail = gettxt (0, &(np -> state_count), &(np -> text_type));
+         offset += strlen (autoname) + 1;
+         strcpy (tmpline + offset, line + tail + 1);
+         recase (LOWERCASE, tmpline + offset);
+         memcpy (line, tmpline, MAXLINE);
+         cptr += strlen(cptr) + 1;         
+         line_status = EOL;
       }
    }
 

@@ -1,4 +1,4 @@
-/* getline.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* getline.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 09 Mar 03   MLA           Replaced trace with debug.

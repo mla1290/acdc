@@ -1,9 +1,11 @@
-/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 04 Jul 09   MLA           Bug: fixed sizes of allocated memory chunks.
+ * 29 Jan 09   MLA           Bug: unfixed dcount for style < 11.
  * 23 May 08   MLA           bug: fixed dcount value.
  * 15 Mar 08   MLA           Version 12 changes.
  * 15 Jan 05   MLA           Use the auto flag for checking lack of use.
- * 06 Mar 03   Stuart Munro  Fix non-ASCII process_proc args declaration.
+ * 06 Mar 03   Stuart Munro  Fix non-ANSI process_proc args declaration.
  * 20 Feb 03   MLA           Chage to code file naming conventions.
  * 07 Jan 03   MLA           Use btree instead of tsearch.
  * 02 Jan 03   MLA           bug: removed a redundant arg to fprintf.
@@ -27,6 +29,7 @@
 #include <string.h>
 
 #include "acdc.h"
+#include "game.h"
 #include "text.h"
 #include "btree.h"
 #include "symbol.h"
@@ -69,7 +72,6 @@ struct node *np;
    printf ("   text_addr[1] %d\n", np -> text_addr[1]);
    printf ("   text_addr[2] %d\n", np -> text_addr[2]);
    printf ("   name_addr %d\n", np -> name_addr);
-   printf ("   needs_qualifier %d\n", np -> needs_qualifier);
    printf ("   text_type %d\n", np -> text_type);
    printf ("   voc_addr %d\n", np -> voc_addr);
    printf ("   word_addr %d\n", np -> word_addr);
@@ -104,7 +106,7 @@ struct node *np;
       if (type == TEXT)
       {
          int trefno = refno - type_base [TEXT];
-         *(text_info + 2 * trefno)     = np -> text_type;
+         *(text_info + 2 * trefno)     = np -> text_type & MORPHING_TEXT;
          *(text_info + 2 * trefno + 1) = np -> state_count;
       }
       if (xref_file)
@@ -356,12 +358,12 @@ fflush (stdout);
 
 /*  Allocate space for description addresses - brief, int and detailed.  */
 
-   dcount = type_base[LOC + 1] - 1;
-   if ((brief_base = (int *) calloc (dcount, sizeof(int))) == NULL)
+   dcount = type_base[LOC + 1] - (style >= 11 ? 1 : 0);
+   if ((brief_base = (int *) calloc (dcount + 1, sizeof(int))) == NULL)
       (void) gripe ("", "Unable to allocate brief description address memory.");
-   if ((int_base = (int *) calloc (dcount, sizeof(int))) == NULL)
+   if ((int_base = (int *) calloc (dcount + 1, sizeof(int))) == NULL)
       (void) gripe ("", "Unable to allocate int description address memory.");
-   if ((detail_base = (int *) calloc (dcount, sizeof(int))) == NULL)
+   if ((detail_base = (int *) calloc (dcount + 1, sizeof(int))) == NULL)
       (void) gripe ("", "Unable to allocate detailed description address memory.");
 
    if ((defs_file = openout("adv5.h","w")) == NULL)
@@ -382,15 +384,15 @@ fflush (stdout);
    btspan (SYMBOL, process_text);
 
    (void) fprintf (defs_file, "int textadr[] = {\n");
-   dump_array(text_base, tcount,  " %8ldL,", 7);
+   dump_array(text_base, tcount,  " %8dL,", 7);
    (void) fprintf (defs_file, "        0L};\n char text_info[] = {\n");
-   dump_array(text_info, 2 * (tcount - type_base[TEXT]),  " %4ld,", 12);
+   dump_array(text_info, 2 * (tcount - type_base[TEXT]),  " %4d,", 12);
    (void) fprintf (defs_file, "    0};\nint brief_desc[] = {\n");
-   dump_array (brief_base, dcount,  " %8ldL,", 7);
+   dump_array (brief_base, dcount,  " %8dL,", 7);
    (void) fprintf (defs_file, "        0L};\nint long_desc[] = {\n");
-   dump_array (int_base, dcount,  " %8ldL,", 7);
+   dump_array (int_base, dcount,  " %8dL,", 7);
    (void) fprintf (defs_file, "        0L};\nint detail_desc[] = {\n");
-   dump_array (detail_base, dcount,  " %8ldL,", 7);
+   dump_array (detail_base, dcount,  " %8dL,", 7);
    (void) fprintf (defs_file, "        0L};\n");
 
    (void) clsfile (defs_file, "adv5.h");      /* Done with this file */

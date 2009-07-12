@@ -1,4 +1,4 @@
-/* initial.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* initial.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 23 May 08   MLA           Added IFTYPED.
  * 02 May 08   MLA           Allow for global flags instead of var flags.

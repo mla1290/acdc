@@ -1,4 +1,4 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 23 May 08   MLA           Added IFTYPED.
  * 01 May 08   MLA           Bug: Must check proc offset to be >= 0!
@@ -79,6 +79,7 @@
 #include <ctype.h>
 
 #include "acdc.h"
+#include "game.h"
 #include "line.h"
 #include "const.h"
 #include "symbol.h"
@@ -1033,9 +1034,12 @@ char *proccond;
                    gripe (tp[1], "Argument not reducible to a text!");
             if (argtyp [1] == TEXT && style >= 11)
             {
-               if (ap[1] -> needs_qualifier == 0 && tp[2])
+               if ((ap[1] -> text_type & QUALIFIER_ALLOWED) == 0 && 
+                    ap[1] -> state_count < 2 && tp[2])
                   gripe (tp[1], "Redundant word qualifier.");
-               else if (((ap[1] -> needs_qualifier) & 1) != 0 && tp[2] == NULL)
+               else if (
+                  (ap[1] -> text_type & QUALIFIER_MANDATORY) == QUALIFIER_MANDATORY 
+                     && tp[2] == NULL)
                   gripe (tp[1], "Missing required word qualifier.");
 	    }
             if (minor_type == DESCRIBE && 

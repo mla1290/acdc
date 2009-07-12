@@ -1,4 +1,4 @@
-/* text.h (acdc) - copyleft Mike Arnautov 1990-2008.
+/* text.h (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 15 Oct 06   MLA           Eliminated redundand NEST_VAR.
@@ -53,11 +53,17 @@ extern void clsfile ();
 #define DWARVISH     '\362'
 #define VHOLDER      '\361'
 
-#define RANDOM_TEXT       1
-#define INCREMENTAL_TEXT  2
-#define CYCLIC_TEXT       3
-#define ASSIGNED_TEXT     4
-#define TIED_TEXT         5
+#define RANDOM_TEXT        1
+#define INCREMENTING_TEXT  2
+#define CYCLIC_TEXT        4
+#define ASSIGNED_TEXT      8
+#define TIED_TEXT         16
+#define FRAGMENT_TEXT     32
+#define INLINE_TEXT       64
+#define MORPHING_TEXT     31
+
+#define QUALIFIER_ALLOWED     512
+#define QUALIFIER_MANDATORY (1024 + QUALIFIER_ALLOWED)
 
 extern int next_addr;
 extern char *text_buf_ptr;
@@ -65,7 +71,6 @@ extern int text_buf_len;
 extern FILE *text_file;
 extern int plain_text;
 extern int memory;
-extern int style;
 extern int text_count;
 extern int switch_count;
 extern int text_lines;

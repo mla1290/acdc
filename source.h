@@ -1,4 +1,4 @@
-/* source.h (acdc) - copyleft Mike Arnautov 1990-2008.
+/* source.h (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 17 Nov 01   MLA           Added the source_* buffers.
@@ -42,3 +42,4 @@ extern FILE *infile [];
 extern char source_stem [];
 extern char source_file [];
 extern char xref_path [];
+extern int inline_count;

@@ -1,5 +1,6 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 31 Mar 09   MLA           Added definition of CGINAME.
  * 30 Apr 08   MLA           Added PROMPT.
  * 22 Mar 08   MLA           BADWORD etc now go from -2 down.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -418,24 +419,22 @@ void organise()
  */
    if ((defs_file = openout("adv1.h","w")) == NULL)
       (void) gripe ("","Unable to open adv1.h (defs.h).");
-   (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", gameid);
-
-/*   if (style <= -1)
-   {
-      strcpy (dbname, gameid);
-      cptr = dbname;
-      while (isalnum (*cptr) || *cptr == '-' || *cptr == '_' || *cptr == '.')
-      {
-         *cptr = tolower (*cptr);
-         cptr++;
-      }
-      *cptr = '\0';
-      strcat (dbname, ".dat");
-   }
-*/
-   (void) fprintf (defs_file, 
-      "#ifdef USEDB\n#define DBNAME \"%s\"\n#endif\n", dbname);
    (void) fprintf (defs_file, "#ifndef ADV1_H\n#define ADV1_H\n");
+   (void) fprintf (defs_file, "#define GAMEID \"%s\"\n", gameid);
+   (void) fprintf (defs_file, "#define STYLE %d\n", style);
+   (void) fprintf (defs_file, "#ifndef ADV01\n");
+   strcpy (dbname, gameid);
+   cptr = dbname;
+   while (isalnum (*cptr))
+   {
+      *cptr = tolower (*cptr);
+      cptr++;
+   }
+   *cptr = '\0';
+   (void) fprintf (defs_file, "#define CGINAME \".%s\"\n", dbname);
+   strcat (dbname, ".dat");
+   (void) fprintf (defs_file, 
+      "#define DBNAME \"%s\"\n", dbname);
    {
       int offset = style >= 12 ? 3 : 0;
       (void) fprintf (defs_file, "#define OBJSIZE %d\n", 
@@ -463,7 +462,6 @@ void organise()
    (void) fprintf (defs_file, "#define NOISE %d\n", NOISE);
    (void) fprintf (defs_file, "#define KNOT %d\n", key_mask);
    (void) fprintf (defs_file, "#define VOCAB_SIZE %d\n", vocab_count);
-   (void) fprintf (defs_file, "#define STYLE %d\n", style);
 
    (void) fprintf (defs_file,
       "#define INHAND %d\n", fndsymb(SYMBOL, "inhand") -> refno);
@@ -704,6 +702,7 @@ void organise()
       procno = np -> proc_base;
       (void) fprintf (defs_file, "#define REPEAT_PROC p%d\n", procno);
    }
+   (void) fprintf (defs_file, "#endif\n");
 
    stage = 1;        /* Restore stage value */
    return;

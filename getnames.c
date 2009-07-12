@@ -1,5 +1,6 @@
-/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 08 Jul 09   MLA           bug: Reinstate style 1 support.
  * 15 Mar 08   MLA           Version 12 changes.
  * 14 Feb 04   MLA           Converted longs to ints.
  * 14 Jul 02   MLA           BUG: Report primary names too!
@@ -50,8 +51,8 @@ struct node *gp;
    if (major_type == NOUN || major_type == ADJECTIVE || 
        major_type == PREPOSITION)  
           current_type = major_type = VERB;
-
-   if (gp)
+   
+   if ((np = gp) != NULL)
    {
       index = 1;
       refno = gp -> refno;

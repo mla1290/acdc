@@ -1,4 +1,4 @@
-/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2008.
+/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2009.
  */
 
 extern char author [40];
@@ -9,7 +9,7 @@ extern int stage;
 #include <malloc.h>
 #include <stdlib.h>
 extern int getline (int key);
-extern int gettxt (int descript, int *max_states, int frag, int *got_holder);
+extern int gettxt (int description, int *max_states, int *text_type);
 extern void gripe (char *error_token, char *error_message);
 extern void deprecate (const char *directive, int from, int major);
 extern void storchar (int ch);

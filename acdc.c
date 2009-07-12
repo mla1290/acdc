@@ -1,6 +1,6 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2009.
  */
-#define ACDC_VERSION "12.8, MLA - 22 Oct 2008"
+#define ACDC_VERSION "12.11, MLA - 05 Jul 2009"
 /*
  * 22 Oct 08   MLA           Bug: Re-initialise line counts after 1st pass!
  * 12 May 08   MLA           Call btinit() using the new calling sequence.
@@ -78,6 +78,7 @@ int level = -1;
 int file_count;
 int total_lines;
 int text_lines;
+int inline_count;
 int line_count [MAXLEVEL];
 char pathname [MAXLEVEL] [MAXLINE + 1];
 FILE *infile [MAXLEVEL];
@@ -273,6 +274,7 @@ int main (argc, argv)
             line_count[i] = 0;
          continue;
       }
+      inline_count = 0;
       (void) domajor ();    /* line_status changes here! */
    }
 

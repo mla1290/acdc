@@ -1,5 +1,7 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 12 Jul 09   MLA           Need tag handling in style 10 too.
+ * 03 Jul 09   MLA           Bug: had to revert to style 11 centered block handling.
  * 21 Sep 08   MLA           Signal cyclic texts to doswitch().
  * 20 Mar 08   MLA           Bug: fixed text and text line counts.
  *                           BUG: Style 1 feature description fix.
@@ -39,6 +41,7 @@
 #include <ctype.h>
 
 #include "acdc.h"
+#include "game.h"
 #include "const.h"
 #include "line.h"
 #include "symbol.h"
@@ -46,13 +49,12 @@
 #include "text.h"
 
 #ifdef __STDC__
-int gettxt (int description, int *max_states, int type, int *got_holder)
+int gettxt (int description, int *max_states, int *text_type)
 #else
-int gettxt (description, max_states, type, got_holder)
+int gettxt (description, max_states, text_type)
 int description;
 int *max_states;
-int type;
-int *got_holder;
+int *text_type;
 #endif
 {
    char *text_ptr;
@@ -67,6 +69,7 @@ int *got_holder;
    int  implicit_switch;
    int escaped;
    int frag;
+   int in_line;
    struct node *nest_text;
    char nest_name [33];
    char *nest_ptr;
@@ -75,10 +78,11 @@ int *got_holder;
    int in_block = 0;
    int html_tag = 0;
    int null_text = 1;
-   int cycle = (got_holder && *got_holder == 3);   /* A cycling text (a bad hack!) */
+   int cycle;
 
    states = 0;
-   frag = (type == 'f');      /* It's a fragment */
+   frag = (text_type && (*text_type & FRAGMENT_TEXT));
+   in_line = (text_type && (*text_type & INLINE_TEXT));
    text_count++;
    text_ptr = text_buf_ptr + 1;
    text_top = text_ptr + text_buf_len - 15;
@@ -248,6 +252,11 @@ a space before the first token on this line */
          *text_ptr++ = ' ';
    escaped = 0;
 
+/*   if (in_block == 2)
+ *      while (*line_ptr == ' ' || *line_ptr == '\t')
+ *         line_ptr++;
+ */
+    
 next_char:
 
    if (text_ptr > text_top)
@@ -263,6 +272,8 @@ next_char:
 
    if (escaped == 0)
    {
+      if (in_line && *line_ptr == '"')
+         goto store;
       if (*line_ptr == LOGICAL_ESCAPE)
          escaped = 1;
       else if (style <= 1 && *line_ptr == '!' && *(line_ptr + 1) == '`')
@@ -389,18 +400,19 @@ store:
          {
             if (*text_ptr == SWITCH_START)
             {
-               doswitch(text_ptr, &states, cycle);
+               doswitch(text_ptr, &states, (text_type && (*text_type & CYCLIC_TEXT)));
                continue;
             }
             if (*text_ptr == '#')
             {
-               if (got_holder && style > 1) 
-                  *got_holder |= 1024;              /* Will need a qualifier */
+               if (text_type && style > 1) 
+                  *text_type |= QUALIFIER_MANDATORY;    /* Will need a qualifier */
                *text_ptr = HOLDER;
             }
             if (*text_ptr == '$' && style >= 11)
             {
-               if (got_holder) *got_holder |= 1024; /* Will need a qualifier */
+               if (text_type) 
+                  *text_type |= QUALIFIER_MANDATORY;    /* Will need a qualifier */
                *text_ptr = VHOLDER;
             }
             else if (*text_ptr == SILENCE)
@@ -435,5 +447,5 @@ end_of_text:
 
    if (max_states)
       *max_states = states;
-   return (description);
+   return (in_line ? line_ptr - line : description);
 }

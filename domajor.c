@@ -1,4 +1,4 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 22 Oct 08   MLA           Bug: fixed handling of the DATE directive.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -63,6 +63,7 @@ int check_text;
 {
    int need_qualifier = 0;
    int embedded_text = 0;
+   int qualifiers = 0;
    
    line_status = EOL;
 
@@ -70,7 +71,7 @@ int check_text;
    {
       if (getline (IGNORE_BLANK) == EOF || (*line != ' ' && *line != '\t'))
          break;
-      if (check_text == 1 && need_qualifier == 0)
+      if (check_text == 1)
       {
          char *cptr = line;
          char lc = '\0';
@@ -79,9 +80,9 @@ int check_text;
             if (lc != '\\')
             {
                if (*cptr == '$' || *cptr == '#')
-                  need_qualifier |= 1;    /* Qualifier required */
+                  qualifiers |= QUALIFIER_MANDATORY;
                if (*cptr == '[' || *cptr == '{')
-                  need_qualifier |= 2;    /* Qualifier allowed (may be implicit) */
+                  qualifiers |= QUALIFIER_ALLOWED;
                lc = *cptr;
             }
             else
@@ -89,16 +90,67 @@ int check_text;
             cptr++;
          }
       }
-      if (check_text == 2)
+      if (check_text == 2 && style >= 12)
       {
+         char autoname [32];
+         struct node *np;
+         int got_end;
          char *cptr = line + 1;           /* We *know* first one is a blank! */
+
          while (*cptr == ' ' || *cptr == '\t')
             cptr++;
-/* ............................... */
+         while (* cptr && *cptr != ' ' && *cptr != '\t')
+            cptr++;
+         while (*cptr == ' ' || *cptr == '\t')
+            cptr++;
+         if (*cptr != '"')
+         {
+            line_status = EOL;
+            continue;
+         }
+         sprintf (autoname, "_auto_text_%d_", ++inline_count);
+         np = addsymb (SYMBOL, autoname, TEXT, type_counts[TEXT]++);
+         got_end = 0;
+         while (1)
+         {
+            char lc = '\0';
+            cptr++;
+            while (*cptr)
+            {
+               if (lc != '\\')
+               {
+                  lc = *cptr;
+                  if (*cptr == '$' || *cptr == '#')
+                     np -> text_type |= QUALIFIER_MANDATORY;
+                  else if (*cptr == '[' || *cptr == '{')
+                     np -> text_type |= QUALIFIER_ALLOWED;
+                  if (*cptr == '"')
+                  {
+                     got_end = 1;
+                     break;
+                  }
+               }
+               else
+                  lc = '\0';
+               cptr++;
+            }
+            if (got_end)
+            {
+               line_status = EOL;
+               break;
+            }
+            if (getline (IGNORE_BLANK) == EOF || 
+                (*line != ' ' && *line != '\t'))
+            {
+               line_status = BOL;
+               break;
+            }
+            cptr = line;
+         }
       }
       line_status = EOL;
    }
-   return (need_qualifier);
+   return (qualifiers);
 }
 
 #ifdef __STDC__
@@ -132,13 +184,11 @@ void domajor ()
    extern void dominor (char *, char *);
    extern void opnsrc (char *, int);
    extern void organise (void);
-   extern void getdesc (struct node *);
    extern struct node *getnames (int, struct node *);
 #else
    extern void dominor ();
    extern void opnsrc ();
    extern void organise ();
-   extern void getdesc ();
    extern struct node *getnames ();
 #endif
 
@@ -444,11 +494,21 @@ void domajor ()
 	 }
          else
          {
+            int description = 1;
+            int max_states = 0;
+            int states = 0;
+
             char ch = *tp[1];
             if (ch == '-' || ch == '+' || ch == '!')
                tp[1]++;
             np = fndsymb (SYMBOL, tp[1]);
-            getdesc (np);
+            while (description > 0)
+            {
+               np -> text_addr [description - 1] = next_addr;
+               description = gettxt (description, &states, NULL);
+               if (max_states < states) max_states = states;
+            }
+            np -> state_count = max_states;
          }
          return;          /* Preserve line_status as BOL ! */
 
@@ -457,11 +517,10 @@ void domajor ()
          line_status = EOL;
          type = texttyp();
 
-         if (type & 16)
-         {
+         if (type & FRAGMENT_TEXT)
             major_type = FRAGMENT;
-            type &= 15;
-         }
+         else if (major_type == FRAGMENT)
+            type |= FRAGMENT_TEXT;
          
          if (tp[1] == NULL) /* Might have changed! */
          {
@@ -475,16 +534,13 @@ void domajor ()
             if (xref && tp [1] != dummy_text)
                write_ref ((char *)(major_type == TEXT ? " TXT " : " FRG "), 
                   tp [1]);
-            np -> needs_qualifier = skip (1);
-            np -> text_type = type;
+            np -> text_type = type | skip (1);
          }
          else
          {
             np = fndsymb (SYMBOL, tp[2] ? tp[2] : tp[1]);
             np -> name_addr = next_addr; /* Sort of "name" */
-            type = np -> text_type;
-            (void) gettxt (0, &(np -> state_count), 
-               major_type == FRAGMENT ? 'f' : 0, &type);
+            (void) gettxt (0, &(np -> state_count), &(np -> text_type));
          }
          return;          /* preserve the BOL line_status! */
 
@@ -522,7 +578,7 @@ void domajor ()
             (np -> proc_count)++;
             if (xref)
                write_ref (" PRC ", tp [1]);
-            skip (2);
+            (void) skip (2);
             return;
          }
 

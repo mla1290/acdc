@@ -1,4 +1,4 @@
-/* opnsrc.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* opnsrc.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 19 May 07   MLA           Added "quiet".

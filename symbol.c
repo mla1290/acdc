@@ -1,4 +1,4 @@
-/* symbol.c (acdc) - copyleft Mike Arnautov 1990-2008.
+/* symbol.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 07 May 07   Stuart Munro  bug: declare chksymb before fndsymb.
@@ -22,6 +22,7 @@
 #include <setjmp.h>
 
 #include "acdc.h"
+#include "game.h"
 #include "symbol.h"
 #include "const.h"
 #include "btree.h"
@@ -47,6 +48,11 @@ struct node *addsymb (btroot, name, type, refno)
       (void) gripe (name, "Unable to allocate memory.");
 
    len = strlen (name);
+   if (style < 10 && len > 12)
+   {
+      len = 12;
+      *(name + 12) = '\0';
+   }
    if ((np -> name = (char *) malloc (len + 1)) == NULL)
       (void) gripe (name, "Unable to allocate symbol name storage.");
    
@@ -73,15 +79,23 @@ struct node *addsymb (btroot, name, type, refno)
 /*======================================================================*/
 
 #ifdef __STDC__
-struct node *fndsymb (int btroot, char *name)
+struct node *fndsymb (int btroot, char *fname)
 #else
-struct node *fndsymb (btroot, name)
+struct node *fndsymb (btroot, fname)
 int btroot;
-char *name;
+char *fname;
 #endif
 {
    struct node *np;
+   char nbuf [160];
+   char *name = nbuf;
+   int maxlen = sizeof (nbuf) - 1;
    
+   if (style < 10 && strlen (fname) > 12)
+      maxlen = 12;
+   strncpy (nbuf, fname, maxlen);
+   *(name + maxlen) = '\0';
+
    int testing = (btroot & 32);
    btroot &= ROOT_MASK;
 
