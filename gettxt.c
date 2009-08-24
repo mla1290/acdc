@@ -1,5 +1,6 @@
 /* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 12 Jul 09   MLA           Need tag handling in style 10 too.
  * 03 Jul 09   MLA           Bug: had to revert to style 11 centered block handling.
  * 21 Sep 08   MLA           Signal cyclic texts to doswitch().
@@ -78,7 +79,6 @@ int *text_type;
    int in_block = 0;
    int html_tag = 0;
    int null_text = 1;
-   int cycle;
 
    states = 0;
    frag = (text_type && (*text_type & FRAGMENT_TEXT));
@@ -264,10 +264,10 @@ next_char:
       text_buf_len += TEXT_INIT_LEN;
       old_text_ptr = text_buf_ptr;
       if ((text_buf_ptr = (char *)realloc(text_buf_ptr, text_buf_len)) == NULL)
-         (void) gripe ("","Unable to extend text buffer.");
+         gripe ("","Unable to extend text buffer.");
       text_ptr = text_buf_ptr + (text_ptr - old_text_ptr);
       text_top = text_buf_ptr + text_buf_len - 16;
-      (void) printf ("Text buffer size increased to %d.\n", text_buf_len);
+      printf ("Text buffer size increased to %d.\n", text_buf_len);
    }
 
    if (escaped == 0)
@@ -298,22 +298,22 @@ next_char:
          while (*line_ptr != NEST_END)
          {
             if (*line_ptr == ' ')
-               (void) gripe ("", "A blank in embedded text name!");
+               gripe ("", "A blank in embedded text name!");
             if (*line_ptr == '\n')
-               (void) gripe ("", "Missing '}' to end nested text name!");
+               gripe ("", "Missing '}' to end nested text name!");
             if (nest_len >= sizeof (nest_name) - 1)
-               (void) gripe ("", "Nested text name too long!");
+               gripe ("", "Nested text name too long!");
             *nest_ptr++ = tolower (*line_ptr++);
             nest_len++;
          }
          *nest_ptr = '\0';
          if ((nest_text = fndsymb (SYMBOL, nest_name)) == NULL)
-            (void) gripe (nest_name, "Nested text name not known.");
+            gripe (nest_name, "Nested text name not known.");
          nest_type = nest_text -> type;
          (nest_text -> used_count)++;
          *text_ptr++ = NEST_TEXT;
          if (nest_type > TEXT)
-            (void) gripe (nest_name, "Not reducible to text.");
+            gripe (nest_name, "Not reducible to text.");
          if (nest_type == OBJ)
             *text_ptr++ = 0;
          else if (nest_type == LOC)
@@ -366,7 +366,7 @@ store:
    }
 
    if (implicit_switch && explicit_switch)
-      (void) gripe ("","Explicit/implicit switch clash.");
+      gripe ("","Explicit/implicit switch clash.");
 
    if (implicit_switch)
       *text_ptr++ = SWITCH_END;
@@ -392,9 +392,9 @@ store:
          }
          else if (*text_ptr == NEST_TEXT)
          {
-            (void) storchar (*text_ptr++);
-            (void) storchar (*text_ptr++);
-            (void) storchar (*text_ptr++);
+            storchar (*text_ptr++);
+            storchar (*text_ptr++);
+            storchar (*text_ptr++);
          }
          else
          {
@@ -419,12 +419,12 @@ store:
                *text_ptr = '\0';
             else if (*text_ptr == '_' && style >= 10)
                *text_ptr = NBSP;
-            else if (*text_ptr == '<' && style >= 11)
+            else if (*text_ptr == '<' && style >= 10)
             {
                *text_ptr = TAG_START;
                html_tag = 1;
             }
-            else if (*text_ptr == '>' && style >= 11)
+            else if (*text_ptr == '>' && style >= 10)
             {
                *text_ptr = TAG_END;
                html_tag = 0;
@@ -432,16 +432,16 @@ store:
          }
       }
       escaped = 0;
-      (void) storchar (*text_ptr);
+      storchar (*text_ptr);
    }
 
 end_of_text:
    if (!frag)
-      (void) storchar ('\n');
+      storchar ('\n');
    if (in_block)
    {
-      (void) storchar (BLOCK_END);
-      (void) storchar ('\n');
+      storchar (BLOCK_END);
+      storchar ('\n');
    }
    storchar('\0');
 

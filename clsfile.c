@@ -25,9 +25,9 @@ char *text;
 {
    if (ferror (outfile))
    {
-      (void) perror ("Fatal!");
-      (void) gripe (text, "Unable to complete file.");
+      perror ("Fatal!");
+      gripe (text, "Unable to complete file.");
    }
-   (void) fclose (outfile);
+   fclose (outfile);
    return;
 }

@@ -40,6 +40,6 @@ void write_ref (tag, token)
          exit (1);
       }
    }
-   (void) fprintf (xref_file, "%24s   %s   %6d %s\n",
+   fprintf (xref_file, "%24s   %s   %6d %s\n",
       token, tag, line_count [level], pathname [level]);
 }

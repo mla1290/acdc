@@ -53,7 +53,7 @@ next_token:
    else if (*cstring_ptr == '@' && isalpha (*(++cstring_ptr)))
       numbase = -1;
    else
-      (void) gripe (cstring,"Not reducible to a constant value.");
+      gripe (cstring,"Not reducible to a constant value.");
 
    next_value = 0;
    if (numbase > 0)
@@ -90,7 +90,7 @@ next_token:
       goto next_token;
    }
    else if (*cstring_ptr != '\0')
-      (void) gripe (cstring, "Bad operator in constant expression.");
+      gripe (cstring, "Bad operator in constant expression.");
 
    return (value);
 }

@@ -41,7 +41,7 @@ int addr;
       voc_buf_len += 1024;      /* Extend by one Kbyte */
       old_voc_ptr = voc_buf_ptr;
       if ((voc_buf_ptr = (char *) realloc (voc_buf_ptr, voc_buf_len)) == NULL)
-         (void) gripe ("","Unable to extend vocabulary buffer.");
+         gripe ("","Unable to extend vocabulary buffer.");
       voc_ptr = voc_buf_ptr + (voc_ptr - old_voc_ptr);
       voc_top = voc_buf_ptr + voc_buf_len - 20;
    }

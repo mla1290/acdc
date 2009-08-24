@@ -115,24 +115,24 @@ int varsize;
    }
    if (locals)
    {
-      (void) fprintf (code_file, "   int lval [%d];\n", locals);
-      (void) fprintf (code_file, "   short lbts [%d];\n", locals * varsize);
+      fprintf (code_file, "   int lval [%d];\n", locals);
+      fprintf (code_file, "   short lbts [%d];\n", locals * varsize);
    }
 
    ppl = param_root;
    locals = 0;
    while (ppl && ppl -> in_use)
    {
-      (void) fprintf (code_file, "   lval[%d] = ", locals);
+      fprintf (code_file, "   lval[%d] = ", locals);
       if (ppl -> arg)
-         (void) fprintf (code_file, "par%d;\n", locals);
+         fprintf (code_file, "par%d;\n", locals);
       else
-         (void) fprintf (code_file, "0;\n");
-      (void) fprintf (code_file, "   lbts [%d] = ", locals * varsize);
+         fprintf (code_file, "0;\n");
+      fprintf (code_file, "   lbts [%d] = ", locals * varsize);
       if (ppl -> arg)
-         (void) fprintf (code_file, "typ%d;\n", locals);
+         fprintf (code_file, "typ%d;\n", locals);
       else
-         (void) fprintf (code_file, "0;\n");
+         fprintf (code_file, "0;\n");
       ppl = ppl -> next;
       locals++;
    }

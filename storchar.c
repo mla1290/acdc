@@ -1,5 +1,6 @@
 /* storchar.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 31 Jul 09   MLA           BUG: text file screwed up in plain mode!
  * 09 Mar 03   MLA           Store as binary or ASCII data depending on 
  *                           value of memory. 
  * 03 Mar 03   MLA           Store as ASCII data.
@@ -19,14 +20,18 @@
 void storchar (int ch)
 #else
 void storchar (ch)
-int ch;
+intch;
 #endif
 {
-/* PRIVATE */
+/*   ch &= 255; */
    if (plain_text)
-/* ENDPRIVATE */
-      fputc(ch, text_file);
-/* PRIVATE */
+   {
+      if (memory == 3)
+         fprintf (text_file,"%s%d", 
+            (next_addr + 1) % 16 == 0 ? ",\n" : ",", ch);
+      else
+         fputc(ch, text_file);
+   }
    else
    {
       int mask;
@@ -40,15 +45,11 @@ int ch;
          mask = 'X';
       mask = (17 * mask + 13) & 127;
       if (memory == 3)
-      {
-         fprintf (text_file, ",%d", ch ^ *gameid_ptr ^ mask);
-         if ((next_addr + 1) % 16 == 0)
-            fputc ('\n', text_file);
-      }
+         fprintf (text_file, "%s%d", 
+            (next_addr + 1) % 16 == 0 ? ",\n" : ",", ch ^ *gameid_ptr ^ mask);
       else
          fputc(ch ^ *gameid_ptr ^ mask, text_file);
    }
-/* ENDPRIVATE */
    next_addr++;
    return;
 }

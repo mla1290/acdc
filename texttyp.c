@@ -1,11 +1,14 @@
 /* texttyp.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
- * 25 Mar 08   MLA               Split off from domajor.c
+ * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
+ * 25 Mar 08   MLA           Split off from domajor.c
  *
  */
  
 #include <stdio.h>
+#include <string.h>
 
+#include "acdc.h"
 #include "line.h"
 #include "text.h"
 
@@ -33,19 +36,19 @@ int texttyp ()
          if (typ)
          {
             if (type && (typ & MORPHING_TEXT))
-               (void) gripe (NULL, "Incompatible text typifiers.");
+               gripe (NULL, "Incompatible text typifiers.");
             if (typ & FRAGMENT_TEXT)
                frag = 1;
             else
                type = typ;
             index = 1;
-            while (tp [index] = tp [index + 1]) /* Yes, I do mean an assignement! */
+            while ((tp [index] = tp [index + 1]) != NULL)
                index++;
             typ = 0;            
             continue;
          }
          else if (tp [2])
-            (void) gripe (tp [1], "Illegal typifier.");
+            gripe (tp [1], "Illegal typifier.");
          break;
       }
       break;

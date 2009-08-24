@@ -5,6 +5,8 @@ extern char author [40];
 extern char datbuf [];
 extern int quiet;
 extern int stage;
+extern int swap;
+extern char *acdc_version;
 #ifdef __STDC__
 #include <malloc.h>
 #include <stdlib.h>

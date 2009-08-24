@@ -64,7 +64,7 @@ int cycle;
          {
             *text_ptr = SW_BREAK;
             if (states == MAX_BREAKS - 2)
-               (void) gripe ("","Too many switch breaks.");
+               gripe ("","Too many switch breaks.");
             if (*(text_ptr + 1) == '=' && 
                (*(text_ptr + 2) == SWITCH_BREAK || 
                 *(text_ptr + 2) == SWITCH_END))
@@ -113,12 +113,12 @@ int cycle;
 
    if (*max_states < states) *max_states = states;
 
-   (void) storchar (SW_START);
-   (void) storchar (states);
+   storchar (SW_START);
+   storchar (states);
    for (offset = 0; offset < states; offset++)
    {
-      (void) storchar (breaks [offset] / 256);
-      (void) storchar (breaks [offset] % 256);
+      storchar (breaks [offset] / 256);
+      storchar (breaks [offset] % 256);
    }
    return;
 }

@@ -1,5 +1,6 @@
 /* openout.c (acdc) - copyleft Mike Arnautov 2002 - 2008.
  *
+ * 03 Aug 09   MLA           Extended copyleft notice to all non-adv550 games.
  * 06 Mar 03   Stuart Munro  Remove unused variables.
  * 04 Mar 03   MLA           Changed copyleft code to be unconditional.
  * 18 Nov 01   MLA           Added the copyleft code for adv660, adv770.
@@ -17,6 +18,7 @@
 
 #include "acdc.h"
 #include "source.h"
+#include "game.h"
 
 #ifdef __STDC__
 FILE *openout (
@@ -51,18 +53,12 @@ FILE *openout (file, mode)
       }
    }
 
-   if (strncmp (source_file, "adv660", 6) || strncmp (source_file, "adv770", 6))
+   if (*title && *author && strcmp (title, "adv550") != 0)
    {
       brk = file + strlen (file) - 2;
       if (*brk == '.' && (*(brk + 1) == 'c' || *(brk + 1) == 'h'))
-      {
-         strcpy (full_name, source_file);
-         brk = strrchr (full_name, '.');
-         if (brk) *brk = '\0';
-         if (*author)
             fprintf (outfile, "/* %s: %s - copyleft %s, %s. */\n\n", file,
-               full_name, author, datbuf);
-      }
+               title, author, datbuf);
    }
 
    return (outfile);

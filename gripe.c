@@ -33,17 +33,17 @@ char *error_message;
    while (*rptr == ' ' || *rptr == '\t') rptr++;
    *(rptr + strlen (rptr) - 1) = '\0';
    
-   (void) fprintf (stderr, "*ERROR* ");
+   fprintf (stderr, "*ERROR* ");
    if (stage != -1)     /* I.e. not called from organise() */
    {
-      (void) fprintf (stderr, "in \"%s\"\n", rptr);
+      fprintf (stderr, "in \"%s\"\n", rptr);
       if (*pathname[level] != '\0')
-         (void) fprintf (stderr, "%s, line %d: ", pathname[level], 
+         fprintf (stderr, "%s, line %d: ", pathname[level], 
             line_count[level]);
    }
    if (error_token && *error_token != '\0')
-      (void) fprintf (stderr, "%s - ", error_token);
-   (void) fprintf (stderr, "%s\n\n", error_message);
+      fprintf (stderr, "%s - ", error_token);
+   fprintf (stderr, "%s\n\n", error_message);
    exit (ERROR);
 }
 

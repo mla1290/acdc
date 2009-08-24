@@ -1,5 +1,6 @@
 /* openfrst.c (acdc) - copyleft Mike Arnautov 2002 - 2008.
  *
+ * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 12 Mar 08   MLA           Varsion 12 changes.
  * 24 Jan 03   MLA           Allowed the .acode variant of the suffix.
  * 10 Mar 02   MLA           Moved opening of xref file to writeref.c
@@ -40,7 +41,7 @@ void openfrst (file_spec)
    char *sfxptr = NULL;
    char fullname [128];
    
-   if (nameptr = strrchr (file_spec, SEP))
+   if ((nameptr = strrchr (file_spec, SEP)) != NULL)
    {
       int len;
       *nameptr++ = '\0';

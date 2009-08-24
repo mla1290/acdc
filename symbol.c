@@ -45,7 +45,7 @@ struct node *addsymb (btroot, name, type, refno)
    btroot &= ROOT_MASK;
          
    if ((np = (struct node *) malloc (sizeof (struct node))) == NULL)
-      (void) gripe (name, "Unable to allocate memory.");
+      gripe (name, "Unable to allocate memory.");
 
    len = strlen (name);
    if (style < 10 && len > 12)
@@ -54,9 +54,9 @@ struct node *addsymb (btroot, name, type, refno)
       *(name + 12) = '\0';
    }
    if ((np -> name = (char *) malloc (len + 1)) == NULL)
-      (void) gripe (name, "Unable to allocate symbol name storage.");
+      gripe (name, "Unable to allocate symbol name storage.");
    
-   (void) strcpy (np -> name, name);
+   strcpy (np -> name, name);
    np -> type = type;
    np -> state_count = (type == VAR) ? 1 : 0;
    np -> used_count = 0;
@@ -72,7 +72,7 @@ struct node *addsymb (btroot, name, type, refno)
    np -> refno = refno;
 
    if (btadd (btroot, np) == 0)
-      (void) gripe (name, "Symbol already defined.");
+      gripe (name, "Symbol already defined.");
    return (np);
 }
 
@@ -90,13 +90,13 @@ char *fname;
    char nbuf [160];
    char *name = nbuf;
    int maxlen = sizeof (nbuf) - 1;
+   int testing = (btroot & 32);
    
    if (style < 10 && strlen (fname) > 12)
       maxlen = 12;
    strncpy (nbuf, fname, maxlen);
    *(name + maxlen) = '\0';
 
-   int testing = (btroot & 32);
    btroot &= ROOT_MASK;
 
    if (*name == '-' || *name == '+' || *name == '!' || *name == '=')
@@ -108,7 +108,7 @@ char *fname;
       if (np == NULL)
       {
          if (testing) return (NULL);
-         (void) gripe (name, "Symbol not found.");
+         gripe (name, "Symbol not found.");
       }
       np = np -> symbol;
    }

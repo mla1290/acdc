@@ -1,5 +1,6 @@
  /* parse.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 15 Mar 08   MLA           Version 12 changes.
  * 19 Aug 04   MLA           Added FREE_ARG.
  * 03 Mar 03   MLA           Use new-style get_token().
@@ -69,11 +70,11 @@ int type;
    int minargs;
    int direct_call = 0;
 
-   (void) strcpy (raw_line, line);
+   strcpy (raw_line, line);
    recase (LOWERCASE, line);
    tp [1] = NULL;
    if ((tp[0] = get_token(&cptr, " ,\n\0")) == NULL)
-      (void) gripe ("","Null directive???");
+      gripe ("","Null directive???");
    if (type != NONE)
    {
       if ((np = fndsymb(type, tp[0])) == NULL)
@@ -91,7 +92,7 @@ int type;
          cptr += strlen(cptr) - 1;
          if (*cptr == '\n') *cptr = '\0';
          if (! *tp[1])
-            (void) gripe (tp[0], "Missing \"rest of line\" argument.");
+            gripe (tp[0], "Missing \"rest of line\" argument.");
          return (np);
       }
    }
@@ -112,7 +113,7 @@ int type;
       }
 
       if (index > ANY_NUMBER)
-          (void) gripe ("","*Far* too many arguments!");
+          gripe ("","*Far* too many arguments!");
 
       if (! *tp[index] || *tp[index] == '{' || *tp[index] == '#')
       {
@@ -126,10 +127,8 @@ int type;
          char autoname [32];
          char tmpline [MAXLINE];
          char *aptr;
-         int frag = 'e';
          int offset;
          int tail;
-         int got_holder;
          
          sprintf (autoname, "_auto_text_%d_", ++inline_count);
          np = fndsymb (SYMBOL, autoname);
@@ -185,9 +184,9 @@ int type;
       if (minargs >= FREE_ARG)
          minargs -= FREE_ARG - 1;
       if (index < minargs)
-         (void) gripe (tp[0],"Not enough arguments.");
+         gripe (tp[0],"Not enough arguments.");
       if (index > np -> max_args)
-         (void) gripe (tp[0],"Too many arguments.");
+         gripe (tp[0],"Too many arguments.");
    }
    return (np);
 }

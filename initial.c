@@ -1,5 +1,6 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 23 May 08   MLA           Added IFTYPED.
  * 02 May 08   MLA           Allow for global flags instead of var flags.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -113,7 +114,7 @@ struct directive keywords[] =
    {"name" ,       MAJOR, NAME  ,      1,   REST},
    {"title",       MAJOR, NAME,        1,   REST},
    {"dbname",      MAJOR, NAME,        1,   1},           /* Compatibility */
-   {"version",     MAJOR, VERSION,     1,   REST},
+   {"version",     MAJOR, GVERSION,    1,   REST},
    {"date",        MAJOR, DATE,        1,   REST},
    {"gameid",      MAJOR, GAMEID,      1,   REST},        /* Compatibility */
    {"author",      MAJOR, AUTHOR,      1,   REST},
@@ -253,10 +254,6 @@ void initial()
 #endif
 {
    int index;
-   char *tptr;
-   int len;
-   int type;
-   int mask;
    struct node *np;
    
    index = 0;
@@ -277,11 +274,11 @@ void initial()
    line_status = EOL;
 
    if ((text_buf_ptr = (char *) calloc (text_buf_len, sizeof(char))) == NULL)
-      (void) gripe ("text_buf", "Unable to allocate text buffer.");
+      gripe ("text_buf", "Unable to allocate text buffer.");
    if ((cond_buf_ptr = (char *) calloc (cond_buf_len, sizeof(char))) == NULL)
-      (void) gripe ("cond_buf", "unable to allocate condition buffer.");
+      gripe ("cond_buf", "unable to allocate condition buffer.");
    if ((voc_buf_ptr = (char *) calloc (voc_buf_len, sizeof(char))) == NULL)
-      (void) gripe ("voc_buf", "unable to allocate vocabulary buffer.");
+      gripe ("voc_buf", "unable to allocate vocabulary buffer.");
    voc_ptr = voc_buf_ptr;
    voc_top = voc_buf_ptr + VOC_INIT_LEN - 20;
 

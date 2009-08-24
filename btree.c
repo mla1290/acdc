@@ -1,14 +1,15 @@
 /* btree.c - balanced tree handling on a linear stack.
  *           Copyleft Mike Arnautov 2001-2008.
  *
- * 12 May 08   MLA               Removed 32-bit dependency.
- * 07 May 07   Stuart Munro      bug: fix declaration and casting of btact args.
- * 03 Sep 06   MLA               Bug: All longs should be ints!
- * 23 Dec 05   MLA               roots[] must be long, not int!
- * 06 Mar 03   Stuart Munro      bug: fix non-ASCII btfind args declaration;
- *                               include stdlib.h; remove unused variables.
- * 07 Jan 03   MLA               Adapted for use by acdc.
- * 24 Mar 01   MLA               Initial coding.
+ * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
+ * 12 May 08   MLA           Removed 32-bit dependency.
+ * 07 May 07   Stuart Munro  bug: fix declaration and casting of btact args.
+ * 03 Sep 06   MLA           Bug: All longs should be ints!
+ * 23 Dec 05   MLA           roots[] must be long, not int!
+ * 06 Mar 03   Stuart Munro  bug: fix non-ASCII btfind args declaration;
+ *                           include stdlib.h; remove unused variables.
+ * 07 Jan 03   MLA           Adapted for use by acdc.
+ * 24 Mar 01   MLA           Initial coding.
  */
  
 #if defined(__cplusplus) && !defined(__STDC__)
@@ -338,7 +339,7 @@ void (*btact)();
       switch (state)
       {
          case 0:
-            if (next = *(root + node + BT_UP + BT_LSIB))
+            if ((next = *(root + node + BT_UP + BT_LSIB)) != 0)
                node = next;
             else 
                state = (*(root + node + BT_UP + BT_RSIB)) ? 1 : 2;
@@ -358,7 +359,7 @@ void (*btact)();
                /* And just fall through! */
             
          case 3:
-            if (next = *(root + node + BT_UP))
+            if ((next = *(root + node + BT_UP)) != 0)
                state = (*(root + next + BT_UP + BT_LSIB) == node) ? 1 : 3;
             node = next;
             break;

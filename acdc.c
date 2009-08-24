@@ -1,7 +1,8 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2009.
  */
-#define ACDC_VERSION "12.11, MLA - 05 Jul 2009"
+#define ACDC_VERSION "12.15, 22 Aug 2009"
 /*
+ * 22 Jul 09   MLA           New command line processing.
  * 22 Oct 08   MLA           Bug: Re-initialise line counts after 1st pass!
  * 12 May 08   MLA           Call btinit() using the new calling sequence.
  * 12 Mar 08   MLA           Version 12 (two-pass).
@@ -59,10 +60,12 @@
 #include "acdc.h"
 char author [40];
 char datbuf [16];
-int memory;
+int memory = -1;
 time_t now;
 int quiet = 0;
 int stage = 0;
+int swap = 0;
+char *acdc_version = ACDC_VERSION;
 
 #include "const.h"
 
@@ -132,6 +135,62 @@ int next_procno;
 char *cond_buf_ptr;
 int cond_buf_len = COND_INIT_LEN;
 
+/*====================================================================*/
+
+#ifdef __STDC__
+int check_it (int val, char *arg1, char **arg2)
+#else
+int check_it (val, arg1, arg2)
+int val;
+char *arg1;
+char **arg2;
+#endif
+{
+   if (val >= 0)
+   {
+      if (*arg2 == NULL)
+      {
+         *arg2 = arg1;
+         return (val);
+      }
+      else
+         fprintf (stderr, 
+            "*ERROR* Conflicting command line keywords '%s' and '%s'!\n", *arg2, arg1);
+   }
+   else if (val == -2)
+      fprintf (stderr, "*ERROR* Bad command line argument '%s'!\n", arg1);
+      
+   fprintf (stderr, "\nUsage: acdc [options] [(path)name]\n");
+   fprintf (stderr, "\nWhere allowed options are:\n");
+   fprintf (stderr, "   -plain (abbreviable to -p)\n");
+   fprintf (stderr, "       Do not encrypt game text.\n");
+   fprintf (stderr, "   -preload (abbreviable to -pr; default keyword)\n");
+   fprintf (stderr, "       Do not create a separate text file.\n");
+   fprintf (stderr, "   -file-page [<npage>] (abbrviable to -fp)\n");
+   fprintf (stderr, "       Create a separate .dat file of text messages and\n");
+   fprintf (stderr, "       use an internal paging mechanism. The optional\n");
+   fprintf (stderr, "       <npage> argument defaults to 32 and specifies the\n");
+   fprintf (stderr, "       number of 1KB buffers to use for paging.\n");
+   fprintf (stderr, "   -file-memory (abbreviable to -fm)\n");
+   fprintf (stderr, "       Read all of the text file into memory on startup.\n");
+   fprintf (stderr, "   -file-read (abbreviable to -fr)\n");
+   fprintf (stderr, "       Read all text as required from the text file.\n");
+   fprintf (stderr, "   -xref (abbreviable to -x)\n");
+   fprintf (stderr, "       Generate the .xrf cross-reference listing.\n");
+   fprintf (stderr, "   -no-warnings (abbreviable to -nw)\n");
+   fprintf (stderr, "       Suppress warnings about unused symbols.\n");
+   fprintf (stderr, "   -quiet (abbreviable to -q)\n");
+   fprintf (stderr, "       Suppress most of the standard info messages.\n");
+   fprintf (stderr, "   -debug (abbreviable to -d)\n");
+   fprintf (stderr, "       Add A-code source as comments in C source and\n");
+   fprintf (stderr, "       announce entry to distinct A-code chunks.\n");
+   fprintf (stderr, "   -help (abbreviable to -h)\n");
+   fprintf (stderr, "       Print this message.\n\n");
+   exit (val >= 0 ? ERROR : OK);
+}
+
+/*====================================================================*/
+
 #ifdef __STDC__
 int main (
    int argc, 
@@ -143,9 +202,6 @@ int main (argc, argv)
 #endif
 {
    int offset;
-   int file = 0;
-   int readin = 0;
-   int builtin = 0;
    int len;
    int i;
    char *arg;
@@ -156,10 +212,9 @@ int main (argc, argv)
    extern void initial ();
    extern void finalise ();
    
-   (void) printf (
-      "[A-code to C translator, version %s]\n", ACDC_VERSION);
+   printf ("[A-code to C translator, version %s]\n", ACDC_VERSION);
    srand ((unsigned int)(now = time (NULL)));
-   (void) strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
+   strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
 
 /* Initialise the search stacks.
  */
@@ -172,66 +227,57 @@ int main (argc, argv)
    *source_path = '\0';
    if (argc > 1)
    {
+      char *larg = NULL;
       while (--argc)
       {
          argv++;
          len = strlen(*argv);
          arg = *argv;
-         if (len == 1 && **argv == '-')  arg = "-rhubarb";
-         else if (strncmp (arg, "-debug", len) == 0)
+         if (*arg == '-' && *(arg + 1) == '-')  /* Cater for GNU-style keywords */
+            arg++;     
+         if (strncmp (arg, "-debug", len) == 0)
             debug = 1;
          else if (strncmp (arg, "-plain", len) == 0)
             plain_text = 1;
          else if (strncmp (arg, "-xref", len) == 0)
             xref = 2;         /* "Super TRUE" -- noxref doesn't override */
-         else if (strncmp (arg, "-file", len) == 0)
-            file = 1;
-         else if (strncmp (arg, "-memory", len) == 0)
-            readin = 1;
+         else if (strncmp (arg, "-file-read", len) == 0 || strcmp (arg, "-fr") == 0)
+            memory = check_it (0, arg, &larg);
+         else if (strncmp (arg, "-file-memory", len) == 0 || strcmp (arg, "-fm") == 0)
+            memory = check_it (2, arg, &larg);
+         else if (strncmp (arg, "-file-page", len) == 0 || strcmp (arg, "-fp") == 0)
+         {
+            memory = check_it (1, arg, &larg);
+            if (*(argv + 1) != NULL)
+            {
+               if ((swap = atoi (*(argv + 1))) > 0)
+               {
+                  if (swap < 16)
+                     swap = 16;
+                  else if (swap > 128)
+                     swap = 128;
+                  argv++;
+               }
+            }
+            else
+               swap = 32;
+         }
          else if (strncmp (arg, "-preload", len) == 0)
-            builtin = 1;
+            memory = check_it (3, arg, &larg);
          else if (strncmp (arg, "-quiet", len) == 0)
-            quiet = 1;
+            quiet |= 1;
+         else if (strncmp (arg, "-no-warnings", len) == 0 || strcmp (arg, "-nw") == 0)
+            quiet |= 2;
+         else if (strncmp (arg, "-help", len) == 0)
+            check_it (-1, NULL, NULL);
          else if (*arg == '-')
-         {
-            (void) puts ("\n   Usage: acdc [options] [(path)name]") ;
-            (void) puts ("\n   Where allowed options are:");
-            (void) puts ("      -plain (abbreviable to -p)");
-            (void) puts ("         Do not encrypt text.");
-            (void) puts ("      -file (abbreviable to -f)");
-            (void) puts ("         Read all text directly from the text file.");
-            (void) puts ("      -memory (abbreviable to -m)");
-            (void) puts ("         Read all text into memory on startup.");
-            (void) puts ("      -preload (abbreviable to -pr)");
-            (void) puts ("         Do not create a separate text file.");
-            (void) puts ("      -xref (abbreviable to -x)");
-            (void) puts ("         Generate the .xrf cross-reference listing.");
-            (void) puts ("      -quiet (abbreviable to -q)");
-            (void) puts ("         Suppressmost of the standard info messages.");
-            (void) puts ("      -debug (abbreviable to -d)");
-            (void) puts ("         Add A-code source as comments in C source and");
-            (void) puts ("         announce entry to distinct A-code chunks.\n");
-            return (ERROR);
-         }
+            check_it (-2, arg, NULL);
          else         
-            (void) strcpy (source_path, arg);
+            strcpy (source_path, arg);
       }
-      if (file)
-      {
-         if (readin || builtin)
-         {
-            (void) puts ("Keyword -file no tcompatible with -memory or -preload.");
-            exit (ERROR);
-         }
-         memory = 0;
-      }
-      else if (builtin)
-         memory = 3;
-      else if (readin)
-         memory = 2;
-      else
-         memory = 1;
    }
+   if (memory == -1)
+      memory = 3;
    
    if (getenv ("PLAIN"))
       plain_text = 1;
@@ -240,11 +286,11 @@ int main (argc, argv)
    
    if (*source_path == '\0')
    {
-      (void) printf ("Adventure name: ");
-      (void) fgets (source_path, 99, stdin);
+      printf ("Adventure name: ");
+      fgets (source_path, 99, stdin);
       if ((offset = strlen (source_path)) <= 1)
       {
-         (void) printf ("No input file specified.\n");
+         printf ("No input file specified.\n");
          return (ERROR);
       }
       source_path [offset - 1] = '\0';
@@ -257,7 +303,7 @@ int main (argc, argv)
 
 /* Initialise search trees and other things */
 
-   (void) initial ();
+   initial ();
    
    while (line_status != EOF || stage == 0)
    {
@@ -275,34 +321,34 @@ int main (argc, argv)
          continue;
       }
       inline_count = 0;
-      (void) domajor ();    /* line_status changes here! */
+      domajor ();    /* line_status changes here! */
    }
 
-   (void) finalise ();
+   finalise ();
 
    free(text_buf_ptr);
    free(voc_buf_ptr);
 
    if (xref_file) fclose (xref_file);
    
-   if (quiet == 0)
+   if ((quiet & 1) == 0)
    {
-      (void) printf (
+      printf (
          "Finished translating \"%s\":\n", source_file);
-      (void) printf (
+      printf (
          "   ... Program files: %d\n", file_count);
-      (void) printf (
-         "   ... Program lines: %ld - code %ld, text %ld\n",
+      printf (
+         "   ... Program lines: %d - code %d, text %d\n",
             total_lines, total_lines - text_lines, text_lines);
-      (void) printf (
+      printf (
          "   ... Vocabulary size: %d vocabulary words\n", vocab_count);
-      (void) printf (
-         "   ... Separate texts: %ld, embedding %d text switches\n", 
+      printf (
+         "   ... Separate texts: %d, embedding %d text switches\n", 
             text_count, switch_count);
-      (void) printf (
-         "   ... Overall data file size: %ld bytes\n", next_addr);
+      printf (
+         "   ... Overall data file size: %d bytes\n", next_addr);
    }
    else
-      (void) puts ("done.");
+      puts ("done.");
    return (OK);
 }

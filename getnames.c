@@ -45,7 +45,7 @@ struct node *gp;
    struct node *vp;
    
    if (*tp [1] == '=')
-      (void) gripe (tp [1], "No preceding word to equate to!");
+      gripe (tp [1], "No preceding word to equate to!");
    index = 0;
    current_type = real_type = major_type;
    if (major_type == NOUN || major_type == ADJECTIVE || 

@@ -65,7 +65,7 @@
 
 #define NAME        40         /* Game's name */
 #define AUTHOR      41         /* Game's author */
-#define VERSION     42         /* Game's version string */
+#define GVERSION    42         /* Game's version string */
 #define DATE        43         /* Game's date */
 #define STYLE       44         /* A-code style */
 

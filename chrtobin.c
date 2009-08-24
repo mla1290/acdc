@@ -29,19 +29,19 @@ char *cstring;
 
    raw_cstring = cstring;
    if (*cstring == '\0')
-      (void) gripe (cstring,"Null number.");
+      gripe (cstring,"Null number.");
    if (*cstring == '-')
       sign = -1;
    if (*cstring == '-' || *cstring == '+')
       cstring++;
    if (*cstring == '\0')
-      (void) gripe (raw_cstring,"A naked sign is not a number!");
+      gripe (raw_cstring,"A naked sign is not a number!");
    if (*cstring == '0')
       base = 8;
    while (*cstring != '\0')
    {
       if (*cstring < '0' || *cstring >= '0' + base)
-         (void) gripe (raw_cstring,"Not an octal or decimal number.");
+         gripe (raw_cstring,"Not an octal or decimal number.");
       value = base * value + (*cstring++) - '0';
    }
    return (sign * value);

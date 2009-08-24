@@ -1,5 +1,6 @@
 /* domajor.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 22 Oct 08   MLA           Bug: fixed handling of the DATE directive.
  * 15 Mar 08   MLA           Version 12 changes.
  * 06 May 07   MLA           Added deprecated warnings.
@@ -61,8 +62,6 @@ int skip (check_text)
 int check_text;
 #endif
 {
-   int need_qualifier = 0;
-   int embedded_text = 0;
    int qualifiers = 0;
    
    line_status = EOL;
@@ -166,13 +165,11 @@ void domajor ()
    int flag_type;
    int major_type;
    int type;
-   int proc;
    int next_arg;
    char *chr;
    char *tag;
    char dummy_text [10];
    char proc_name [10];
-   struct proc_member *proc_id;
    char prochead [MAXLINE];
    char proccond [MAXLINE];
    char proctemp [MAXLINE];
@@ -194,10 +191,10 @@ void domajor ()
 
    line_ptr = line;
    if (isspace (*line_ptr))
-      (void) gripe ("","Major directives must start in column 1!");
+      gripe ("","Major directives must start in column 1!");
 
    if ((np = parse (MAJOR)) == NULL)
-      (void) gripe (tp [0], "Unknown major directive.");
+      gripe (tp [0], "Unknown major directive.");
 
    index = 0;
    major_type = np -> refno;
@@ -216,7 +213,7 @@ void domajor ()
       {
          case STYLE:
          case NAME:
-         case VERSION:
+         case GVERSION:
          case DATE:
          case AUTHOR:
          case GAMEID:
@@ -239,7 +236,7 @@ void domajor ()
          case STATE:
          case CONSTANT:
          case FLAGS:
-            (void) skip (0);
+            skip (0);
             return;              /* Preserving line status as BOL! */
             
          case PROCEDURE:
@@ -250,12 +247,12 @@ void domajor ()
             zapparam ();
             if (minor_count >= CODE_CHUNK)
             {
-               (void) clsfile (code_file, "Automatic code");
-               (void) sprintf (proc_name, "adv%02d.c", ++code_part);
+               clsfile (code_file, "Automatic code");
+               sprintf (proc_name, "adv%02d.c", ++code_part);
                if ((code_file = openout (proc_name, "w")) == NULL)
-                  (void) gripe (proc_name, "Unable to open new code chunk.");
-               (void) fprintf (code_file, "#include \"adv0.h\"\n");
-               (void) fprintf (code_file, "#include \"adv3.h\"\n");
+                  gripe (proc_name, "Unable to open new code chunk.");
+               fprintf (code_file, "#include \"adv0.h\"\n");
+               fprintf (code_file, "#include \"adv3.h\"\n");
                minor_count = 0;
             }
             break;
@@ -271,7 +268,7 @@ void domajor ()
       case CONCLUDE:
          recase (LOWERCASE, tp [1]);
          if (level == MAXLEVEL - 1)
-            (void) gripe ("", "Includes nested too deeply.");
+            gripe ("", "Includes nested too deeply.");
          opnsrc (tp [1], major_type == INCLUDE ? 1 : 0);
          break;
 
@@ -285,11 +282,11 @@ void domajor ()
          if (xref)
             write_ref ("ARRAY", tp [index]);
          if (tp [++index] == NULL)
-            (void) gripe ("", "Missing array size specification.");
+            gripe ("", "Missing array size specification.");
          if ((value = atoi (tp [index])) <= 0)
-            (void) gripe (tp [index], "Invalid array size specification.");
+            gripe (tp [index], "Invalid array size specification.");
          if (tp [++index] != NULL)
-            (void) gripe ("", "Invalid array declaration.");
+            gripe ("", "Invalid array declaration.");
          np -> state_count = value;
          type_counts[VAR] += value;
          break;
@@ -307,7 +304,7 @@ void domajor ()
          deprecate ("SYNONYM", 10, 1);
          if ((np = fndsymb (TESTSYMBOL, tp [1])) != NULL)
          {
-            (void) getnames (np -> type, np);
+            getnames (np -> type, np);
             break;
          }           /* Otherwise assume a constant and fall through! */
             
@@ -324,11 +321,11 @@ void domajor ()
             else 
             {
                if ((np = fndsymb (SYMBOL, tp [1])) == NULL)
-                  (void) gripe (tp [1], "Unknown symbol used as a flag type.");
+                  gripe (tp [1], "Unknown symbol used as a flag type.");
                flag_type = np -> refno;
                if (flag_type != OBJFLAG && flag_type != LOCFLAG && 
                   flag_type != VARFLAG)
-                     (void) gripe (tp [1], "Illegal flag type.");
+                     gripe (tp [1], "Illegal flag type.");
                if (flag_type != VARFLAG)
                   value = LAST_DEFAULT_FLAG;
             }
@@ -336,12 +333,12 @@ void domajor ()
             if ((line_status = getline (IGNORE_BLANK)) == EOF)
                return;
             if (*line_ptr != ' ' && *line_ptr != '\t')
-               (void) gripe ("", "FLAGS directive has no flag declarations!");
+               gripe ("", "FLAGS directive has no flag declarations!");
             if (flag_type != VARFLAG && 
                flag_field_size [flag_type] > LAST_DEFAULT_FLAG)
-                  (void) gripe (tp [1], 
+                  gripe (tp [1], 
                      "Only one set of this flag type allowed!");
-            (void) parse (NONE);
+            parse (NONE);
             index = 0;
          }
 
@@ -352,7 +349,7 @@ void domajor ()
             {
                if (major_type != FLAGS && flag_type != OBJFLAG && 
                   flag_type != LOCFLAG)
-                     (void) gripe ("", 
+                     gripe ("", 
                         "Only object and place flags may have vocab entries.");
 
 /* Adjective flags not in use yet, so for the moment ignore the vocabulary
@@ -363,10 +360,10 @@ void domajor ()
             if (isdigit (*chr) || *chr == '-')
             {
                if (major_type == FLAGS)
-                  (void) gripe (tp [index], 
+                  gripe (tp [index], 
                      "FLAGS may not be set to explicit values!");
                if (tp [index + 1] == NULL)
-                  (void) gripe ("", "Missing symbolic name.");
+                  gripe ("", "Missing symbolic name.");
                value = chrtobin (tp [index]);
             }
             else
@@ -378,7 +375,7 @@ void domajor ()
                flag_field_size [flag_type] = value;
             else if (major_type == STATE)
                if (value < 0)
-                  (void) gripe ("", "Negative state values not legal!");
+                  gripe ("", "Negative state values not legal!");
 
             while (tp [++index] != NULL)
             {
@@ -399,7 +396,7 @@ void domajor ()
                return;
             if (*line_ptr != ' ' && *line_ptr != '\t')
                break;
-            (void) parse (NONE);
+            parse (NONE);
             index = 0;
          }
          return;          /* Preserve line_status as BOL ! */
@@ -413,10 +410,10 @@ void domajor ()
          {
             index = chrtobin (tp[2] ? tp[2] : tp[1]);
             if (index > 12)
-               (void) gripe ("",
+               gripe ("",
                   "Style higher than current maximum of 12!");
             if (index < 10 && style != 1)
-               (void) gripe ("", "Style values from 2 to 9 are meaningless.");
+               gripe ("", "Style values from 2 to 9 are meaningless.");
             style = index;
          }
          break;
@@ -428,7 +425,7 @@ void domajor ()
          *(title + sizeof (title) - 1) = '\0';
          break;
 
-      case VERSION:
+      case GVERSION:
          if (*version)
             gripe ("", "Repeated VERSION directive.");
          strncpy (version, tp [1], sizeof (version) - 1);
@@ -490,7 +487,7 @@ void domajor ()
             else if (np -> type != major_type)
                gripe (tp [1], "Alreday declared as other than a place or an object.");
             np -> refno = type_counts[major_type]++;
-            (void) skip (0);
+            skip (0);
 	 }
          else
          {
@@ -524,7 +521,7 @@ void domajor ()
          
          if (tp[1] == NULL) /* Might have changed! */
          {
-            (void) sprintf (dummy_text, ".t%d", next_dummy++);
+            sprintf (dummy_text, ".t%d", next_dummy++);
             tp [1] = dummy_text;
          }
       
@@ -540,7 +537,7 @@ void domajor ()
          {
             np = fndsymb (SYMBOL, tp[2] ? tp[2] : tp[1]);
             np -> name_addr = next_addr; /* Sort of "name" */
-            (void) gettxt (0, &(np -> state_count), &(np -> text_type));
+            gettxt (0, &(np -> state_count), &(np -> text_type));
          }
          return;          /* preserve the BOL line_status! */
 
@@ -578,7 +575,7 @@ void domajor ()
             (np -> proc_count)++;
             if (xref)
                write_ref (" PRC ", tp [1]);
-            (void) skip (2);
+            skip (2);
             return;
          }
 
@@ -586,39 +583,39 @@ void domajor ()
          if (major_type != PROCEDURE)
             (np -> used_count)++;
          if (debug)
-            (void) fprintf (code_file, "/* %s */\n", tp [1]);
+            fprintf (code_file, "/* %s */\n", tp [1]);
          if (np -> proc_count > 1)
             (np -> proc_done)++;
          refno = np -> proc_base + (np -> proc_done);
-         (void) fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", refno);
+         fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", refno);
          next_arg = 0;
          if (tp [2] == NULL || major_type != PROCEDURE)
-            (void) fprintf (code_file, "void");
+            fprintf (code_file, "void");
          else
          {
             for (index = 2; tp [index]; index++, next_arg++)
             {
                addparam (1, tp [index]);
-               (void) fprintf (code_file, "%sint typ%d,int par%d",
+               fprintf (code_file, "%sint typ%d,int par%d",
                   index == 2 ? "" : ",", index - 2, index - 2);
                if (xref)
                   write_ref (" ARG ", tp [index]);
             }
          }
-         (void) fprintf (code_file, ")\n#else\nvoid p%d(", refno);
+         fprintf (code_file, ")\n#else\nvoid p%d(", refno);
          if (tp [2])
          {
             for (index = 2; tp [index]; index++)
-               (void) fprintf (code_file, "%styp%d,par%d",
+               fprintf (code_file, "%styp%d,par%d",
                   index == 2 ? "" : ",", index - 2, index - 2);
-            (void) fprintf (code_file, ")\n");
+            fprintf (code_file, ")\n");
             for (index = 2; tp [index]; index++)
-               (void) fprintf (code_file, "int typ%d;int par%d;\n",
+               fprintf (code_file, "int typ%d;int par%d;\n",
                   index - 2, index - 2);
          }
          else
-            (void) fprintf (code_file, ")\n");
-         (void) fprintf (code_file, "#endif\n{\n");
+            fprintf (code_file, ")\n");
+         fprintf (code_file, "#endif\n{\n");
          if (debug)
          {
             strcpy (prochead, tp [0]);
@@ -639,14 +636,13 @@ void domajor ()
             {
                np = fndsymb (SYMBOL, tp [index]);
                if (np -> type > VERB)
-                  (void) gripe (tp [index], "Not a verb, place or object.");
-               (void) sprintf (proctemp, 
-                  "if (!KEY(%d)) return;\n", np -> refno);
+                  gripe (tp [index], "Not a verb, place or object.");
+               sprintf (proctemp, "if (!KEY(%d)) return;\n", np -> refno);
                strcat (proccond, proctemp);
             }
 	 }
          dominor (prochead, proccond);
-         (void) fprintf (code_file, "}\n");
+         fprintf (code_file, "}\n");
          return;
 
       case DEFINE:
@@ -658,7 +654,7 @@ void domajor ()
             if (np -> type != VAR)
             {
                if (np -> type != LOC)
-                  (void) gripe (tp [index], "Only places can be defined!");
+                  gripe (tp [index], "Only places can be defined!");
                if (fndsymb (VOCAB, tp [index]) == NULL)
                {
                   struct node *vp = storword (tp [index], LOC, next_vocaddr);
@@ -671,7 +667,7 @@ void domajor ()
          break;
 
       default:
-         (void) gripe (tp [0], "Unimplemented major directive.");
+         gripe (tp [0], "Unimplemented major directive.");
    }
    line_status = EOL;
    return;

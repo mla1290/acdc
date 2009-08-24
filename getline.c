@@ -36,7 +36,7 @@ next_line:
       while (level >= 0)
       {
          if (fgets (line, MAXLINE, infile [level]) != NULL) break;
-         (void) fclose (infile [level]);
+         fclose (infile [level]);
          infile [level] = NULL;
          if (--level < 0)
          {

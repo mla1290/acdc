@@ -1,5 +1,8 @@
 /* finalise.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 22 Jul 09   MLA           Optionally suppressed unused symbol warnings.
+ * 21 Jul 09   MLA           Added the VERSION comment to adv1.h.
+ * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 04 Jul 09   MLA           Bug: fixed sizes of allocated memory chunks.
  * 29 Jan 09   MLA           Bug: unfixed dcount for style < 11.
  * 23 May 08   MLA           bug: fixed dcount value.
@@ -136,18 +139,17 @@ struct node *np;
 #endif
 {
    int refno;
-   int feature;
 
    if (np -> type <= VERB)
       refno = np -> refno = (np -> symbol) -> refno;
    else
       refno = 0;
 
-   (void) fprintf (defs_file, "%4d, ", refno);
+   fprintf (defs_file, "%4d, ", refno);
    if (++node_count == 11)
    {
       node_count = 0;
-      (void) fputc ('\n', defs_file);
+      fputc ('\n', defs_file);
    }
    return;
 }
@@ -161,11 +163,11 @@ void process_voc_type(np)
 struct node *np;
 #endif
 {
-   (void) fprintf (defs_file, "%4d, ", np -> type);
+   fprintf (defs_file, "%4d, ", np -> type);
    if (++node_count == 11)
    {
       node_count = 0;
-      (void) fputc ('\n', defs_file);
+      fputc ('\n', defs_file);
    }
    return;
 }
@@ -179,12 +181,12 @@ void process_voc_addr(np)
 struct node *np;
 #endif
 {
-   (void) fprintf (defs_file, "%8ldL, ", 
+   fprintf (defs_file, "%8dL, ", 
       base_voc_addr + np -> voc_addr);
    if (++node_count == 7)
    {
       node_count = 0;
-      (void) fputc ('\n', defs_file);
+      fputc ('\n', defs_file);
    }
    return;
 }
@@ -198,12 +200,12 @@ void process_voc_word(np)
 struct node *np;
 #endif
 {
-   (void) fprintf (defs_file, "%8ldL, ", 
+   fprintf (defs_file, "%8dL, ", 
       base_voc_addr + np -> word_addr);
    if (++node_count == 7)
    {
       node_count = 0;
-      (void) fputc ('\n', defs_file);
+      fputc ('\n', defs_file);
    }
    return;
 }
@@ -227,12 +229,12 @@ int group;
     base = addr;
     while(count-- > 0)
     {
-       (void) fprintf (defs_file, pattern, *addr++);
+       fprintf (defs_file, pattern, *addr++);
        tokens++;
        if (tokens == group)
        {
           tokens=0;
-          (void) fputc ('\n', defs_file);
+          fputc ('\n', defs_file);
        }
     }
     free(base);
@@ -254,9 +256,9 @@ struct node *np;
    int type   = np -> type;
    int count  = np -> proc_count;
 
-   if (quiet == 0 && style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
+   if ((quiet & 2) == 0 && style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
       (np -> auto_flag) == '\0' && strncmp (np -> name, "spare..", 7))
-         (void) printf ("   %-22s symbol defined but not used.\n", np -> name);
+         printf ("   %-22s symbol defined but not used.\n", np -> name);
 
    if (count == 0) return;
 
@@ -267,30 +269,30 @@ struct node *np;
 
    if (count == 1) return;
 
-   (void) fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", procno);
+   fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", procno);
    if ((np -> arg_count) > 0)
       for (i = 0; i < (np -> arg_count); i++)
-         (void) fprintf (code_file, "%sint typ%d,int par%d", i ? "," : "", i, i);
-   (void) fprintf (code_file, ")\n#else\nvoid p%d(", procno);      
+         fprintf (code_file, "%sint typ%d,int par%d", i ? "," : "", i, i);
+   fprintf (code_file, ")\n#else\nvoid p%d(", procno);      
    if ((np -> arg_count) > 0)
    {
       for (i = 0; i < (np -> arg_count); i++)
-         (void) fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
+         fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
       for (i = 0; i < (np -> arg_count); i++)
-         (void) fprintf (code_file, "int typ%d;int par%d;\n", i, i);
+         fprintf (code_file, "int typ%d;int par%d;\n", i, i);
    }
    else
-      (void) fprintf (code_file, ")\n");
-   (void) fprintf (code_file, "#endif\n{\n");
+      fprintf (code_file, ")\n");
+   fprintf (code_file, "#endif\n{\n");
    for (j = 1; j <= (np -> proc_count); j++)
    {
-      (void) fprintf (code_file, "   p%d(", procno + j);
+      fprintf (code_file, "   p%d(", procno + j);
       if (np -> arg_count > 0)
          for (i = 0; i < (np -> arg_count); i++)
-            (void) fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
-      (void) fprintf (code_file, ");\n");         
+            fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
+      fprintf (code_file, ");\n");         
    }
-   (void) fprintf (code_file, "   return;\n}\n");
+   fprintf (code_file, "   return;\n}\n");
    return;
 }
 
@@ -320,54 +322,54 @@ fflush (stdout);
       storchar(*voc_ptr++);
    if (memory == 3)
       fprintf (text_file, "};\n");
-   (void) clsfile (text_file, "Text");
+   clsfile (text_file, "Text");
 
-   (void) fprintf (defs_file, "#define TEXT_BYTES %ld\n", next_addr);
-   (void) fprintf (defs_file, "#endif\n");
-   (void) clsfile (defs_file, "adv1.h");     /* Ahhh.... done at last! */
+   fprintf (defs_file, "#define TEXT_BYTES %d\n", next_addr);
+   fprintf (defs_file, "#endif\n");
+   clsfile (defs_file, "adv1.h");     /* Ahhh.... done at last! */
 
 /* Write the vocabulary include file */
 
    if ((defs_file = openout("adv2.h","w")) == NULL)
-      (void) gripe ("adv2.h","Unable to open (adv2.h).");
+      gripe ("adv2.h","Unable to open (adv2.h).");
 
-   (void) fprintf (defs_file, "short voc_refno[] = {\n");
+   fprintf (defs_file, "short voc_refno[] = {\n");
    node_count = 0;
    btspan(VOCAB, process_voc_refno);
-   (void) fprintf (defs_file, "   0};\nshort voc_type[] = {\n");
+   fprintf (defs_file, "   0};\nshort voc_type[] = {\n");
    node_count = 0;
    btspan(VOCAB, process_voc_type);
-   (void) fprintf (defs_file, "   0};\nint voc_addr[] = {\n");
+   fprintf (defs_file, "   0};\nint voc_addr[] = {\n");
    node_count = 0;
    btspan(VOCAB, process_voc_addr);
-   (void) fprintf (defs_file, "   0};\nint voc_word[] = {\n");
+   fprintf (defs_file, "   0};\nint voc_word[] = {\n");
    node_count = 0;
    btspan(VOCAB, process_voc_word);
-   (void) fprintf (defs_file, "   0};\n");
+   fprintf (defs_file, "   0};\n");
 
-   (void) clsfile (defs_file, "adv2.h");      /* Vocabulary done */
+   clsfile (defs_file, "adv2.h");      /* Vocabulary done */
 
 /*  Allocate the space for message addresses and types  */
 
    tcount = type_base[TEXT + 1];
    if ((text_base = (int *) calloc (tcount, sizeof(int))) == NULL)
-      (void) gripe ("", "Unable to allocate text address memory.");
+      gripe ("", "Unable to allocate text address memory.");
    if ((text_info = (int *) calloc (2 * (tcount - type_base[TEXT]), 
       sizeof(int))) == NULL)
-        (void) gripe ("", "Unable to allocate text type memory.");
+         gripe ("", "Unable to allocate text type memory.");
 
 /*  Allocate space for description addresses - brief, int and detailed.  */
 
    dcount = type_base[LOC + 1] - (style >= 11 ? 1 : 0);
    if ((brief_base = (int *) calloc (dcount + 1, sizeof(int))) == NULL)
-      (void) gripe ("", "Unable to allocate brief description address memory.");
+      gripe ("", "Unable to allocate brief description address memory.");
    if ((int_base = (int *) calloc (dcount + 1, sizeof(int))) == NULL)
-      (void) gripe ("", "Unable to allocate int description address memory.");
+      gripe ("", "Unable to allocate int description address memory.");
    if ((detail_base = (int *) calloc (dcount + 1, sizeof(int))) == NULL)
-      (void) gripe ("", "Unable to allocate detailed description address memory.");
+      gripe ("", "Unable to allocate detailed description address memory.");
 
    if ((defs_file = openout("adv5.h","w")) == NULL)
-      (void) gripe ("","Unable to open adv5.h (words.h).");
+      gripe ("","Unable to open adv5.h (words.h).");
 
 /* A cosmetic fix to avoid worrying nosey parkers. The relevant array elements
  * don't get actually referenced by the game. They shouldn't have been
@@ -383,79 +385,79 @@ fflush (stdout);
    
    btspan (SYMBOL, process_text);
 
-   (void) fprintf (defs_file, "int textadr[] = {\n");
+   fprintf (defs_file, "int textadr[] = {\n");
    dump_array(text_base, tcount,  " %8dL,", 7);
-   (void) fprintf (defs_file, "        0L};\n char text_info[] = {\n");
+   fprintf (defs_file, "        0L};\n char text_info[] = {\n");
    dump_array(text_info, 2 * (tcount - type_base[TEXT]),  " %4d,", 12);
-   (void) fprintf (defs_file, "    0};\nint brief_desc[] = {\n");
+   fprintf (defs_file, "    0};\nint brief_desc[] = {\n");
    dump_array (brief_base, dcount,  " %8dL,", 7);
-   (void) fprintf (defs_file, "        0L};\nint long_desc[] = {\n");
+   fprintf (defs_file, "        0L};\nint long_desc[] = {\n");
    dump_array (int_base, dcount,  " %8dL,", 7);
-   (void) fprintf (defs_file, "        0L};\nint detail_desc[] = {\n");
+   fprintf (defs_file, "        0L};\nint detail_desc[] = {\n");
    dump_array (detail_base, dcount,  " %8dL,", 7);
-   (void) fprintf (defs_file, "        0L};\n");
+   fprintf (defs_file, "        0L};\n");
 
-   (void) clsfile (defs_file, "adv5.h");      /* Done with this file */
+   clsfile (defs_file, "adv5.h");      /* Done with this file */
 
    proc_count = type_base [VERB + 1];
    if ((proc_array = (int *) calloc (proc_count, sizeof (int))) == NULL)
-      (void) gripe ("", "Unable to allocate procedure array space.");
+      gripe ("", "Unable to allocate procedure array space.");
 
    if ((proc_args = (int *) calloc (next_procno, sizeof (int))) == NULL)
-      (void) gripe ("", "Unable to allocate argument array space.");
+      gripe ("", "Unable to allocate argument array space.");
 
-   (void) clsfile (code_file, "Automatic code");
-   (void) sprintf (proc_name, "adv%02d.c", ++code_part);
+   clsfile (code_file, "Automatic code");
+   sprintf (proc_name, "adv%02d.c", ++code_part);
    if ((code_file = openout (proc_name, "w")) == NULL)
-      (void) gripe (proc_name, "Unable to open final code chunk.");
-   (void) fprintf (code_file, "#include \"adv3.h\"\n");
+      gripe (proc_name, "Unable to open final code chunk.");
+   fprintf (code_file, "#include \"adv3.h\"\n");
 
    btspan (SYMBOL, process_proc);
-   (void) fprintf (code_file, 
+   fprintf (code_file, 
       "#ifdef __STDC__\nvoid p0(void)\n#else\nvoid p0()\n#endif\n{return;}\n");
 
-   (void) clsfile (code_file, "Final automatic code");
+   clsfile (code_file, "Final automatic code");
    if ((code_file = openout ("adv3.h", "w")) == NULL)
-      (void) gripe ("finalise", "Unable to open adv3.h.");
+      gripe ("finalise", "Unable to open adv3.h.");
 
-   (void) fprintf (code_file, 
+   fprintf (code_file, 
       "#ifdef __STDC__\nextern void fake(int x, int y);\n");
    for (index = 0; index < next_procno; index++)
    {
-      (void) fprintf (code_file, "extern void p%d(", index);
-      if (count = *(proc_args + index))
+      fprintf (code_file, "extern void p%d(", index);
+      if ((count = *(proc_args + index)) != 0)
          while (count--)
-            (void) fprintf (code_file, "int,int%s", count ? "," : "");
+            fprintf (code_file, "int,int%s", count ? "," : "");
       else
-         (void) fprintf (code_file, "void");
-      (void) fprintf (code_file, ");\n");
+         fprintf (code_file, "void");
+      fprintf (code_file, ");\n");
    }
-   (void) fprintf (code_file, "#else\nextern void fake();\n");
+   fprintf (code_file, "#else\nextern void fake();\n");
    for (index = 0; index < next_procno; index++)
    {
-      (void) fprintf (code_file, "extern void p%d();\n", index);
+      fprintf (code_file, "extern void p%d();\n", index);
    }
-   (void) fprintf (code_file, "#endif\n");
+   fprintf (code_file, "#endif\n");
 
-   (void) clsfile (code_file, "adv3.h");
+   clsfile (code_file, "adv3.h");
    
    if ((code_file = openout ("adv4.h", "w")) == NULL)
-      (void) gripe ("finalise", "Unable to open adv4.h.");
+      gripe ("finalise", "Unable to open adv4.h.");
 
    proc_arr_ptr = proc_array;
-   (void) fprintf (code_file, "void (*procs[])() = {\n");
+   fprintf (code_file, "void (*procs[])() = {\n");
    count = 0;
    for (index = 0; index < proc_count; index++)
    {
-      (void) fprintf (code_file, "p%d,", *proc_arr_ptr++);
+      fprintf (code_file, "p%d,", *proc_arr_ptr++);
       if (count++ == 10)
       {
          count = 0;
-         (void) fputc ('\n', code_file);
+         fputc ('\n', code_file);
       }
    }
-   (void) fprintf (code_file, "p0 };\n");
-   (void) clsfile (code_file, "adv4.h");
+   fprintf (code_file, "p0 };\n");
+   clsfile (code_file, "adv4.h");
 
    return;
 }

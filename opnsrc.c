@@ -1,5 +1,6 @@
 /* opnsrc.c (acdc) - copyleft Mike Arnautov 1990-2009.
  *
+ * 22 Jul 09   MLA           Changed check for the quiet mode.
  * 15 Mar 08   MLA           Version 12 changes.
  * 19 May 07   MLA           Added "quiet".
  * 08 Mar 94   MLA           Made INCLUDEs relative to umbrella source.
@@ -41,14 +42,14 @@ int fatal;
 /* Construct the source file name. */
 
    if (*source_stem == '\0')
-      (void) strcpy (path, name);
+      strcpy (path, name);
    else
-      (void) sprintf (path, "%s%s", source_stem, name);
+      sprintf (path, "%s%s", source_stem, name);
    cstring = path;
-   (void) recase (LOWERCASE, cstring);
+   recase (LOWERCASE, cstring);
    len = strlen (path);
    if (len < 4 || strcmp (cstring + len - 4,".acd") != 0) 
-      (void) strcat (path, ".acd");
+      strcat (path, ".acd");
    else
       cstring = NULL;
 
@@ -61,18 +62,18 @@ int fatal;
          level--;
          if (fatal == 0)
             return;
-         (void) perror (path);
-         (void) gripe (path, "Unable to open source file.");
+         perror (path);
+         gripe (path, "Unable to open source file.");
       }
    }
    file_count++;
    line_count [level] = 0;   
-   if (quiet == 0 && stage) 
+   if ((quiet & 1) == 0 && stage) 
    {
       lev = level;
       while (lev-- > 0) 
-         (void) printf ("   ");
-      (void) printf ("%s\n",path + strlen (source_stem));
+         printf ("   ");
+      printf ("%s\n",path + strlen (source_stem));
    }
    return;
 }
