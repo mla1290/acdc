@@ -1,4 +1,4 @@
-/* text.h (acdc) - copyleft Mike Arnautov 1990-2009.
+/* text.h (acdc) - copyleft Mike Arnautov 1990-2010.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 15 Oct 06   MLA           Eliminated redundand NEST_VAR.

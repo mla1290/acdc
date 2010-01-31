@@ -1,8 +1,9 @@
-/* minor.h (acdc) - copyleft Mike Arnautov 1990-2009.
+/* minor.h (acdc) - copyleft Mike Arnautov 1990-2010.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 10 Nov 07   MLA           Added DUMP.
  * 01 Jan 05   MLA           Added UNDO/REDO.
+ * 20 Aug 04   MLA           Added IFCGI and IFDOALL
  * 27 Jul 02   MLA           Added CHECKPOINT.
  * 12 Jul 02   MLA           Added IFNE, IFLE, IFGE, DESCRIBE.
  * 01 Jan 02   MLA           Added LOCAL.
@@ -33,11 +34,12 @@
 # define IFKEY       14
 # define IFANY       15
 # define IFFLAG      16
-# define IFCGI       17
-# define IFDOALL     18
-# define IFTYPED     19
-# define CHANCE      20
-# define QUERY       21
+# define IFHTML      17
+# define IFCGI       18
+# define IFDOALL     19
+# define IFTYPED     20
+# define CHANCE      21
+# define QUERY       22
 
 # define NOT         25
 # define AND         26

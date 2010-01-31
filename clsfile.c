@@ -1,4 +1,4 @@
-/* clsfile.c (acdc) - copyleft Mike Arnautov 1990-2009.
+/* clsfile.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 29 Dec 90   MLA           Initial coding.

@@ -1,5 +1,7 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2009.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
+ *                           new gcc header clash.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 12 Jul 09   MLA           Need tag handling in style 10 too.
  * 03 Jul 09   MLA           Bug: had to revert to style 11 centered block handling.
@@ -95,7 +97,7 @@ int *text_type;
 
 next_line:
 
-   if (getline(ACCEPT_BLANK) == EOF ||
+   if (nextline(ACCEPT_BLANK) == EOF ||
        (*line_ptr != ' ' && *line_ptr != '\t' && *line_ptr != '\n'))
    {
       if (null_text)

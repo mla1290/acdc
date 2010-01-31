@@ -1,5 +1,6 @@
-/* initial.c (acdc) - copyleft Mike Arnautov 1990-2009.
+/* initial.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 29 Jan 10   MLA           Added IFHTML.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 23 May 08   MLA           Added IFTYPED.
  * 02 May 08   MLA           Allow for global flags instead of var flags.
@@ -148,6 +149,7 @@ struct directive keywords[] =
    {"ifinrange",   MINOR, IFINRANGE,   3,   3},
    {"ifis",        MINOR, IFIS,        2,   ANY_NUMBER},
    {"ifloc",       MINOR, IFLOC,       2,   ANY_NUMBER},
+   {"ifhtml",      MINOR, IFHTML,      0,   0},
    {"ifcgi",       MINOR, IFCGI,       0,   0},
    {"ifdoall",     MINOR, IFDOALL,     0,   0},
    {"iftyped",     MINOR, IFTYPED,     FREE_ARG,   1},

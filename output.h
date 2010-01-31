@@ -1,4 +1,4 @@
-/* output.h (acdc) - copyleft Mike Arnautov 1990-2009.
+/* output.h (acdc) - copyleft Mike Arnautov 1990-2010.
  *
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 31 Dec 01   MLA           Added xref.

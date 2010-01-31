@@ -1,5 +1,7 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2009.
+/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
+ *                           new gcc header clash.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 22 Oct 08   MLA           Bug: fixed handling of the DATE directive.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -68,7 +70,7 @@ int check_text;
 
    while (1)
    {
-      if (getline (IGNORE_BLANK) == EOF || (*line != ' ' && *line != '\t'))
+      if (nextline (IGNORE_BLANK) == EOF || (*line != ' ' && *line != '\t'))
          break;
       if (check_text == 1)
       {
@@ -138,7 +140,7 @@ int check_text;
                line_status = EOL;
                break;
             }
-            if (getline (IGNORE_BLANK) == EOF || 
+            if (nextline (IGNORE_BLANK) == EOF || 
                 (*line != ' ' && *line != '\t'))
             {
                line_status = BOL;
@@ -330,7 +332,7 @@ void domajor ()
                   value = LAST_DEFAULT_FLAG;
             }
             line_status = EOL;
-            if ((line_status = getline (IGNORE_BLANK)) == EOF)
+            if ((line_status = nextline (IGNORE_BLANK)) == EOF)
                return;
             if (*line_ptr != ' ' && *line_ptr != '\t')
                gripe ("", "FLAGS directive has no flag declarations!");
@@ -392,7 +394,7 @@ void domajor ()
                }
             }
             line_status = EOL;
-            if ((line_status = getline (IGNORE_BLANK)) == EOF)
+            if ((line_status = nextline (IGNORE_BLANK)) == EOF)
                return;
             if (*line_ptr != ' ' && *line_ptr != '\t')
                break;

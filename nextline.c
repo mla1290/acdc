@@ -1,5 +1,7 @@
-/* getline.c (acdc) - copyleft Mike Arnautov 1990-2009.
+/* getline.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
+ *                           new gcc header clash.
  * 15 Mar 08   MLA           Version 12 changes.
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 25 Feb 01   MLA           Don't count comment or blank lines towards total.
@@ -22,9 +24,9 @@
 #include "output.h"
 
 #ifdef __STDC__
-int getline (int key)
+int nextline (int key)
 #else
-int getline (key)
+int nextline (key)
 int key;
 #endif
 {

@@ -1,5 +1,7 @@
-/* source.h (acdc) - copyleft Mike Arnautov 1990-2009.
+/* source.h (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 11 Jan 10   Stuart Munro  _WIN32_ should be _WIN32.
+ *             MLA           Added __MACH__ for OS X.
  * 15 Mar 08   MLA           Version 12 changes.
  * 17 Nov 01   MLA           Added the source_* buffers.
  * 14 Mar 01   MLA           Replaced old_style with style and moved to text.h.
@@ -16,10 +18,10 @@
 #include "const.h"
 #endif
 
-#if defined(unix) || defined(__CYGWIN__)
+#if defined(unix) || defined(__CYGWIN__) || defined(__MACH__)
 #  define SEP '/'
 #else
-#  if defined(MSDOS) || defined (_WIN32_)
+#  if defined(MSDOS) || defined (_WIN32)
 #     define SEP '\\'
 #  else
 #     ifdef __50SERIES

@@ -1,5 +1,8 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2009.
+/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 29 Jan 10   MLA           Added IFHTML.
+ * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
+ *                           new gcc header clash.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 23 May 08   MLA           Added IFTYPED.
  * 01 May 08   MLA           Bug: Must check proc offset to be >= 0!
@@ -154,7 +157,7 @@ char *proccond;
    while (TRUE)
    {
       line_status = EOL;
-      if (getline (IGNORE_BLANK) == EOF)
+      if (nextline (IGNORE_BLANK) == EOF)
          goto terminate;
       line_ptr = line;
       if (*line_ptr != ' ' && *line_ptr != '\t')
@@ -627,11 +630,11 @@ char *proccond;
             cond_ptr += SPRINTF2 (cond_ptr, ")");
             break;
 
+         case IFHTML:
          case IFCGI:
          case IFDOALL:
-            cond_ptr += SPRINTF4 (cond_ptr, "%stest(\"%s\")", 
-               (not_pending) ? "!" : "", 
-                  minor_type == IFCGI ? "cgi" : "doall");
+            cond_ptr += SPRINTF4 (cond_ptr, "%stest(\"%s\")",
+               (not_pending) ? "!" : "", tp [0] + 2);
             break;
             
          case IFTYPED:

@@ -1,7 +1,9 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2009.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2010.
  */
-#define ACDC_VERSION "12.15, 22 Aug 2009"
+#define ACDC_VERSION "12.16, 29 Jan 2010"
 /*
+ * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
+ *                           new gcc header clash.
  * 22 Jul 09   MLA           New command line processing.
  * 22 Oct 08   MLA           Bug: Re-initialise line counts after 1st pass!
  * 12 May 08   MLA           Call btinit() using the new calling sequence.
@@ -312,7 +314,7 @@ int main (argc, argv)
          stage++;
          openfrst (source_path);
       }
-      if ((line_status = getline (IGNORE_BLANK)) == EOF)
+      if ((line_status = nextline (IGNORE_BLANK)) == EOF)
       {
          if (stage)
             break;

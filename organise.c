@@ -1,4 +1,4 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2009.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
  * 22 Aug 09   MLA           Spare 3 obj/loc bits restricted to style >= 20. 
  * 31 Jul 09   MLA           Write adv6.h as signed char array, not just char.
