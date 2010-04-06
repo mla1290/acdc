@@ -1,6 +1,6 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2010.
  */
-#define ACDC_VERSION "12.16, 29 Jan 2010"
+#define ACDC_VERSION "12.18, 06 Apr 2010"
 /*
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.

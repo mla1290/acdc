@@ -56,9 +56,9 @@
 #define INIT        22         /* Initialisation code chunk */
 #define REPEAT      23         /* Code chunk of the main game loop */
 
-/* One remaining compilation directive (have chucked LIST/NOLIST and XREF/NOXREF). */
+/* Two compilation directives (have chucked LIST/NOLIST and XREF/NOXREF). */
 
-#define INCLUDE     30
+#define INCLUDE     30         /* Include a source file */
 #define CONCLUDE    31         /* Conditional include */
 
 /* Game header (description) directives */

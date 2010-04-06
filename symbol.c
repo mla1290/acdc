@@ -1,5 +1,6 @@
 /* symbol.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 06 Apr 10   MLA           Resticted identifier names.
  * 15 Mar 08   MLA           Version 12 changes.
  * 07 May 07   Stuart Munro  bug: declare chksymb before fndsymb.
  * 15 Jan 05   MLA           Added AUTOSYMBOL handling.
@@ -19,6 +20,7 @@
 #endif
 
 #include <string.h>
+#include <ctype.h>
 #include <setjmp.h>
 
 #include "acdc.h"
@@ -43,7 +45,29 @@ struct node *addsymb (btroot, name, type, refno)
    int auto_flag = btroot & 64;
 
    btroot &= ROOT_MASK;
-         
+   
+   if (style > 1)
+   {
+      int bad_char = 1;
+      if (isalpha (*name) || strchr (".?!", *name))
+      {
+         char *c = name + 1;
+         bad_char = 0;
+         while (*c)
+         {
+            if (isalnum (*c) || strchr (".?!-_'/&", *c))
+               c++;
+            else
+            {
+               bad_char = 1;
+               break;
+            }
+         }
+      }
+      if (bad_char)
+         gripe (name, "Not a legal name.");
+   }
+   
    if ((np = (struct node *) malloc (sizeof (struct node))) == NULL)
       gripe (name, "Unable to allocate memory.");
 

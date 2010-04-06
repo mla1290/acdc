@@ -1,5 +1,6 @@
 /* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 06 Feb 10   MLA           Added quote-block handling.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
@@ -176,25 +177,31 @@ next_line:
 
 /* Check for end of block */
 
-   if (in_block && *line_ptr != '=' && *line_ptr != '+')
+   if ((in_block == 1 && *line_ptr != '=') ||
+       (in_block == 2 && *line_ptr != '+') ||
+       (in_block == 3 && *line_ptr != '^'))
    {
       *text_ptr++ = BLOCK_END;
       *text_ptr++ = '\n';
       in_block = 0;
    }
       
-/* Here comes a tricky bit. A '/', '=' or '+' at the beginning of a line 
+/* Here comes a tricky bit. A '/', '=', '+' or '^' at the beginning of a line 
  * forces a new line. If *only* that character is present, we treat the line
  * as completly blank. The !@ combination is an obsolete equivalent of '/'.*/
 
    if (*line_ptr == '/' || 
       (style <= 1 &&  *line_ptr == '!' && *(line_ptr + 1) == '@') ||
-      (style >= 10 && (*line_ptr == '=' || *line_ptr == '+')))
+      (style >= 10 && (*line_ptr == '=' || *line_ptr == '+' ||
+                       *line_ptr == '^')))
    {
       if (*line_ptr == '!')
          line_ptr++;
       else if (*line_ptr != '/' && in_block == 0)
-         in_block = *line_ptr == '=' ? -1 : -2;
+      {
+         if (*line_ptr == '^') in_block = -3;
+         else in_block = *line_ptr == '=' ? -1 : -2;
+      }
       line_ptr++;
       temp_ptr = line_ptr;
       while (*temp_ptr == ' ' || *temp_ptr == '\t')
@@ -210,7 +217,10 @@ next_line:
       if (in_block < 0)
       {
          in_block = -in_block;
-         *text_ptr++ = in_block == 1 ? BLOCK_START : CENTRE_START;
+         if (in_block == 3)
+            *text_ptr++ = QUOTE_START;
+         else
+            *text_ptr++ = in_block == 1 ? BLOCK_START : CENTRE_START;
       }
    }
 

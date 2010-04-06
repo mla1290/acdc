@@ -633,8 +633,8 @@ char *proccond;
          case IFHTML:
          case IFCGI:
          case IFDOALL:
-            cond_ptr += SPRINTF4 (cond_ptr, "%stest(\"%s\")",
-               (not_pending) ? "!" : "", tp [0] + 2);
+            cond_ptr += SPRINTF4 (cond_ptr, "%stest(\"%s\")", 
+               (not_pending) ? "!" : "", tp [0] + 2); 
             break;
             
          case IFTYPED:

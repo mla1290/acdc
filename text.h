@@ -1,5 +1,6 @@
 /* text.h (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 06 Feb 10   MLA           Added QUOTE_START.
  * 15 Mar 08   MLA           Version 12 changes.
  * 15 Oct 06   MLA           Eliminated redundand NEST_VAR.
  * 03 Mar 03   MLA           Adedd memory.
@@ -43,7 +44,7 @@ extern void clsfile ();
 #define SILENCE      '\374'
 #define IGNORE_EOL   '\373'
 #define NEST_TEXT    '\372'
-                   /* \371 is spare */
+#define QUOTE_START  '\371'
 #define TAG_START    '\370'
 #define TAG_END      '\367'
 #define NBSP         '\366'
