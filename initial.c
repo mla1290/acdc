@@ -1,5 +1,7 @@
 /* initial.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 06 Oct 10   MLA           Added RESAY.
+ * 04 Oct 10   MLA           bug: Restore ITLOC as a synonym of ITPLACE.
  * 29 Jan 10   MLA           Added IFHTML.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 23 May 08   MLA           Added IFTYPED.
@@ -165,6 +167,7 @@ struct directive keywords[] =
    {"itobj",       MINOR, ITOBJ,       1,   ANY_NUMBER},
    {"itlist",      MINOR, ITOBJ,       1,   3},     /* For compatibility */
    {"itplace",     MINOR, ITLOC,       1,   3},
+   {"itloc",       MINOR, ITLOC,       1,   3},
    {"iterate",     MINOR, ITERATE,     3,   3},
    {"next",        MINOR, NEXT,        0,   0},
    {"continue",    MINOR, NEXT,        0,   0},
@@ -195,6 +198,7 @@ struct directive keywords[] =
    {"value",       MINOR, VALUE,       2,   2},
    {"vocab",       MINOR, DICT,        4,   4},
    {"append",      MINOR, APPEND,      1,   2},
+   {"resay",       MINOR, RESAY,       1,   2},
    {"set",         MINOR, SET,         2,   2},
    {"add",         MINOR, ADD,         2,   2},
    {"subtract",    MINOR, SUBTRACT,    2,   2},

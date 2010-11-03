@@ -1,5 +1,6 @@
 /* dominor.c (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 06 Oct 10   MLA           Added RESAY.
  * 29 Jan 10   MLA           Added IFHTML.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.
@@ -1008,6 +1009,9 @@ char *proccond;
             argtyp [1] = argtyp [index]; argtyp [2] = argtyp [index + 1];
             argval [1] = argval [index]; argval [2] = argval [index + 1];
             minor_type = QUIP;
+         case RESAY:
+            if (minor_type == RESAY) /* I.e. we didn't fall through to here */
+               fprintf (code_file, "zap_text();\n");
          case APPEND:
             if (minor_type == APPEND) /* I.e. we didn't fall through to here */
                fprintf (code_file, "glue_text();\n");

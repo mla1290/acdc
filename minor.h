@@ -1,5 +1,6 @@
 /* minor.h (acdc) - copyleft Mike Arnautov 1990-2010.
  *
+ * 06 Oct 10   MLA           Added RESAY.
  * 15 Mar 08   MLA           Version 12 changes.
  * 10 Nov 07   MLA           Added DUMP.
  * 01 Jan 05   MLA           Added UNDO/REDO.
@@ -85,6 +86,7 @@
 # define RESPOND     85
 # define DICT        86
 # define APPEND      87
+# define RESAY       88
 
 # define FLAG        91
 # define UNFLAG      92
