@@ -1,4 +1,4 @@
-/* const.h (acdc) - copyleft Mike Arnautov 1990-2010.
+/* const.h (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 15 Jan 05   MLA           Added AUTOSYMBOL.

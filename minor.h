@@ -1,4 +1,4 @@
-/* minor.h (acdc) - copyleft Mike Arnautov 1990-2010.
+/* minor.h (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 06 Oct 10   MLA           Added RESAY.
  * 15 Mar 08   MLA           Version 12 changes.

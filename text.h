@@ -1,4 +1,4 @@
-/* text.h (acdc) - copyleft Mike Arnautov 1990-2010.
+/* text.h (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 06 Feb 10   MLA           Added QUOTE_START.
  * 15 Mar 08   MLA           Version 12 changes.

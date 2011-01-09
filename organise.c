@@ -1,4 +1,4 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2010.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 30 Mar 10   MLA           CGINAME starts with an _ on DOS, Windows, VMS.
  * 22 Aug 09   MLA           Spare 3 obj/loc bits restricted to style >= 20. 

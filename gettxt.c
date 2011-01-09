@@ -1,4 +1,4 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2010.
+/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 06 Feb 10   MLA           Added quote-block handling.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a

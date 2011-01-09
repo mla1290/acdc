@@ -1,4 +1,4 @@
-/* source.h (acdc) - copyleft Mike Arnautov 1990-2010.
+/* source.h (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 11 Jan 10   Stuart Munro  _WIN32_ should be _WIN32.
  *             MLA           Added __MACH__ for OS X.

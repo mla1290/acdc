@@ -1,4 +1,4 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2010.
+/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.

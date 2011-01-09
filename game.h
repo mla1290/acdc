@@ -1,4 +1,4 @@
-/* game.h (acdc) - copyleft Mike Arnautov 2010.
+/* game.h (acdc) - copyleft Mike Arnautov 2011.
  *
  * 15 Mar 08   MLA               Initial coding.
  *

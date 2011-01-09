@@ -1,4 +1,4 @@
-/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2010.
+/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 22 Jul 09   MLA           Optionally suppressed unused symbol warnings.
  * 21 Jul 09   MLA           Added the VERSION comment to adv1.h.

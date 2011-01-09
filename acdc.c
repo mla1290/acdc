@@ -1,6 +1,6 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2010.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2011.
  */
-#define ACDC_VERSION "12.20, 06 Oct 2010"
+#define ACDC_VERSION "12.21, 09 Jan 2011"
 /*
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.
@@ -188,6 +188,8 @@ char **arg2;
    fprintf (stderr, "       announce entry to distinct A-code chunks.\n");
    fprintf (stderr, "   -help (abbreviable to -h)\n");
    fprintf (stderr, "       Print this message.\n\n");
+   fprintf (stderr, "   -version (abbreviable to -v)\n");
+   fprintf (stderr, "       Show version number and exit\n");
    exit (val >= 0 ? ERROR : OK);
 }
 
@@ -237,6 +239,8 @@ int main (argc, argv)
          arg = *argv;
          if (*arg == '-' && *(arg + 1) == '-')  /* Cater for GNU-style keywords */
             arg++;     
+         if (strncmp (arg, "-version", len) == 0 || strcmp(arg, "-v") == 0)
+            exit (0);         
          if (strncmp (arg, "-debug", len) == 0)
             debug = 1;
          else if (strncmp (arg, "-plain", len) == 0)

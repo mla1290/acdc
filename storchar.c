@@ -1,4 +1,4 @@
-/* storchar.c (acdc) - copyleft Mike Arnautov 1990-2010.
+/* storchar.c (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 31 Jul 09   MLA           BUG: text file screwed up in plain mode!
  * 09 Mar 03   MLA           Store as binary or ASCII data depending on 

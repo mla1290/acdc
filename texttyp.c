@@ -1,4 +1,4 @@
-/* texttyp.c (acdc) - copyleft Mike Arnautov 1990-2010.
+/* texttyp.c (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 25 Mar 08   MLA           Split off from domajor.c

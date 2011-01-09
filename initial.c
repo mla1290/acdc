@@ -1,4 +1,4 @@
-/* initial.c (acdc) - copyleft Mike Arnautov 1990-2010.
+/* initial.c (acdc) - copyleft Mike Arnautov 1990-2011.
  *
  * 06 Oct 10   MLA           Added RESAY.
  * 04 Oct 10   MLA           bug: Restore ITLOC as a synonym of ITPLACE.
