@@ -130,7 +130,7 @@ int type;
          int offset;
          int tail;
          
-         sprintf (autoname, "_auto_text_%d_", ++inline_count);
+         sprintf (autoname, ".auto_text_%d_", ++inline_count);
          np = fndsymb (SYMBOL, autoname);
          np -> text_type = 0;
          np -> name_addr = next_addr;

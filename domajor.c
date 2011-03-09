@@ -109,7 +109,7 @@ int check_text;
             line_status = EOL;
             continue;
          }
-         sprintf (autoname, "_auto_text_%d_", ++inline_count);
+         sprintf (autoname, ".auto_text_%d_", ++inline_count);
          np = addsymb (SYMBOL, autoname, TEXT, type_counts[TEXT]++);
          got_end = 0;
          while (1)
