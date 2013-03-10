@@ -1,6 +1,7 @@
 /* organise.c (acdc) - copyleft Mike Arnautov 1990-2011.
  *
- * 30 Mar 10   MLA           CGINAME starts with an _ on DOS, Windows, VMS.
+ * 10 Mar 13   MLA           Bug: PERSISTENT_DATA needs _ on DOS.
+ * 30 Mar 10   MLA           CGINAME starts with an _ on DOS, Windows.
  * 22 Aug 09   MLA           Spare 3 obj/loc bits restricted to style >= 20. 
  * 31 Jul 09   MLA           Write adv6.h as signed char array, not just char.
  * 22 Jul 09   MLA           Added SWAP definition to adv1.h.
@@ -445,10 +446,12 @@ void organise()
       cptr++;
    }
    *cptr = '\0';
+   fprintf (defs_file, "#if defined(MSDOS) || defined(_WIN32)\n");
    if (style >= 11)
-      fprintf (defs_file, "#define PERSISTENT_DATA \".%s.adp\"\n", dbname);
-   fprintf (defs_file, "#if defined(MSDOS) || defined(_WIN32) || defined(VMS)\n");
+      fprintf (defs_file, "#  define PERSISTENT_DATA \"_%s.adp\"\n", dbname);
    fprintf (defs_file, "#  define CGINAME \"_%s\"\n#else\n", dbname);
+   if (style >= 11)
+      fprintf (defs_file, "#  define PERSISTENT_DATA \".%s.adp\"\n", dbname);
    fprintf (defs_file, "#  define CGINAME \".%s\"\n#endif\n", dbname);
    strcat (dbname, ".dat");
    fprintf (defs_file, 
