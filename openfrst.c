@@ -1,5 +1,6 @@
-/* openfrst.c (acdc) - copyleft Mike Arnautov 2002-2011.
+/* openfrst.c (acdc) - copyleft Mike Arnautov 2002-2013.
  *
+ * 11 May 11   MLA           Bug: Fixed in-line name count initialisation.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 12 Mar 08   MLA           Varsion 12 changes.
  * 24 Jan 03   MLA           Allowed the .acode variant of the suffix.
@@ -37,6 +38,7 @@ void openfrst (file_spec)
    char *file_spec;
 #endif
 {
+   int i;
    char *nameptr = file_spec;
    char *sfxptr = NULL;
    char fullname [128];
@@ -80,6 +82,9 @@ void openfrst (file_spec)
    text_lines = 0;
    text_count = 0;
    switch_count = 0;
+   inline_count = 0;
+   for (i=0; i<10; i++)
+      line_count[i] = 0;
    return;
 
 }

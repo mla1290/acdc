@@ -1,4 +1,4 @@
-/* major.h (acdc) - copyleft Mike Arnautov 1990-2011.
+/* major.h (acdc) - copyleft Mike Arnautov 1990-2013.
  *
  * 21 Mar 08   MLA           Added embedded texts.
  * 12 Mar 08   MLA           Version 12 changes.

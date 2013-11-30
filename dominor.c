@@ -1,4 +1,4 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2011.
+/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2013.
  *
  * 06 Oct 10   MLA           Added RESAY.
  * 29 Jan 10   MLA           Added IFHTML.

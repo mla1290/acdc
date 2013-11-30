@@ -1,4 +1,4 @@
-/* openout.c (acdc) - copyleft Mike Arnautov 2002-2011.
+/* openout.c (acdc) - copyleft Mike Arnautov 2002-2013.
  *
  * 03 Aug 09   MLA           Extended copyleft notice to all non-adv550 games.
  * 06 Mar 03   Stuart Munro  Remove unused variables.

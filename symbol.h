@@ -1,4 +1,4 @@
-/* symbol.h (acdc) - copyleft Mike Arnautov 1990-2011.
+/* symbol.h (acdc) - copyleft Mike Arnautov 1990-2013.
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 03 Sep 06   MLA           Bug: longs should be ints.

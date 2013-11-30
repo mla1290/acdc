@@ -1,7 +1,9 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2011.
+/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2013.
  */
-#define ACDC_VERSION "12.23, 10 Mar 2013"
+#define ACDC_VERSION "12.24, 11 May 2013"
 /*
+ * 11 May 11   MLA           Bug: Fixed in-line name count initialisation.
+ *                           Bug: Fixed line counting for main source file.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.
  * 22 Jul 09   MLA           New command line processing.
@@ -318,15 +320,8 @@ int main (argc, argv)
          stage++;
          openfrst (source_path);
       }
-      if ((line_status = nextline (IGNORE_BLANK)) == EOF)
-      {
-         if (stage)
-            break;
-         for (i=0; i<10; i++)
-            line_count[i] = 0;
-         continue;
-      }
-      inline_count = 0;
+      if ((line_status = nextline (IGNORE_BLANK)) == EOF && stage)
+         break;
       domajor ();    /* line_status changes here! */
    }
 

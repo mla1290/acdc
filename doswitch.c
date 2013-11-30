@@ -1,4 +1,4 @@
-/* doswitch.c (acdc) - copyleft Mike Arnautov 1990-2011.
+/* doswitch.c (acdc) - copyleft Mike Arnautov 1990-2013.
  *
  * 21 Sep 08   MLA           Use LCM max states for cycled texts.
  * 15 Mar 08   MLA           Version 12 changes.

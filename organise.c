@@ -1,4 +1,4 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2011.
+/* organise.c (acdc) - copyleft Mike Arnautov 1990-2013.
  *
  * 10 Mar 13   MLA           Bug: PERSISTENT_DATA needs _ on DOS.
  * 30 Mar 10   MLA           CGINAME starts with an _ on DOS, Windows.

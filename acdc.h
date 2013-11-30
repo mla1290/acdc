@@ -1,4 +1,4 @@
-/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2011.
+/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2013.
  */
 
 extern char author [40];

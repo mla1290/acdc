@@ -1,4 +1,4 @@
-/* symbol.c (acdc) - copyleft Mike Arnautov 1990-2011.
+/* symbol.c (acdc) - copyleft Mike Arnautov 1990-2013.
  *
  * 06 Apr 10   MLA           Resticted identifier names.
  * 15 Mar 08   MLA           Version 12 changes.

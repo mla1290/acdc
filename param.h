@@ -1,4 +1,4 @@
-/* param.h (acdc) - copyleft Mike Arnautov 1990-2011.
+/* param.h (acdc) - copyleft Mike Arnautov 1990-2013.
  *
  * 30 Dec 01   MLA          Initial coding.
  *

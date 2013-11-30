@@ -1,5 +1,6 @@
-/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2011.
+/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2013.
  *
+ * 11 May 13   MLA           bug: Fixed LOC spacing in cross-reference file.
  * 08 Jul 09   MLA           bug: Reinstate style 1 support.
  * 15 Mar 08   MLA           Version 12 changes.
  * 14 Feb 04   MLA           Converted longs to ints.
@@ -80,7 +81,7 @@ struct node *gp;
          if (xref)
          {
             if (real_type == LOC)
-               tag = "LOC";
+               tag = " LOC ";
             else if (real_type == OBJ)
                tag = " OBJ ";
             else if (real_type == SYNONYM)
