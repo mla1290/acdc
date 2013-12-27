@@ -1,8 +1,8 @@
 /* acdc.c (acdc) - copyleft Mike Arnautov 1990-2013.
  */
-#define ACDC_VERSION "12.24, 11 May 2013"
+#define ACDC_VERSION "12.25, 05 Dec 2013"
 /*
- * 11 May 11   MLA           Bug: Fixed in-line name count initialisation.
+ * 11 May 13   MLA           Bug: Fixed in-line name count initialisation.
  *                           Bug: Fixed line counting for main source file.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.
@@ -196,6 +196,12 @@ char **arg2;
 }
 
 /*====================================================================*/
+#ifdef DEBUG
+void symlist (struct node *np)
+{
+  printf("   %s\n", np->name);
+}
+#endif /* DEBUG */
 
 #ifdef __STDC__
 int main (
@@ -312,16 +318,23 @@ int main (argc, argv)
 /* Initialise search trees and other things */
 
    initial ();
-   
+   if (!quiet) printf ("Parsing...\n")   ;
    while (line_status != EOF || stage == 0)
    {
       if (line_status == EOF)
       {
+#ifdef DEBUG
+         btspan(SYMBOL, symlist);
+#endif /* DEBUG */
          stage++;
          openfrst (source_path);
+         if (!quiet) printf ("Translating...\n")   ;
       }
-      if ((line_status = nextline (IGNORE_BLANK)) == EOF && stage)
-         break;
+      if ((line_status = nextline (IGNORE_BLANK)) == EOF)
+      {
+         if (stage)
+            break;
+      }
       domajor ();    /* line_status changes here! */
    }
 

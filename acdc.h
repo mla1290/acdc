@@ -18,7 +18,7 @@ extern void storchar (int ch);
 extern void doswitch (char *text_ptr, int *max_states, int cycle);
 extern void write_ref (char *tag, char *token);
 #ifdef EOF
-   extern FILE *openout(char *name, char *mode);
+   extern FILE *openout(char *name);
    extern void openfrst (char *file_spec);
 #endif /* EOF */
 #else  /* ! __STDC__ */

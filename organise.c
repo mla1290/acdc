@@ -238,7 +238,7 @@ void organise()
    if (style != 10 && *gameid)
       gripe ("", "The GAMEID directive only valid in A-code style 10!");
 
-   if ((code_file = openout("adv02.c", "w")) == NULL)
+   if ((code_file = openout("adv02.c")) == NULL)
       gripe ("adv01.c", "Unable to open code file.");
    fprintf (code_file, "#include \"adv0.h\"\n");
    fprintf (code_file, "#include \"adv3.h\"\n");
@@ -291,7 +291,7 @@ void organise()
    else
       tptr = "adv6.h";
    
-   if ((text_file = openout (tptr, "wb")) == NULL)
+   if ((text_file = openout (tptr)) == NULL)
       gripe (tptr, "Unable to open data file.");
 
    tptr = *gameid ? gameid : source_file;
@@ -424,7 +424,7 @@ void organise()
 /*  Now create the include file which will define various symbolic
  *  constants required by the kernel routines.
  */
-   if ((defs_file = openout("adv1.h","w")) == NULL)
+   if ((defs_file = openout("adv1.h")) == NULL)
       gripe ("","Unable to open adv1.h (defs.h).");
    fprintf (defs_file, "#ifndef ADV1_H\n#define ADV1_H\n");
    fprintf (defs_file, "#define GAME_NAME \"%s\"\n", title);

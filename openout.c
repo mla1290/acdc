@@ -1,5 +1,6 @@
 /* openout.c (acdc) - copyleft Mike Arnautov 2002-2013.
  *
+ * 09 Apr 13   MLA           Ditched 2nd argument of openout().
  * 03 Aug 09   MLA           Extended copyleft notice to all non-adv550 games.
  * 06 Mar 03   Stuart Munro  Remove unused variables.
  * 04 Mar 03   MLA           Changed copyleft code to be unconditional.
@@ -22,12 +23,10 @@
 
 #ifdef __STDC__
 FILE *openout (
-   char *file,
-   char *mode)
+   char *file)
 #else
-FILE *openout (file, mode)
+FILE *openout (file)
    char *file;
-   char *mode;
 #endif
 {
    char *brk;
@@ -39,14 +38,14 @@ FILE *openout (file, mode)
    else
       sprintf (full_name, "%sC%c%s", source_stem, SEP, file);
 
-   if ((outfile = fopen (full_name, mode)) == NULL)
+   if ((outfile = fopen (full_name, "wb")) == NULL)
    {      
       if (*source_stem == '\0')
          strcpy (full_name, file);
       else
          sprintf (full_name, "%s%s", source_stem, file);
 
-      if ((outfile = fopen (full_name, mode)) == NULL)
+      if ((outfile = fopen (full_name, "wb")) == NULL)
       {
          fprintf (stderr, "%s -- unable to open file!\n", full_name);
          exit (1);

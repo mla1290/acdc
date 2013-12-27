@@ -1,6 +1,6 @@
 /* openfrst.c (acdc) - copyleft Mike Arnautov 2002-2013.
  *
- * 11 May 11   MLA           Bug: Fixed in-line name count initialisation.
+ * 11 May 13   MLA           Bug: Fixed in-line name generation.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 12 Mar 08   MLA           Varsion 12 changes.
  * 24 Jan 03   MLA           Allowed the .acode variant of the suffix.

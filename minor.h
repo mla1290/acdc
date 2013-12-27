@@ -72,8 +72,9 @@
 
 # define CALL        61
 # define PROCEED     62
-# define QUIT        63
-# define STOP        64 
+# define RETURN      63
+# define QUIT        64
+# define STOP        65 
 
 # define GOTO        71
 # define MOVE        72

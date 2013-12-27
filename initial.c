@@ -177,6 +177,7 @@ struct directive keywords[] =
    {"call",        MINOR, CALL,        1,   ANY_NUMBER},
    {"proceed",     MINOR, PROCEED,     0,   0},
    {"procede",     MINOR, PROCEED,     0,   0},
+   {"return",      MINOR, RETURN,      0,   0},
    {"quit",        MINOR, QUIT,        0,   0},
    {"stop",        MINOR, STOP,        0,   0},
    {"get",         MINOR, GET,         1,   1},

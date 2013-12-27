@@ -1,5 +1,6 @@
 /* finalise.c (acdc) - copyleft Mike Arnautov 1990-2013.
  *
+ * 09 Apr 13   MLA           Ditched 2nd arg of openout().
  * 22 Jul 09   MLA           Optionally suppressed unused symbol warnings.
  * 21 Jul 09   MLA           Added the VERSION comment to adv1.h.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
@@ -57,7 +58,6 @@ int key_mask;
 
 /*====================================================================*/
 
-#ifdef DEBUG
 #ifdef __STDC__
 void show_node (struct node *np)
 #else
@@ -88,7 +88,6 @@ struct node *np;
    printf ("   max_args %d\n", np -> max_args);
    printf ("........................................\n");
 }
-#endif
 
 /*====================================================================*/
 
@@ -266,14 +265,13 @@ struct node *np;
       *(proc_args + procno) = np -> arg_count;
    if (type < PROCEDURE)
       *(proc_array + refno) = procno;
-
    if (count == 1) return;
 
-   fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", procno);
+   fprintf (code_file, "#ifdef __STDC__\nint p%d(", procno);
    if ((np -> arg_count) > 0)
       for (i = 0; i < (np -> arg_count); i++)
          fprintf (code_file, "%sint typ%d,int par%d", i ? "," : "", i, i);
-   fprintf (code_file, ")\n#else\nvoid p%d(", procno);      
+   fprintf (code_file, ")\n#else\nint p%d(", procno);      
    if ((np -> arg_count) > 0)
    {
       for (i = 0; i < (np -> arg_count); i++)
@@ -286,13 +284,13 @@ struct node *np;
    fprintf (code_file, "#endif\n{\n");
    for (j = 1; j <= (np -> proc_count); j++)
    {
-      fprintf (code_file, "   p%d(", procno + j);
+      fprintf (code_file, "   if (p%d(", procno + j);
       if (np -> arg_count > 0)
          for (i = 0; i < (np -> arg_count); i++)
             fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
-      fprintf (code_file, ");\n");         
+      fprintf (code_file, ")) return 0;\n");         
    }
-   fprintf (code_file, "   return;\n}\n");
+   fprintf (code_file, "   return 1;\n}\n");
    return;
 }
 
@@ -330,7 +328,7 @@ fflush (stdout);
 
 /* Write the vocabulary include file */
 
-   if ((defs_file = openout("adv2.h","w")) == NULL)
+   if ((defs_file = openout("adv2.h")) == NULL)
       gripe ("adv2.h","Unable to open (adv2.h).");
 
    fprintf (defs_file, "short voc_refno[] = {\n");
@@ -368,7 +366,7 @@ fflush (stdout);
    if ((detail_base = (int *) calloc (dcount + 1, sizeof(int))) == NULL)
       gripe ("", "Unable to allocate detailed description address memory.");
 
-   if ((defs_file = openout("adv5.h","w")) == NULL)
+   if ((defs_file = openout("adv5.h")) == NULL)
       gripe ("","Unable to open adv5.h (words.h).");
 
 /* A cosmetic fix to avoid worrying nosey parkers. The relevant array elements
@@ -408,24 +406,24 @@ fflush (stdout);
 
    clsfile (code_file, "Automatic code");
    sprintf (proc_name, "adv%02d.c", ++code_part);
-   if ((code_file = openout (proc_name, "w")) == NULL)
+   if ((code_file = openout (proc_name)) == NULL)
       gripe (proc_name, "Unable to open final code chunk.");
    fprintf (code_file, "#include \"adv3.h\"\n");
 
    btspan (SYMBOL, process_proc);
    fprintf (code_file, 
-      "#ifdef __STDC__\nvoid p0(void)\n#else\nvoid p0()\n#endif\n{return;}\n");
+      "#ifdef __STDC__\nint p0(void)\n#else\nint p0()\n#endif\n{return 0;}\n");
 
    clsfile (code_file, "Final automatic code");
-   if ((code_file = openout ("adv3.h", "w")) == NULL)
+   if ((code_file = openout ("adv3.h")) == NULL)
       gripe ("finalise", "Unable to open adv3.h.");
 
    fprintf (code_file, 
       "#ifdef __STDC__\nextern void fake(int x, int y);\n");
    for (index = 0; index < next_procno; index++)
    {
-      fprintf (code_file, "extern void p%d(", index);
-      if ((count = *(proc_args + index)) != 0)
+      fprintf (code_file, "extern int p%d(", index);
+      if ((count = *(proc_args + index)) > 0)
          while (count--)
             fprintf (code_file, "int,int%s", count ? "," : "");
       else
@@ -435,17 +433,17 @@ fflush (stdout);
    fprintf (code_file, "#else\nextern void fake();\n");
    for (index = 0; index < next_procno; index++)
    {
-      fprintf (code_file, "extern void p%d();\n", index);
+      fprintf (code_file, "extern int p%d();\n", index);
    }
    fprintf (code_file, "#endif\n");
 
    clsfile (code_file, "adv3.h");
    
-   if ((code_file = openout ("adv4.h", "w")) == NULL)
+   if ((code_file = openout ("adv4.h")) == NULL)
       gripe ("finalise", "Unable to open adv4.h.");
 
    proc_arr_ptr = proc_array;
-   fprintf (code_file, "void (*procs[])() = {\n");
+   fprintf (code_file, "int (*procs[])() = {\n");
    count = 0;
    for (index = 0; index < proc_count; index++)
    {

@@ -38,7 +38,7 @@ char *error_message;
    {
       fprintf (stderr, "in \"%s\"\n", rptr);
       if (*pathname[level] != '\0')
-         fprintf (stderr, "%s, line %d: ", pathname[level], 
+         fprintf (stderr, "%s (%d), line %d: ", pathname[level], level, 
             line_count[level]);
    }
    if (error_token && *error_token != '\0')

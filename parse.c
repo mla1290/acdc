@@ -1,5 +1,7 @@
  /* parse.c (acdc) - copyleft Mike Arnautov 1990-2013.
  *
+ * 02 Dec 13   MLA           BUG: Take care with in-line texts in style 1!
+ * 09 Jan 11   MLA           Added in-line text parsing.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 15 Mar 08   MLA           Version 12 changes.
  * 19 Aug 04   MLA           Added FREE_ARG.
@@ -121,7 +123,7 @@ int type;
          break;
       }
       
-      if (*tp[index] == '"' && style >= 12)
+      if (*tp[index] == '"' && (style > 1 || index == 1))
       {
          struct node *np;
          char autoname [32];
@@ -130,7 +132,7 @@ int type;
          int offset;
          int tail;
          
-         sprintf (autoname, ".auto_text_%d_", ++inline_count);
+         sprintf (autoname, "auto_text_%d_", ++inline_count);
          np = fndsymb (SYMBOL, autoname);
          np -> text_type = 0;
          np -> name_addr = next_addr;

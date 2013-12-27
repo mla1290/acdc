@@ -1,5 +1,6 @@
 /* major.h (acdc) - copyleft Mike Arnautov 1990-2013.
  *
+ * 04 Apr 12   MLA           Removed redundant definition of FREE.
  * 21 Mar 08   MLA           Added embedded texts.
  * 12 Mar 08   MLA           Version 12 changes.
  * 07 Mar 08   MLA           Removed LIST, NOLIST, XREF and NOXREF.
@@ -27,7 +28,6 @@
 #define TEXT         4         /* A "random text", complete or a fragment */
 #define PROCEDURE    5         /* A callable procedure */
 #define PROC         5         /* Ditto */
-#define FREE         5         /* Start of free refnos (procs use own sequence) */
 #define CONSTANT     6         /* A symbolic value */
 #define CONST        6         /* Ditto */
 #define MAXTYPES  CONSTANT     /* In case we ever need to define more of them */

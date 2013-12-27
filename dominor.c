@@ -182,7 +182,7 @@ char *proccond;
             fprintf (code_file, "\n   ");
          else
          {
-            fprintf (code_file, "-1)) return;\n");
+            fprintf (code_file, "-1)) return 0;\n");
             multiple_pending = FALSE;
          }
       }
@@ -408,7 +408,7 @@ char *proccond;
                if (tp [++index])
                   fprintf (code_file, " || ");
             }
-            fprintf (code_file, ") return;\n");
+            fprintf (code_file, ") return 0;\n");
             break;
 
          case ATLOC:
@@ -439,7 +439,7 @@ char *proccond;
                if (tp [++index])
                   fprintf (code_file, " && ");
             }
-            fprintf (code_file, ") return;\n");
+            fprintf (code_file, ") return 0;\n");
             break;
 
          case IFEQ:
@@ -867,7 +867,9 @@ char *proccond;
             break;
             
          case PROCEED:
-            fprintf (code_file, "   return;\n");
+         case RETURN:
+            fprintf (code_file, "   return %d;\n", 
+               minor_type == PROCEED ? 0 : 1);
             break;
 
          case QUIT:
@@ -1632,7 +1634,7 @@ char *proccond;
                   if (args_count == 0)
                      gripe (tp [proc_index], "too many arguments!");
                   if (argtyp [index] > TEXT && argtyp [index] != CONSTANT &&
-                      argtyp [index] != LOCAL)
+                      argtyp [index] != LOCAL && argtyp [index] != SYNONYM)
                         gripe (tp [index], "illegal argument type!");
                   fprintf (code_file, "%s", index == 2 ? "" : ",");
                   if (argtyp [index] != VAR)

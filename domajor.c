@@ -1,5 +1,8 @@
 /* domajor.c (acdc) - copyleft Mike Arnautov 1990-2013.
  *
+ * 18 May 13   MLA           Allowed in-line texts in all styles (for CGI mode).
+ * 09 Apr 13   MLA           Ditched second arg of openout().
+ * 09 Jan 11   MLA           Added in-line text parsing.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
@@ -91,25 +94,21 @@ int check_text;
             cptr++;
          }
       }
-      if (check_text == 2 && style >= 12)
+      if (check_text == 2)
       {
          char autoname [32];
          struct node *np;
          int got_end;
-         char *cptr = line + 1;           /* We *know* first one is a blank! */
-
-         while (*cptr == ' ' || *cptr == '\t')
-            cptr++;
-         while (* cptr && *cptr != ' ' && *cptr != '\t')
-            cptr++;
-         while (*cptr == ' ' || *cptr == '\t')
-            cptr++;
-         if (*cptr != '"')
+         char *cptr; 
+         
+         if ((cptr = strpbrk(line, "#{")) != NULL)
+            *cptr = '\0';
+         if ((cptr = strchr(line, '"')) == NULL)
          {
             line_status = EOL;
             continue;
          }
-         sprintf (autoname, ".auto_text_%d_", ++inline_count);
+         sprintf (autoname, "auto_text_%d_", ++inline_count);
          np = addsymb (SYMBOL, autoname, TEXT, type_counts[TEXT]++);
          got_end = 0;
          while (1)
@@ -135,11 +134,9 @@ int check_text;
                   lc = '\0';
                cptr++;
             }
+            line_status = EOL;
             if (got_end)
-            {
-               line_status = EOL;
                break;
-            }
             if (nextline (IGNORE_BLANK) == EOF || 
                 (*line != ' ' && *line != '\t'))
             {
@@ -251,7 +248,7 @@ void domajor ()
             {
                clsfile (code_file, "Automatic code");
                sprintf (proc_name, "adv%02d.c", ++code_part);
-               if ((code_file = openout (proc_name, "w")) == NULL)
+               if ((code_file = openout (proc_name)) == NULL)
                   gripe (proc_name, "Unable to open new code chunk.");
                fprintf (code_file, "#include \"adv0.h\"\n");
                fprintf (code_file, "#include \"adv3.h\"\n");
@@ -589,7 +586,7 @@ void domajor ()
          if (np -> proc_count > 1)
             (np -> proc_done)++;
          refno = np -> proc_base + (np -> proc_done);
-         fprintf (code_file, "#ifdef __STDC__\nvoid p%d(", refno);
+         fprintf (code_file, "#ifdef __STDC__\nint p%d(", refno);
          next_arg = 0;
          if (tp [2] == NULL || major_type != PROCEDURE)
             fprintf (code_file, "void");
@@ -604,7 +601,7 @@ void domajor ()
                   write_ref (" ARG ", tp [index]);
             }
          }
-         fprintf (code_file, ")\n#else\nvoid p%d(", refno);
+         fprintf (code_file, ")\n#else\nint p%d(", refno);
          if (tp [2])
          {
             for (index = 2; tp [index]; index++)
@@ -617,7 +614,7 @@ void domajor ()
          }
          else
             fprintf (code_file, ")\n");
-         fprintf (code_file, "#endif\n{\n");
+         fprintf (code_file, "#endif\n{\nint done=0;\n");
          if (debug)
          {
             strcpy (prochead, tp [0]);
@@ -639,12 +636,12 @@ void domajor ()
                np = fndsymb (SYMBOL, tp [index]);
                if (np -> type > VERB)
                   gripe (tp [index], "Not a verb, place or object.");
-               sprintf (proctemp, "if (!KEY(%d)) return;\n", np -> refno);
+               sprintf (proctemp, "if (!KEY(%d)) return 0;\n", np -> refno);
                strcat (proccond, proctemp);
             }
 	 }
          dominor (prochead, proccond);
-         fprintf (code_file, "}\n");
+         fprintf (code_file, "return done;\n}\n");
          return;
 
       case DEFINE:
