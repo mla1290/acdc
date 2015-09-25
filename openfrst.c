@@ -1,5 +1,7 @@
-/* openfrst.c (acdc) - copyleft Mike Arnautov 2002-2013.
+/* openfrst.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Jan 15   MLA           BUG: Fixed source file specified by pathname.
  * 11 May 13   MLA           Bug: Fixed in-line name generation.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 12 Mar 08   MLA           Varsion 12 changes.
@@ -42,15 +44,11 @@ void openfrst (file_spec)
    char *nameptr = file_spec;
    char *sfxptr = NULL;
    char fullname [128];
-   
+      
    if ((nameptr = strrchr (file_spec, SEP)) != NULL)
    {
-      int len;
-      *nameptr++ = '\0';
-      len = strlen (file_spec);
-      strncpy (source_stem, file_spec, sizeof (source_stem));
-      *(source_stem + len++) = SEP;
-      *(source_stem + len) = '\0';
+      nameptr ++;
+      strncpy (source_stem, file_spec,  nameptr - file_spec);
    }
    else
    {

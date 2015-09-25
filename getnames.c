@@ -1,4 +1,5 @@
-/* getnames.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* getnames.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 11 May 13   MLA           bug: Fixed LOC spacing in cross-reference file.
  * 08 Jul 09   MLA           bug: Reinstate style 1 support.
@@ -38,7 +39,6 @@ struct node *gp;
    int prefix;
    int current_type;
    int real_type;
-   int refno;
    int used;
    int last_addr;
    char *tag;
@@ -56,7 +56,6 @@ struct node *gp;
    if ((np = gp) != NULL)
    {
       index = 1;
-      refno = gp -> refno;
       last_addr = gp -> word_addr;
    }
 

@@ -1,7 +1,9 @@
-/* acdc.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* acdc.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  */
-#define ACDC_VERSION "12.25, 05 Dec 2013"
+#define ACDC_VERSION "12.29.04, 10 Jan 2015"
 /*
+ * 02 Jan 15   MLA           bug: Don't use <malloc.h> on Mac OSX.
  * 11 May 13   MLA           Bug: Fixed in-line name count initialisation.
  *                           Bug: Fixed line counting for main source file.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a

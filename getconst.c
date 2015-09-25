@@ -1,4 +1,5 @@
-/* getconst.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* getconst.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 10 Jan 02   MLA           Disallow LOCAL in constants.
  * 24 Jul 99   MLA           Fixed complier warnings.

@@ -1,4 +1,5 @@
-/* finalise.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* finalise.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 09 Apr 13   MLA           Ditched 2nd arg of openout().
  * 22 Jul 09   MLA           Optionally suppressed unused symbol warnings.

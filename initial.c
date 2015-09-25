@@ -1,5 +1,7 @@
-/* initial.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* initial.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 02 Jan 15   MLA           Give DBNAME own refno.
  * 06 Oct 10   MLA           Added RESAY.
  * 04 Oct 10   MLA           bug: Restore ITLOC as a synonym of ITPLACE.
  * 29 Jan 10   MLA           Added IFHTML.
@@ -116,7 +118,7 @@ struct directive keywords[] =
    {"define",      MAJOR, DEFINE,      1,   ANY_NUMBER},  /* Compatibility */
    {"name" ,       MAJOR, NAME  ,      1,   REST},
    {"title",       MAJOR, NAME,        1,   REST},
-   {"dbname",      MAJOR, NAME,        1,   1},           /* Compatibility */
+   {"dbname",      MAJOR, DBNAME,      0,   ANY_NUMBER},  /* Compatibility */
    {"version",     MAJOR, GVERSION,    1,   REST},
    {"date",        MAJOR, DATE,        1,   REST},
    {"gameid",      MAJOR, GAMEID,      1,   REST},        /* Compatibility */

@@ -1,5 +1,5 @@
 /* btree.c - balanced tree handling on a linear stack.
- *           Copyleft Mike Arnautov 2001-2008.
+ *           Copyright Mike Arnautov 2001-2008.
  *
  * Balanced tree handling on a linear stack.
  *

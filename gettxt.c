@@ -1,4 +1,5 @@
-/* gettxt.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* gettxt.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 06 Feb 10   MLA           Added quote-block handling.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
@@ -80,7 +81,6 @@ int *text_type;
    int nest_len;
    int nest_type;
    int in_block = 0;
-   int html_tag = 0;
    int null_text = 1;
 
    states = 0;
@@ -432,15 +432,9 @@ store:
             else if (*text_ptr == '_' && style >= 10)
                *text_ptr = NBSP;
             else if (*text_ptr == '<' && style >= 10)
-            {
                *text_ptr = TAG_START;
-               html_tag = 1;
-            }
             else if (*text_ptr == '>' && style >= 10)
-            {
                *text_ptr = TAG_END;
-               html_tag = 0;
-            }
          }
       }
       escaped = 0;

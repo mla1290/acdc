@@ -1,4 +1,5 @@
-/* openout.c (acdc) - copyleft Mike Arnautov 2002-2013.
+/* openout.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 09 Apr 13   MLA           Ditched 2nd argument of openout().
  * 03 Aug 09   MLA           Extended copyleft notice to all non-adv550 games.
@@ -56,8 +57,11 @@ FILE *openout (file)
    {
       brk = file + strlen (file) - 2;
       if (*brk == '.' && (*(brk + 1) == 'c' || *(brk + 1) == 'h'))
-            fprintf (outfile, "/* %s: %s - copyleft %s, %s. */\n\n", file,
-               title, author, datbuf);
+      {
+         fprintf (outfile, "/* %s: %s - copyright %s, %s.\n", file,
+            title, author, datbuf);
+         fprintf (outfile, " * Licensed under the Modified BSD Licence (see the supplied LICENCE file).\n */\n\n");
+      }
    }
 
    return (outfile);

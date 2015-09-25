@@ -1,4 +1,5 @@
-/* param.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* param.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 06 Mar 03   Stuart Munro  Include stdlib.h; declare gripe().
  * 13 Jan 02   MLA           Give up -- pass "hidden" type args.

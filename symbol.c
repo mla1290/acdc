@@ -1,5 +1,7 @@
-/* symbol.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* symbol.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 29 Dec 14   MLA           Fixed symbol arithmetic in STYLE 1.
  * 06 Apr 10   MLA           Resticted identifier names.
  * 15 Mar 08   MLA           Version 12 changes.
  * 07 May 07   Stuart Munro  bug: declare chksymb before fndsymb.
@@ -72,7 +74,7 @@ struct node *addsymb (btroot, name, type, refno)
       gripe (name, "Unable to allocate memory.");
 
    len = strlen (name);
-   if (style < 10 && len > 12)
+   if (style < 10 && len > 12 && strpbrk (name, "+-") == NULL)
    {
       len = 12;
       *(name + 12) = '\0';
@@ -116,7 +118,7 @@ char *fname;
    int maxlen = sizeof (nbuf) - 1;
    int testing = (btroot & 32);
    
-   if (style < 10 && strlen (fname) > 12)
+   if (style < 10 && strlen (fname) > 12 && strpbrk (fname, "+-") == NULL)
       maxlen = 12;
    strncpy (nbuf, fname, maxlen);
    *(name + maxlen) = '\0';

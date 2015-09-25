@@ -1,4 +1,5 @@
-/* acdc.h (acdc) - copyleft Mike Arnautov 1990-2013.
+/* acdc.h (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  */
 
 extern char author [40];
@@ -8,7 +9,9 @@ extern int stage;
 extern int swap;
 extern char *acdc_version;
 #ifdef __STDC__
+#ifndef __MACH__
 #include <malloc.h>
+#endif /* __MACH__ */
 #include <stdlib.h>
 extern int nextline (int key);
 extern int gettxt (int description, int *max_states, int *text_type);

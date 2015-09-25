@@ -1,4 +1,5 @@
-/* major.h (acdc) - copyleft Mike Arnautov 1990-2013.
+/* major.h (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 04 Apr 12   MLA           Removed redundant definition of FREE.
  * 21 Mar 08   MLA           Added embedded texts.
@@ -73,5 +74,6 @@
 
 #define DEFINE      90         /* A-code 1 only */
 #define GAMEID      91         /* A-code 10 only */
+#define DBNAME      92         /* Obsolete  style 10 directive */
 
 /*====================================================================*/

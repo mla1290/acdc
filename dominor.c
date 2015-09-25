@@ -1,5 +1,7 @@
-/* dominor.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* dominor.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 09 Jan 15   MLA           Added multipl-pending sanity check.
  * 06 Oct 10   MLA           Added RESAY.
  * 29 Jan 10   MLA           Added IFHTML.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
@@ -1666,6 +1668,9 @@ char *proccond;
    }
 
 terminate:
+   if (multiple_pending)
+      gripe("", "Null code block?");
+      
    if (brace_count > 0)
    {
       if (style <= 1)

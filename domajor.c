@@ -1,5 +1,7 @@
-/* domajor.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* domajor.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 02 Jan 15   MLA           Disallow DBNAME directive.
  * 18 May 13   MLA           Allowed in-line texts in all styles (for CGI mode).
  * 09 Apr 13   MLA           Ditched second arg of openout().
  * 09 Jan 11   MLA           Added in-line text parsing.
@@ -263,6 +265,10 @@ void domajor ()
 
    switch (major_type)
    {
+      case DBNAME:
+         gripe ("DBNAME", 
+            "Obsolete directive!\n      Please replace with STYLE 10.\n");
+         break;
       case INCLUDE:
       case CONCLUDE:
          recase (LOWERCASE, tp [1]);

@@ -1,4 +1,5 @@
-/* source.h (acdc) - copyleft Mike Arnautov 1990-2013.
+/* source.h (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 11 Jan 10   Stuart Munro  _WIN32_ should be _WIN32.
  *             MLA           Added __MACH__ for OS X.

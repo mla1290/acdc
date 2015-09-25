@@ -1,4 +1,5 @@
-/* gripe.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* gripe.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 15 Mar 08   MLA           Version 12 changes.
  * 06 Mar 03   Stuart Munro  Include string.h.

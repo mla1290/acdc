@@ -1,4 +1,5 @@
-/* recase.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* recase.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 06 Mar 91   MLA           Provide own tolower/upper, to guard against
@@ -24,19 +25,22 @@ int key;
 char *cstring;
 #endif
 {
-   if (key == LOWERCASE)
-      *cstring = TOLOWER(*cstring);
-   else
-      *cstring = TOUPPER(*cstring);
-
-   if (key == CAPITALISE) key = LOWERCASE;
-
-   while (*(++cstring) != '\0')
+   if (cstring && *cstring)
    {
-      if (key == UPPERCASE)
-         *cstring = TOUPPER(*cstring);
-      else
+      if (key == LOWERCASE)
          *cstring = TOLOWER(*cstring);
+      else
+         *cstring = TOUPPER(*cstring);
+
+      if (key == CAPITALISE) key = LOWERCASE;
+
+      while (*(++cstring) != '\0')
+      {
+         if (key == UPPERCASE)
+            *cstring = TOUPPER(*cstring);
+         else
+            *cstring = TOLOWER(*cstring);
+      }
    }
    return;
 }

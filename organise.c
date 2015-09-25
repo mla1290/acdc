@@ -1,5 +1,8 @@
-/* organise.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* organise.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 02 Jan 15   MLA           Rationalised GAME_ID for all styles.
+ * 31 Dec 14   MLA           Generate sensible GAME_ID for all styles.
  * 10 Mar 13   MLA           Bug: PERSISTENT_DATA needs _ on DOS.
  * 30 Mar 10   MLA           CGINAME starts with an _ on DOS, Windows.
  * 22 Aug 09   MLA           Spare 3 obj/loc bits restricted to style >= 20. 
@@ -271,19 +274,22 @@ void organise()
 
 /* Assemble the game ID */
 
-   if (style >= 11)
+   if (style == 1)
    {
-      strcpy (gameid, title);
+      if (strstr(title, "550"))
+      {
+        strcpy (title, "Adv550");
+        strcpy (date, "September 18 1984");
+      }
+   }
+   if (!*gameid)
+   {
+      if (!*date)
+         strcpy (date, datbuf);
       if (*version)
-      {
-         strcat (gameid, " version ");
-         strcat (gameid, version);
-      }
-      if (*date)
-      {
-         strcat (gameid, ", ");
-         strcat (gameid, date);
-      }
+         sprintf (gameid, "%s version %s, %s", title, version, date);
+      else
+         sprintf (gameid, "%s version %s", title, date);
    }
       
    if (memory < 3)

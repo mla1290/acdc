@@ -1,4 +1,5 @@
-/* output.h (acdc) - copyleft Mike Arnautov 1990-2013.
+/* output.h (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 09 Mar 03   MLA           Replaced trace with debug.
  * 31 Dec 01   MLA           Added xref.

@@ -1,4 +1,5 @@
-/* opnsrc.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* opnsrc.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 22 Jul 09   MLA           Changed check for the quiet mode.
  * 15 Mar 08   MLA           Version 12 changes.

@@ -1,4 +1,5 @@
-/* param.h (acdc) - copyleft Mike Arnautov 1990-2013.
+/* param.h (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 30 Dec 01   MLA          Initial coding.
  *

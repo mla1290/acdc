@@ -1,5 +1,7 @@
- /* parse.c (acdc) - copyleft Mike Arnautov 1990-2013.
+ /* parse.c (acdc) - copyright Mike Arnautov 1990-2015.
+  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 04 Jan 15   MLA           BUG: Hendle CR-terminated lines correctly.
  * 02 Dec 13   MLA           BUG: Take care with in-line texts in style 1!
  * 09 Jan 11   MLA           Added in-line text parsing.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
@@ -75,7 +77,7 @@ int type;
    strcpy (raw_line, line);
    recase (LOWERCASE, line);
    tp [1] = NULL;
-   if ((tp[0] = get_token(&cptr, " ,\n\0")) == NULL)
+   if ((tp[0] = get_token(&cptr, " ,\r\n")) == NULL)
       gripe ("","Null directive???");
    if (type != NONE)
    {
@@ -89,16 +91,16 @@ int type;
       if (direct_call == 0 && np -> max_args == REST)
       {
          cptr = raw_line + (cptr - line);
-         cptr += strspn (cptr, " ,\n\0");
+         cptr += strspn (cptr, " ,\r\n");
          tp [1] = cptr;
          cptr += strlen(cptr) - 1;
-         if (*cptr == '\n') *cptr = '\0';
+         if (*cptr == '\n' || *cptr == '\r') *cptr = '\0';
          if (! *tp[1])
             gripe (tp[0], "Missing \"rest of line\" argument.");
          return (np);
       }
    }
-   while (cptr && (tp[++index] = get_token(&cptr," ,\n\0\r")) != NULL)
+   while (cptr && (tp[++index] = get_token(&cptr," ,\n\r")) != NULL)
    {
       if (style <= 1)
       {

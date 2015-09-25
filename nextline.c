@@ -1,5 +1,8 @@
-/* getline.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* getline.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 10 Jan 15   MLA           Bug: Make sure all lines are terminated by \n.
+ * 04 Jan 15   MLA           Bug: fixed checking for blank lines.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -17,6 +20,7 @@
 #endif
 
 #include <string.h>
+#include <ctype.h>
 
 #include "const.h"
 #include "line.h"
@@ -30,6 +34,7 @@ int nextline (key)
 int key;
 #endif
 {
+   int len;
    line_ptr = line;
 
 next_line:
@@ -47,9 +52,14 @@ next_line:
          }
       }
       line_count [level]++;
+      len = strlen (line) - 1;
+      if (*(line + len) != '\n')
+      {
+         *(line + (len++)) = '\n';
+         *(line + len) = '\0';
+      }
       if (debug > 1)
       {
-         int len;
          len = strlen (line) - 1;
          *(line + len) = '\0';
          fprintf (code_file, "/* %s */\n", line);
@@ -57,7 +67,14 @@ next_line:
       }
       if (*line_ptr == '*' || *line_ptr == '#')
          goto next_line;   /* Ignore comment lines */
-      if (*line_ptr == '\n' && key == IGNORE_BLANK) goto next_line;
+      if (key == IGNORE_BLANK)
+      {
+        char *lptr = line;
+        while (isspace(*lptr))
+           lptr++;
+        if (!*lptr)
+          goto next_line;
+      }
       total_lines++;
    }
    line_status = BOL;

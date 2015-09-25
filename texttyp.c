@@ -1,4 +1,5 @@
-/* texttyp.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* texttyp.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 25 Mar 08   MLA           Split off from domajor.c

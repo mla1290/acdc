@@ -1,4 +1,5 @@
-/* storchar.c (acdc) - copyleft Mike Arnautov 1990-2013.
+/* storchar.c (acdc) - copyright Mike Arnautov 1990-2015.
+ * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 31 Jul 09   MLA           BUG: text file screwed up in plain mode!
  * 09 Mar 03   MLA           Store as binary or ASCII data depending on 
