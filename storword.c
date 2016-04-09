@@ -1,6 +1,7 @@
-/* storword.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* storword.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 15 Mar 08   MLA           Version 12 changes.
  * 14 Feb 04   MLA           Converted longs to ints.
  * 11 Mar 03   MLA           Suppressed "vocabulary buffer enlarged" message.
@@ -11,23 +12,12 @@
  *
  */
  
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include "acdc.h"
 #include "symbol.h"
 #include "text.h"
 #include "const.h"
 
-#ifdef __STDC__
 struct node *storword(char *cstring, int type, int addr)
-#else
-void storword(cstring, type, addr)
-char *cstring;
-int type;
-int addr;
-#endif
 {
    char *old_voc_ptr;
    struct node *np;

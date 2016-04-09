@@ -1,6 +1,13 @@
-/* dominor.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* dominor.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 09 Apr 16   MLA           BUG: EVAL must set pointer status correctly.
+ * 04 Apr 16   MLA           Eliminated setjmp/lomgjmp calls in generated code.
+ *                           Hence CALL directive reverted to being mandatory.
+ *                           Bug: In ITERATE use poinetrs for pointers.
+ * 30 Mar 16   MLA           Bug: never indirect 2nd DEPOSIT argument.
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
+ *                           Added SELECT.
  * 09 Jan 15   MLA           Added multipl-pending sanity check.
  * 06 Oct 10   MLA           Added RESAY.
  * 29 Jan 10   MLA           Added IFHTML.
@@ -77,10 +84,6 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -108,19 +111,11 @@
 #define SPRINTF5(A,B,C,D,E) sprintf(A,B,C,D,E)
 #endif
 
-#ifdef __STDC__
 void addparam (int arg, char *name);
 int fndparam (char *name);
 int iniparam (int varsize);
+
 void dominor (char *prochead, char *proccond)
-#else
-void addparam ();
-int fndparam ();
-int iniparam ();
-void dominor (prochead, proccond)
-char *prochead;
-char *proccond;
-#endif /* __STDC__ */
 {
    int minor_type;
    int type;
@@ -138,6 +133,7 @@ char *proccond;
    int args_count;
    int got_code;
    int locals;
+   int cnt;
    char *chr;
    struct node *np;
    char *cond_ptr;
@@ -656,14 +652,14 @@ char *proccond;
                if (argtyp [index] != OBJ && argtyp [index] != LOC &&
                    argtyp [index] != VAR && argtyp [index] != LOCAL)
                       gripe (tp [index], "not reducible to a location.");
-               cond_ptr += SPRINTF3 (cond_ptr, "%slocation[", 
+               cond_ptr += SPRINTF3 (cond_ptr, "%sgetloc(", 
                   index > 2 ? "||" : "");
                if (argtyp [1] == VAR)
-                  cond_ptr += SPRINTF3 (cond_ptr, "value[%d]]==", argval [1]);
+                  cond_ptr += SPRINTF3 (cond_ptr, "value[%d])==", argval [1]);
                else if (argtyp [1] == LOCAL)
-                  cond_ptr += SPRINTF3 (cond_ptr, "lval[%d]]==", argval [1]);
+                  cond_ptr += SPRINTF3 (cond_ptr, "lval[%d])==", argval [1]);
                else
-                  cond_ptr += SPRINTF3 (cond_ptr, "%d]==", argval [1]);
+                  cond_ptr += SPRINTF3 (cond_ptr, "%d)==", argval [1]);
                if (argtyp [index] == VAR)
                   cond_ptr += SPRINTF3 (cond_ptr, "value[%d]", 
                      argval [index]);
@@ -741,7 +737,7 @@ char *proccond;
             brace_count++;
             loop_count++;
             if (argtyp [1] == VAR)
-               fprintf (code_file, "   *bitword(%d)= -1; value[%d]=",
+               fprintf (code_file, "   *bitword(%d)=-1; value[%d]=",
                   argval [1], argval [1]);
             else if (argtyp [1] == LOCAL)
                fprintf (code_file, "   lbts[%d*VARSIZE]=-1; lval[%d]=",
@@ -829,12 +825,23 @@ char *proccond;
             break;
 
          case ITERATE:
-            if (argtyp [1] == VAR)
-               fprintf (code_file, "   value[%d]=", argval [1]);
-            else if (argtyp [1] == LOCAL)
-               fprintf (code_file, "   lval[%d]=", argval [1]);
-            else
+            if (argtyp [1] != VAR && argtyp [1] != LOCAL)
                gripe (tp [1], "Not a variable.");
+            if (argtyp[2] == VAR || argtyp[2] == LOCAL)
+            {
+               if (argtyp [2] == VAR)
+                  fprintf (code_file, "if (*bitword(%d) == -1) ", 
+                     argval[2]);
+               else
+                  fprintf (code_file, "if (lbts[%d*VARSIZE] == -1) ", 
+                     argval[2]);
+            }
+            if (argtyp [1] == VAR)
+               fprintf (code_file, "*bitword(%d)=-1;value[%d]=", 
+                  argval [1], argval [1]);
+            else if (argtyp [1] == LOCAL)
+               fprintf (code_file, "lbts[%d*VARSIZE]=-1;lval[%d]=", 
+                  argval [1], argval [1]);
             if (argtyp [2] == VAR)
                fprintf (code_file, "value[%d]", argval [2]);
             else if (argtyp [2] == LOCAL)
@@ -875,7 +882,8 @@ char *proccond;
             break;
 
          case QUIT:
-            fprintf (code_file, "   longjmp(loop_back,1);\n");
+/*            fprintf (code_file, "   longjmp(loop_back,1);\n"); */
+            fprintf (code_file, "   loop=1; return(0);\n");
             break;
 
          case STOP:
@@ -966,7 +974,7 @@ char *proccond;
             while (++index <= end_index)
                fprintf (code_file, ",%s%d",
                   (index == end_index) ? "-" : "", argval [index]);
-            fprintf (code_file, ");\n");
+            fprintf (code_file, "); if (loop) return(0);\n");
             break;
 
          case DICT:
@@ -1012,13 +1020,13 @@ char *proccond;
             tp [1]     = tp [index];     tp [2]     = tp [index + 1];
             argtyp [1] = argtyp [index]; argtyp [2] = argtyp [index + 1];
             argval [1] = argval [index]; argval [2] = argval [index + 1];
-            minor_type = QUIP;
          case RESAY:
             if (minor_type == RESAY) /* I.e. we didn't fall through to here */
                fprintf (code_file, "zap_text();\n");
          case APPEND:
             if (minor_type == APPEND) /* I.e. we didn't fall through to here */
                fprintf (code_file, "glue_text();\n");
+            minor_type = QUIP;
          case QUIP:
          case SAY:
          case VALUE:
@@ -1087,6 +1095,8 @@ char *proccond;
               fprintf (code_file, "lval[%d]);\n", argval [2]);
             else
               fprintf (code_file, "%d);\n", argval [2]);
+            if (minor_type == QUIP)
+              fprintf(code_file, " if (loop) return(0);");
             break;
 
          case SET:
@@ -1192,6 +1202,33 @@ char *proccond;
                fprintf (code_file, "%d+1)+%d;\n", argval [2], argval [2]);
             break;
 
+         case RANDSEL:
+            if (argtyp [1] > VAR && argtyp [1] != LOCAL)   
+               gripe (tp [1], "Not a value holder.");
+            cnt = 0;
+            type = argtyp [2];
+            if (type == LOCAL)
+               gripe (tp [index], "Cannot indirect to local variables.");
+            for (index = 2; tp[index] != NULL; index++)
+            {
+               if (argtyp [index] != type)
+                  gripe (tp [index], "Changed option type!");
+               cnt++;
+            }
+            if (cnt < 2)
+               gripe (tp [1], "Not enough options to select from.");
+            if (argtyp [1] == VAR)
+               fprintf (code_file, "   value[%d]=randsel(%d,%d", 
+                  argval [1], cnt, argval [2]);
+            else
+               fprintf (code_file, "   lval[%d]=randsel(%d,%d", 
+                  argval [1], type, argval [2]);
+            for (index = 3; tp[index] != NULL; index++)
+               fprintf (code_file, ",%d", argval[index]);
+            if (type != CONSTANT)
+               fprintf (code_file, ");*bitword(%d) = -1;\n", argval [1]);
+            break;
+
          case DEPOSIT:       /* DEPOSIT variable {objptr|placeptr} */
             if (argtyp [1] != VAR && argtyp [1] != LOCAL)
                gripe (tp [1], "Not a variable.");
@@ -1202,9 +1239,7 @@ char *proccond;
             if (argtyp [2] <= TEXT)
                fprintf (code_file, "value[%d];\n", argval[2]);
             else if (argtyp [2] == LOCAL)
-               fprintf (code_file, 
-                  "lbts[%d*VARSIZE]==-1?value[lval[%d]]:lval[%d];\n", 
-                     argval[2], argval[2], argval[2]);
+               fprintf (code_file, "lval[%d];\n", argval[2]);
             else
                fprintf (code_file, "%d;\n", argval[2]);
             break;
@@ -1233,12 +1268,17 @@ char *proccond;
                if (argtyp [2] != VAR && argtyp [2] != LOCAL)
                   gripe (tp [2], "Not a variable.");
                if (argtyp [2] == VAR)
-                  fprintf (code_file, "value[value[%d]];",
-                     argval [2]);
+                  fprintf (code_file, "value[value[%d]];", argval [2]);
                else
-                  fprintf (code_file, "value[lval[%d]];",
-                     argval [2]);
-               type = 0;
+                  fprintf (code_file, "value[lval[%d]];", argval [2]);
+               if (argtyp [1] == VAR)
+                  fprintf (code_file, "*bitword(%d)=", argval [1]);
+               else
+                  fprintf (code_file, "lbts[%d*VARSIZE]=", argval [1]);
+       	       if (argtyp [2] == VAR)
+                  fprintf (code_file, "*bitword(%d);", argval [2]);
+       	       else
+                  fprintf (code_file, "lbts[%d*VARSIZE];", argval [2]);
             }
             else if (minor_type == LOCATE)
             {
@@ -1246,22 +1286,23 @@ char *proccond;
                   argtyp [2] != OBJ)
                      gripe (tp [2], "Not reducible to an object.");
                if (argtyp [2] == VAR)
-                  fprintf (code_file, "location[value[%d]];",
+                  fprintf (code_file, "getloc(value[%d]);",
                      argval [2]);
                else if (argtyp [2] == LOCAL)
-                  fprintf (code_file, "location[lval[%d]];",
+                  fprintf (code_file, "getloc(lval[%d]);",
                      argval [2]);
                else
-                  fprintf (code_file, "location[%d];",
+                  fprintf (code_file, "getloc(%d);",
                      argval [2]);
                type = -1;
             }
-            if (argtyp [1] == VAR)
-               fprintf (code_file, "*bitword(%d)=%d;\n",
-                  argval [1], type);
-            else
-               fprintf (code_file, "lbts[%d*VARSIZE]=%d;\n",
-                  argval [1], type);
+            if (minor_type != EVAL)
+            {
+               if (argtyp [1] == VAR)
+                  fprintf (code_file, "*bitword(%d)=-1;\n", argval [1]);
+               else
+                  fprintf (code_file, "lbts[%d*VARSIZE]=-1;\n", argval [1]);
+            }
             break;
 
          case FLAG:      /* FLAG/UNFLAG {variable|place|obj} {flag} */
@@ -1331,6 +1372,7 @@ char *proccond;
             }
             else
                fprintf (code_file, "   input(0);\n");
+            fprintf (code_file, "   if (loop) return(0);\n");
             break;
 
          case DEFAULT:      /* DEFAULT/DOALL {place | placeptr} [flag] */
@@ -1604,7 +1646,6 @@ char *proccond;
 
          case CALL:
             index = 1;        /* Point at proc name and fall through. */
-         default:
             if (index == 0)
             {
                argtyp[0] = ap[0] -> type;
@@ -1662,7 +1703,11 @@ char *proccond;
                fprintf (code_file, "); else pcall(lval[%d]);\n", argval [proc_index]);
 	    else
                fprintf (code_file, ");\n");
+            fprintf (code_file, "if (loop) return (0);\n");
             break;
+            
+         default:
+            gripe (tp [0], "not a known minor directive.");
       }
       if (minor_type < NOT) not_pending = FALSE;
    }

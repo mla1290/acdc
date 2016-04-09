@@ -1,8 +1,11 @@
-/* acdc.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* acdc.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  */
-#define ACDC_VERSION "12.29.04, 10 Jan 2015"
+#define ACDC_VERSION "12.32, 09 Apr 2016"
 /*
+ * 03 Mar 16   MLA           Added SELECT.
+ *                           Removed non-ANSI C support.
+ * 25 Feb 16   MLA           bug: Clear out redundant adv<n>.c files, if any.
  * 02 Jan 15   MLA           bug: Don't use <malloc.h> on Mac OSX.
  * 11 May 13   MLA           Bug: Fixed in-line name count initialisation.
  *                           Bug: Fixed line counting for main source file.
@@ -55,10 +58,6 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -89,11 +88,15 @@ int total_lines;
 int text_lines;
 int inline_count;
 int line_count [MAXLEVEL];
+char out_stem [MAXLINE + 3];
 char pathname [MAXLEVEL] [MAXLINE + 1];
 FILE *infile [MAXLEVEL];
 
+/* Default to style 1. Other than Platt's original Adv550, A-code games
+ * should explicitly specify their style.
+ */
 #include "game.h"
-int style = -1;
+int style = 1;
 char dbname [80];
 char title [80];
 char date [80];
@@ -111,6 +114,7 @@ int flag_field_size [VARFLAG + 1];
 int *used_counts;
 int *roots [] = {NULL, NULL, NULL, NULL};
 int ref_redo = 0;
+struct node *entname = NULL;
 
 #include "text.h"
 int next_addr;
@@ -143,14 +147,7 @@ int cond_buf_len = COND_INIT_LEN;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 int check_it (int val, char *arg1, char **arg2)
-#else
-int check_it (val, arg1, arg2)
-int val;
-char *arg1;
-char **arg2;
-#endif
 {
    if (val >= 0)
    {
@@ -205,19 +202,13 @@ void symlist (struct node *np)
 }
 #endif /* DEBUG */
 
-#ifdef __STDC__
-int main (
-   int argc, 
-   char **argv)
-#else
-int main (argc, argv)
-   int argc;
-   char **argv;
-#endif
+int main (int argc, char **argv)
 {
    int offset;
    int len;
    int i;
+   int obs_first;
+   int obs_last = 0;
    char *arg;
    char source_path [MAXLINE + 1];
 
@@ -346,6 +337,23 @@ int main (argc, argv)
    free(voc_buf_ptr);
 
    if (xref_file) fclose (xref_file);
+
+/* Clear any junk left by a previous run of acdc */
+
+   obs_first = code_part;
+   while (1)
+   {
+      sprintf (line, "%sadv%02d.c", out_stem, ++code_part);
+      if ((code_file = fopen(line, "r")) != NULL)
+      {
+         unlink(line);
+         obs_last = code_part;
+      }
+      else
+         break;
+   }
+
+/* Report results */
    
    if ((quiet & 1) == 0)
    {
@@ -353,6 +361,16 @@ int main (argc, argv)
          "Finished translating \"%s\":\n", source_file);
       printf (
          "   ... Program files: %d\n", file_count);
+      if (obs_last)
+      {
+         int cnt = obs_last - obs_first;
+         obs_first++;
+         printf ("   ... (Cleared %d obsolete file", cnt);
+         if (cnt == 1)
+            printf (" adv%02d.c)\n", obs_first);
+         else
+            printf ("s -- adv%02d through to adv%02d)\n", obs_first, obs_last);
+      }
       printf (
          "   ... Program lines: %d - code %d, text %d\n",
             total_lines, total_lines - text_lines, text_lines);
@@ -364,7 +382,7 @@ int main (argc, argv)
       printf (
          "   ... Overall data file size: %d bytes\n", next_addr);
    }
-   else
+   else if (!quiet)
       puts ("done.");
    return (OK);
 }

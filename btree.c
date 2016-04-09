@@ -13,10 +13,6 @@
  * 24 Mar 01   MLA           Initial coding.
  */
  
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -38,15 +34,7 @@
 
 /*====================================================================*/
 
-#ifdef __STDC__
 static void sing_rot (int *root, int parent, int child, int dir)
-#else /* ! __STDC__ */
-static void sing_rot (root, parent, child, dir)
-int *root;
-int parent;
-int child;
-int dir;
-#endif /* __STDC__ */
 {
    int gparent = *(root + parent + BT_UP);
    int gchild = *(root + child + BT_UP - dir);
@@ -69,15 +57,7 @@ int dir;
 
 /*--------------------------------------------------------------------*/
 
-#ifdef __STDC__
 static void dub_rot (int *root, int parent, int child, int dir)
-#else /* ! __STDC__ */
-static void dub_rot (root, parent, child, dir)
-int *root;
-int parent;
-int child;
-int dir;
-#endif /* __STDC__ */
 {
    int gparent = *(root + parent + BT_UP);
    int gchild = *(root + child + BT_UP - dir);
@@ -114,13 +94,7 @@ int dir;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 int btcmpa (struct node *itemptr, struct node *nodeptr)
-#else /* ! __STDC__ */
-int btcmpa (itemptr, nodeptr)
-struct node *itemptr;
-struct node *nodeptr;
-#endif /* __STDC__ */
 {
    char *n1;
    char *n2;
@@ -140,13 +114,7 @@ struct node *nodeptr;
 
 /*--------------------------------------------------------------------*/
 
-#ifdef __STDC__
 int btcmpf (char *word, struct node *nodeptr)
-#else /* ! __STDC__ */
-int btcmpf (word, nodeptr)
-char *word;
-struct node *nodeptr;
-#endif /* __STDC__ */
 {
    char *name;
    int result;
@@ -162,12 +130,7 @@ struct node *nodeptr;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void btinit (int type)
-#else /* ! __STDC__ */
-void btinit (type)
-int type;
-#endif /* __STDC__ */
 {
    int *root = *(roots + type);
    if (root == NULL)
@@ -198,13 +161,7 @@ int type;
 
 #ifdef BT_DEBUG
 
-#ifdef __STDC__
 void btshow (int *root, struct node *nodeptr)
-#else /* ! __STDC__ */
-void btshow (root, text)
-int *root;
-char *text;
-#endif /* __STDC__ */
 {
    int *iptr;
 
@@ -224,13 +181,7 @@ char *text;
 
 /*--------------------------------------------------------------------*/
 
-#ifdef __STDC__
 int btadd (int type, void *record)
-#else /* ! __STDC__ */
-int btadd (type, record)
-int type;
-struct node *record;
-#endif /* __STDC__ */
 {
    int *root = roots [type];
    int parent = 0;
@@ -291,13 +242,7 @@ struct node *record;
 
 /*--------------------------------------------------------------------*/
 
-#ifdef __STDC__
 struct node *btfind (int type, char *word)
-#else /* ! __STDC__ */
-struct node *btfind (type, word)
-int type;
-char *word;
-#endif /* __STDC__ */
 {
    int node;
    int dir;
@@ -318,13 +263,7 @@ char *word;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void btspan (int type, void (*btact)(struct node *))
-#else /* ! __STDC__ */
-void btspan (type, btact)
-int type;
-void (*btact)();
-#endif /* __STDC__ */
 {
    struct node *np;
    int state = 0;

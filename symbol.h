@@ -1,4 +1,4 @@
-/* symbol.h (acdc) - copyright Mike Arnautov 1990-2015.
+/* symbol.h (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 15 Mar 08   MLA           Version 12 changes.
@@ -75,15 +75,10 @@
    } ;
       
    extern int *roots[];
+   extern int flag_field_size[];
 
-#ifdef __STDC__
+   extern struct node *entname;
    extern struct node *fndsymb(int, char *);
    extern struct node *addsymb(int, char *, int, int);
-#else
-   extern struct node *fndsymb();
-   extern struct node *addsymb();
-#endif
-
-   extern int flag_field_size[];
 
 #endif /* SYMBOL_DONE */

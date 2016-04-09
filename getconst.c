@@ -1,15 +1,12 @@
-/* getconst.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* getconst.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 10 Jan 02   MLA           Disallow LOCAL in constants.
  * 24 Jul 99   MLA           Fixed complier warnings.
  * 15 Sep 90   MLA           Initial coding.
  *
  */
-
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
 
 #include <ctype.h>
 
@@ -19,13 +16,7 @@
 #include "major.h"
 #include "param.h"
 
-#ifdef __STDC__
-int getconst (
-   char *cstring)
-#else
-int getconst (cstring)
-   char *cstring;
-#endif
+int getconst (char *cstring)
 {
    char *cstring_ptr;
    char token [161];

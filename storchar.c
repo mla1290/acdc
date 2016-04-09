@@ -1,6 +1,7 @@
-/* storchar.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* storchar.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 31 Jul 09   MLA           BUG: text file screwed up in plain mode!
  * 09 Mar 03   MLA           Store as binary or ASCII data depending on 
  *                           value of memory. 
@@ -10,19 +11,10 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include "text.h"
 #include "game.h"
 
-#ifdef __STDC__
 void storchar (int ch)
-#else
-void storchar (ch)
-intch;
-#endif
 {
 /*   ch &= 255; */
    if (plain_text)

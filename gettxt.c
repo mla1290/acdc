@@ -1,6 +1,7 @@
-/* gettxt.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* gettxt.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 06 Feb 10   MLA           Added quote-block handling.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
  *                           new gcc header clash.
@@ -39,10 +40,6 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <ctype.h>
 
 #include "acdc.h"
@@ -53,14 +50,7 @@
 #include "major.h"
 #include "text.h"
 
-#ifdef __STDC__
 int gettxt (int description, int *max_states, int *text_type)
-#else
-int gettxt (description, max_states, text_type)
-int description;
-int *max_states;
-int *text_type;
-#endif
 {
    char *text_ptr;
    char *temp_ptr;
@@ -82,6 +72,7 @@ int *text_type;
    int nest_type;
    int in_block = 0;
    int null_text = 1;
+   int text_len = 0;
 
    states = 0;
    frag = (text_type && (*text_type & FRAGMENT_TEXT));
@@ -384,6 +375,7 @@ store:
       *text_ptr++ = SWITCH_END;
 
    *text_ptr = '\0';
+   text_len = text_ptr - text_buf_ptr;
    text_ptr = text_buf_ptr;
    if (implicit_switch)
    {
@@ -393,7 +385,7 @@ store:
 
    escaped = 0;
 
-   while (*(++text_ptr) != '\0')
+   while (text_len-- && *(++text_ptr) != '\0')
    {
       if (escaped == 0)
       {

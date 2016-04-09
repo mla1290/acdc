@@ -1,6 +1,7 @@
-/* doswitch.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* doswitch.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 21 Sep 08   MLA           Use LCM max states for cycled texts.
  * 15 Mar 08   MLA           Version 12 changes.
  * 14 Mar 08   MLA           Fixed switch offsets!
@@ -15,21 +16,10 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include "acdc.h"
 #include "text.h"
 
-#ifdef __STDC__
 void doswitch (char *text_ptr, int *max_states, int cycle)
-#else
-void doswitch (text_ptr, max_states, cycle)
-char *text_ptr;
-int *max_states;
-int cycle;
-#endif
 {
    int breaks [MAX_BREAKS];
    int states = 0;

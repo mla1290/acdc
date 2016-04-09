@@ -1,4 +1,4 @@
-/* param.h (acdc) - copyright Mike Arnautov 1990-2015.
+/* param.h (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 30 Dec 01   MLA          Initial coding.
@@ -6,7 +6,6 @@
  */
  
 #ifndef PARAM_DONE
-
 #  define PARAM_DONE
 
    struct param_list
@@ -17,16 +16,9 @@
       struct param_list *next;
    };
    
-#  ifdef __STDC__
    extern void zapparam (void);
    extern void addparam (int, char *name);
    extern int iniparam (int);
    extern int  fndparam (char *name);
-#  else
-   extern void zapparam ();
-   extern void addparam ();
-   extern int iniparam ();
-   extern int  fndparam ();
-#  endif
    
 #endif /* PARAM_DONE */

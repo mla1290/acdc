@@ -1,5 +1,5 @@
 /* btree.c - balanced tree handling on a linear stack.
- *           Copyright Mike Arnautov 2001-2008.
+ *           Copyright Mike Arnautov 2001-2016.
  *
  * Balanced tree handling on a linear stack.
  *
@@ -13,24 +13,10 @@
  */
 
 #ifndef __BTREE__
-
 #  define __BTREE__
-
-#  ifdef __STDC__
-
       void btinit (int type);
       int btadd (int type, void *record);
       struct node *btfind (int type, char *word);
       void btspan (int type, void (*btact)(struct node *));
-
-#  else /* ! __STDC__ */
-
-      void btinit ();
-      int btadd ();
-      struct node *btfind ();
-      void btspan ();
-
-#  endif /* __STDC__ */
-
 #endif /* __BTREE__ */
 

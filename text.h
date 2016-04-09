@@ -1,4 +1,4 @@
-/* text.h (acdc) - copyright Mike Arnautov 1990-2015.
+/* text.h (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 06 Feb 10   MLA           Added QUOTE_START.
@@ -22,13 +22,8 @@
 #include <stdio.h>
 #endif
 
-#ifdef __STDC__
 extern struct node *storword (char *, int, int);
 extern void clsfile (FILE *outfile, char *text);
-#else
-extern struct node *storword ();
-extern void clsfile ();
-#endif
 
 #define TEXT_INIT_LEN  8192
 #define LOGICAL_ESCAPE '\\'

@@ -1,6 +1,7 @@
-/* texttyp.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* texttyp.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 25 Mar 08   MLA           Split off from domajor.c
  *
@@ -13,11 +14,7 @@
 #include "line.h"
 #include "text.h"
 
-#ifdef __STDC__
 int texttyp (void)
-#else
-int texttyp ()
-#endif
 {
    int type = 0;
    int frag = 0;

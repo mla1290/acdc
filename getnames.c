@@ -1,6 +1,7 @@
-/* getnames.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* getnames.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 11 May 13   MLA           bug: Fixed LOC spacing in cross-reference file.
  * 08 Jul 09   MLA           bug: Reinstate style 1 support.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -14,10 +15,6 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include "acdc.h"
 #include "const.h"
 #include "line.h"
@@ -27,13 +24,7 @@
 #include "source.h"
 #include "text.h"
 
-#ifdef __STDC__
 struct node *getnames (int major_type, struct node *gp)
-#else
-struct node *getnames (major_type, gp)
-int major_type;
-struct node *gp;
-#endif
 {
    int index;
    int prefix;

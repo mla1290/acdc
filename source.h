@@ -1,6 +1,7 @@
-/* source.h (acdc) - copyright Mike Arnautov 1990-2015.
+/* source.h (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 11 Jan 10   Stuart Munro  _WIN32_ should be _WIN32.
  *             MLA           Added __MACH__ for OS X.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -42,6 +43,7 @@ extern int text_count;
 extern int switch_count;
 extern char pathname [MAXLEVEL] [MAXLINE + 1];
 extern FILE *infile [];
+extern char out_stem [];
 extern char source_stem [];
 extern char source_file [];
 extern char xref_path [];

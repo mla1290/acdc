@@ -1,6 +1,8 @@
-/* openout.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* openout.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
+ * 25 Feb 16   MLA           Don't re-compute output stem: use out_stem.
  * 09 Apr 13   MLA           Ditched 2nd argument of openout().
  * 03 Aug 09   MLA           Extended copyleft notice to all non-adv550 games.
  * 06 Mar 03   Stuart Munro  Remove unused variables.
@@ -11,10 +13,6 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <string.h>
 
@@ -22,35 +20,44 @@
 #include "source.h"
 #include "game.h"
 
-#ifdef __STDC__
-FILE *openout (
-   char *file)
-#else
-FILE *openout (file)
-   char *file;
-#endif
+FILE *openout (char *file)
 {
    char *brk;
    char full_name [128];
    FILE *outfile;
    
-   if (*source_stem == '\0')
-      sprintf (full_name, "C%c%s", SEP, file);
-   else
-      sprintf (full_name, "%sC%c%s", source_stem, SEP, file);
-
-   if ((outfile = fopen (full_name, "wb")) == NULL)
-   {      
+   if (*out_stem == '\0')
+   {
+      sprintf(out_stem, "%sC%c", source_stem, SEP);
       if (*source_stem == '\0')
-         strcpy (full_name, file);
+         sprintf (full_name, "C%c%s", SEP, file);
       else
-         sprintf (full_name, "%s%s", source_stem, file);
-
+         sprintf (full_name, "%sC%c%s", source_stem, SEP, file);
+   
       if ((outfile = fopen (full_name, "wb")) == NULL)
-      {
-         fprintf (stderr, "%s -- unable to open file!\n", full_name);
-         exit (1);
+      {      
+         strcpy(out_stem, source_stem);
+         if (*source_stem == '\0')
+         {
+            strcpy (full_name, file);
+            *out_stem = '\0';
+         }
+         else
+            sprintf (full_name, "%s%s", source_stem, file);
+
+         outfile = fopen (full_name, "wb");   
       }
+   }
+   else
+   {
+      sprintf(full_name, "%s%s", out_stem, file);
+      outfile = fopen (full_name, "wb");
+   }
+
+   if (outfile == NULL)
+   {
+      fprintf (stderr, "%s -- unable to open file!\n", full_name);
+      exit (1);
    }
 
    if (*title && *author && strcmp (title, "adv550") != 0)

@@ -1,6 +1,7 @@
-/* symbol.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* symbol.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 29 Dec 14   MLA           Fixed symbol arithmetic in STYLE 1.
  * 06 Apr 10   MLA           Resticted identifier names.
  * 15 Mar 08   MLA           Version 12 changes.
@@ -17,10 +18,6 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <string.h>
 #include <ctype.h>
 #include <setjmp.h>
@@ -32,15 +29,7 @@
 #include "btree.h"
 #include "major.h"
 
-#ifdef __STDC__
 struct node *addsymb (int btroot, char *name, int type, int refno)
-#else
-struct node *addsymb (btroot, name, type, refno)
-   int btroot;
-   char *name;
-   int type;
-   int refno;
-#endif
 {
    struct node *np;
    int len;
@@ -104,13 +93,7 @@ struct node *addsymb (btroot, name, type, refno)
 
 /*======================================================================*/
 
-#ifdef __STDC__
 struct node *fndsymb (int btroot, char *fname)
-#else
-struct node *fndsymb (btroot, fname)
-int btroot;
-char *fname;
-#endif
 {
    struct node *np;
    char nbuf [160];

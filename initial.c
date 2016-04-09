@@ -1,6 +1,8 @@
-/* initial.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* initial.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
+ *                           Added SELECT.
  * 02 Jan 15   MLA           Give DBNAME own refno.
  * 06 Oct 10   MLA           Added RESAY.
  * 04 Oct 10   MLA           bug: Restore ITLOC as a synonym of ITPLACE.
@@ -54,10 +56,6 @@
  * 15 Sep 90   MLA           Initial coding.
  *
  */
-
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -234,6 +232,8 @@ struct directive keywords[] =
    {"ifnear",      MINOR, IFNEAR,      1,   2},
    {"ifhere",      MINOR, IFHERE,      1,   2},
    {"randomise",   MINOR, RANDOMISE,   2,   2},
+   {"randsel",     MINOR, RANDSEL,     3,   ANY_NUMBER},
+   {"randselect",  MINOR, RANDSEL,     3,   ANY_NUMBER},
    {"tie",         MINOR, TIE,         2,   ANY_NUMBER},
    {"fakearg",     MINOR, FAKEARG,     2,   2},
    {"fakecom",     MINOR, FAKECOM,     2,   2},
@@ -256,11 +256,7 @@ struct directive keywords[] =
    {"",            0,     ENDOFLIST,   0,   0}
 } ;
 
-#ifdef __STDC__
 void initial(void)
-#else
-void initial()
-#endif
 {
    int index;
    struct node *np;
@@ -296,7 +292,6 @@ void initial()
    *date = '\0';
    *version = '\0';
    *title = '\0';
-   style = -1;
    next_addr = 0;
 
    return;

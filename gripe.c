@@ -1,6 +1,7 @@
-/* gripe.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* gripe.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 15 Mar 08   MLA           Version 12 changes.
  * 06 Mar 03   Stuart Munro  Include string.h.
  * 24 Jul 99   MLA           Fixed complier warnings.
@@ -8,10 +9,6 @@
  * 15 Sep 90   MLA           Initial coding.
  *
  */
-
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -22,18 +19,13 @@
 #include "line.h"
 #include "source.h"
 
-#ifdef __STDC__
 void gripe(char *error_token, char *error_message)
-#else
-void gripe(error_token, error_message)
-char *error_token;
-char *error_message;
-#endif
 {
    char *rptr = raw_line;
    while (*rptr == ' ' || *rptr == '\t') rptr++;
    *(rptr + strlen (rptr) - 1) = '\0';
    
+ fprintf (stderr, "STYLE %d\n", style);
    fprintf (stderr, "*ERROR* ");
    if (stage != -1)     /* I.e. not called from organise() */
    {
@@ -50,14 +42,7 @@ char *error_message;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void deprecate( const char *directive, int from, int major)
-#else
-void deprecate(directive, from, major)
-char *directive;
-int from;
-int major;
-#endif
 {
    if (style >= from)
    fprintf (stderr, "%s, line %d: deprecated %s directive %s\n", 

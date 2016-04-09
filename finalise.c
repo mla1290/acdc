@@ -1,6 +1,8 @@
-/* finalise.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* finalise.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Apr 16   MLA           Eliminated setjmp/lomgjmp calls in generated code.
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 09 Apr 13   MLA           Ditched 2nd arg of openout().
  * 22 Jul 09   MLA           Optionally suppressed unused symbol warnings.
  * 21 Jul 09   MLA           Added the VERSION comment to adv1.h.
@@ -26,10 +28,6 @@
  *
  */
  
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <string.h>
 
@@ -56,15 +54,11 @@ int *int_base;
 int *detail_base;
 int base_voc_addr;
 int key_mask;
+int *ent_addr;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void show_node (struct node *np)
-#else
-void show_node (np)
-struct node *np;
-#endif
 {
    printf ("Node name %s\n", np -> name);
    printf ("   type %d\n", np -> type);
@@ -92,12 +86,7 @@ struct node *np;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void process_text(struct node *np)
-#else
-void process_text(np)
-struct node *np;
-#endif
 {
    int refno;
    int *array_ptr;
@@ -131,12 +120,7 @@ struct node *np;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void process_voc_refno (struct node *np)
-#else
-void process_voc_refno (np)
-struct node *np;
-#endif
 {
    int refno;
 
@@ -156,12 +140,7 @@ struct node *np;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void process_voc_type(struct node *np)
-#else
-void process_voc_type(np)
-struct node *np;
-#endif
 {
    fprintf (defs_file, "%4d, ", np -> type);
    if (++node_count == 11)
@@ -174,12 +153,7 @@ struct node *np;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void process_voc_addr(struct node *np)
-#else
-void process_voc_addr(np)
-struct node *np;
-#endif
 {
    fprintf (defs_file, "%8dL, ", 
       base_voc_addr + np -> voc_addr);
@@ -193,12 +167,7 @@ struct node *np;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void process_voc_word(struct node *np)
-#else
-void process_voc_word(np)
-struct node *np;
-#endif
 {
    fprintf (defs_file, "%8dL, ", 
       base_voc_addr + np -> word_addr);
@@ -212,15 +181,27 @@ struct node *np;
 
 /*====================================================================*/
 
-#ifdef __STDC__
+void process_ent_name(struct node *np)
+{
+   static int node_count = 0;
+   char *nptr = np -> name;
+   int refno = np -> refno;
+   int type = np -> type;
+   if (type >= 0 && type <= 4)
+   {
+      *(ent_addr + refno) = next_addr;
+      while (1)
+      {
+         storchar (*nptr);
+         if (!*nptr) break;
+         nptr++;
+      }
+   }
+}
+
+/*====================================================================*/
+
 void dump_array (int *addr, int count, char *pattern, int group)
-#else
-void dump_array (addr, count, pattern, group)
-int *addr;
-int count;
-char *pattern;
-int group;
-#endif
 {
     int *base;
     int tokens;
@@ -243,12 +224,7 @@ int group;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 static void process_proc (struct node *np)
-#else
-static void process_proc (np)
-struct node *np;
-#endif
 {
    int i, j;
    int procno = np -> proc_base;
@@ -268,28 +244,18 @@ struct node *np;
       *(proc_array + refno) = procno;
    if (count == 1) return;
 
-   fprintf (code_file, "#ifdef __STDC__\nint p%d(", procno);
+   fprintf (code_file, "int p%d(", procno);
    if ((np -> arg_count) > 0)
       for (i = 0; i < (np -> arg_count); i++)
          fprintf (code_file, "%sint typ%d,int par%d", i ? "," : "", i, i);
-   fprintf (code_file, ")\n#else\nint p%d(", procno);      
-   if ((np -> arg_count) > 0)
-   {
-      for (i = 0; i < (np -> arg_count); i++)
-         fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
-      for (i = 0; i < (np -> arg_count); i++)
-         fprintf (code_file, "int typ%d;int par%d;\n", i, i);
-   }
-   else
-      fprintf (code_file, ")\n");
-   fprintf (code_file, "#endif\n{\n");
+   fprintf (code_file, ")\n{\n");      
    for (j = 1; j <= (np -> proc_count); j++)
    {
       fprintf (code_file, "   if (p%d(", procno + j);
       if (np -> arg_count > 0)
          for (i = 0; i < (np -> arg_count); i++)
             fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
-      fprintf (code_file, ")) return 0;\n");         
+      fprintf (code_file, ") || loop) return 0;\n");         
    }
    fprintf (code_file, "   return 1;\n}\n");
    return;
@@ -297,11 +263,7 @@ struct node *np;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 void finalise (void)
-#else
-void finalise ()
-#endif
 {
    char proc_name [20];
    int proc_count;
@@ -319,6 +281,13 @@ fflush (stdout);
    voc_ptr = voc_buf_ptr;
    while (voc_ptr < voc_top)
       storchar(*voc_ptr++);
+
+   if (entname)
+   {
+      ent_addr = (int *) calloc(type_base[TEXT + 1], sizeof(int));
+      btspan(SYMBOL, process_ent_name);
+   }
+   
    if (memory == 3)
       fprintf (text_file, "};\n");
    clsfile (text_file, "Text");
@@ -395,7 +364,12 @@ fflush (stdout);
    fprintf (defs_file, "        0L};\nint detail_desc[] = {\n");
    dump_array (detail_base, dcount,  " %8dL,", 7);
    fprintf (defs_file, "        0L};\n");
-
+   if (entname)
+   {
+      fprintf (defs_file, "int ent_name[] = {\n");
+      dump_array (ent_addr, type_base[TEXT + 1], " %8dL,", 7);
+      fprintf (defs_file, "        0L};\n");
+   }
    clsfile (defs_file, "adv5.h");      /* Done with this file */
 
    proc_count = type_base [VERB + 1];
@@ -409,18 +383,19 @@ fflush (stdout);
    sprintf (proc_name, "adv%02d.c", ++code_part);
    if ((code_file = openout (proc_name)) == NULL)
       gripe (proc_name, "Unable to open final code chunk.");
+   fprintf (code_file, "#include \"adv0.h\"\n");
    fprintf (code_file, "#include \"adv3.h\"\n");
 
    btspan (SYMBOL, process_proc);
    fprintf (code_file, 
-      "#ifdef __STDC__\nint p0(void)\n#else\nint p0()\n#endif\n{return 0;}\n");
+      "int p0(void)\n{return 0;}\n");
 
    clsfile (code_file, "Final automatic code");
    if ((code_file = openout ("adv3.h")) == NULL)
       gripe ("finalise", "Unable to open adv3.h.");
 
    fprintf (code_file, 
-      "#ifdef __STDC__\nextern void fake(int x, int y);\n");
+      "extern void fake(int x, int y);\n");
    for (index = 0; index < next_procno; index++)
    {
       fprintf (code_file, "extern int p%d(", index);
@@ -431,12 +406,6 @@ fflush (stdout);
          fprintf (code_file, "void");
       fprintf (code_file, ");\n");
    }
-   fprintf (code_file, "#else\nextern void fake();\n");
-   for (index = 0; index < next_procno; index++)
-   {
-      fprintf (code_file, "extern int p%d();\n", index);
-   }
-   fprintf (code_file, "#endif\n");
 
    clsfile (code_file, "adv3.h");
    

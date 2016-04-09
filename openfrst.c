@@ -1,6 +1,7 @@
-/* openfrst.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* openfrst.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 03 Jan 15   MLA           BUG: Fixed source file specified by pathname.
  * 11 May 13   MLA           Bug: Fixed in-line name generation.
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
@@ -14,10 +15,6 @@
  * 07 Aug 99   MLA           Initial coding.
  *
  */
-
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,12 +30,7 @@
 char source_stem [MAXLINE + 1];
 char source_file [80];
 
-#ifdef __STDC__
 void openfrst (char *file_spec)
-#else
-void openfrst (file_spec)
-   char *file_spec;
-#endif
 {
    int i;
    char *nameptr = file_spec;

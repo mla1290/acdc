@@ -1,4 +1,4 @@
-/* acdc.h (acdc) - copyright Mike Arnautov 1990-2015.
+/* acdc.h (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  */
 
@@ -8,7 +8,6 @@ extern int quiet;
 extern int stage;
 extern int swap;
 extern char *acdc_version;
-#ifdef __STDC__
 #ifndef __MACH__
 #include <malloc.h>
 #endif /* __MACH__ */
@@ -24,19 +23,3 @@ extern void write_ref (char *tag, char *token);
    extern FILE *openout(char *name);
    extern void openfrst (char *file_spec);
 #endif /* EOF */
-#else  /* ! __STDC__ */
-extern int nextline ();
-extern void gripe ();
-extern void deprecate();
-extern int gettxt ();
-extern void storchar ();
-extern void doswitch ();
-extern write_ref ();
-extern void *calloc ();
-extern void *malloc ();
-extern void *realloc ();
-#ifdef EOF
-   extern FILE *openout ();
-   extern void openfrst ();
-#endif /* EOF */
-#endif /* ! __STDC__ */

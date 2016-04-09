@@ -1,4 +1,4 @@
-/* chrtobin.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* chrtobin.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 24 Jul 99   MLA           Fixed complier warnings.
@@ -6,18 +6,9 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include "acdc.h"
 
-#ifdef __STDC__
 int chrtobin (char *cstring)
-#else
-int chrtobin (cstring)
-char *cstring;
-#endif
 {
    int sign;
    int base;

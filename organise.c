@@ -1,6 +1,7 @@
-/* organise.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* organise.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 02 Jan 15   MLA           Rationalised GAME_ID for all styles.
  * 31 Dec 14   MLA           Generate sensible GAME_ID for all styles.
  * 10 Mar 13   MLA           Bug: PERSISTENT_DATA needs _ on DOS.
@@ -56,10 +57,6 @@
  *
  */
  
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -76,12 +73,7 @@
 
 /*====================================================================*/
 
-#ifdef __STDC__
 static void process_voc_proc (struct node *np)
-#else
-static void process_voc_proc (np)
-struct node *np;
-#endif
 {
    if (np -> proc_count && np -> symbol)
       (np -> symbol) -> proc_count += np -> proc_count;
@@ -89,14 +81,7 @@ struct node *np;
 
 /*======================================================================*/
 
-#ifdef __STDC__
 void define_constant(char *name, char *upname, char *type)
-#else
-void define_constant(name, upname, type)
-char *name;
-char *upname;
-char *type;
-#endif
 {
    struct node *np;
    char temp[60];
@@ -116,14 +101,7 @@ char *type;
 
 /*======================================================================*/
 
-#ifdef __STDC__
 void declare_constant(char *name, char *upname, int value)
-#else
-void declare_constant(name, upname, value)
-char *name;
-char *upname;
-int value;
-#endif
 {
    struct node *np;
 
@@ -144,14 +122,7 @@ int value;
 
 /*======================================================================*/
 
-#ifdef __STDC__
 void declare_flag(char *name, char *upname, int value)
-#else
-void declare_flag(name, upname, value)
-char *name;
-char *upname;
-int   value;
-#endif
 {
    struct node *np;
 
@@ -171,12 +142,7 @@ int   value;
 
 /*======================================================================*/
 
-#ifdef __STDC__
 void process_procnos (struct node *np)
-#else
-void process_procnos (np)
-struct node *np;
-#endif
 {
    if (np -> proc_count)
    {
@@ -188,12 +154,7 @@ struct node *np;
 
 /*======================================================================*/
 
-#ifdef __STDC__
 void process_refnos (struct node *np)
-#else
-void process_refnos (np)
-struct node *np;
-#endif
 {
    int type = np -> type;
    switch (type)
@@ -214,11 +175,7 @@ struct node *np;
 
 /*======================================================================*/
 
-#ifdef __STDC__
 void organise(void)
-#else
-void organise()
-#endif
 {
    int index;
    int next_constant;
@@ -230,14 +187,14 @@ void organise()
    char dbname [80];
    struct node *undo_stat = NULL;
    struct node *undo = NULL;
-
+   
    stage = -1;         /* Tell gripe we are not reading source file at present */
 /* Deal with the game header info */
 
    btspan (VOCAB, process_voc_proc);
 
-   if (style == -1)
-      style = *title ? 10 : 1;
+   if (style == 1 && *title)
+      style = 10;
    if (style != 10 && *gameid)
       gripe ("", "The GAMEID directive only valid in A-code style 10!");
 
@@ -372,7 +329,7 @@ void organise()
          printf ("Author: %s\n", author);
    }   
    else
-      printf ("Translating: %s ... ", gameid);
+      printf ("Translating: %s%s", gameid, quiet ? "\n" : "");
 
 /* Check for mandatory symbols and add them if missing */
 
@@ -405,8 +362,10 @@ void organise()
    else if (np -> type != VAR)
       gripe ("ARG3", "Declared as a non-variable!");
 
-   if ((np = fndsymb(TESTSYMBOL, "undo")) != NULL &&
-      np -> type == VERB)
+   if ((np = fndsymb(TESTSYMBOL, "entname")) != NULL && np -> type == VAR)
+      entname = np;
+      
+   if ((np = fndsymb(TESTSYMBOL, "undo")) != NULL && np -> type == VERB)
    {
       undo = np;
       if ((np = fndsymb(TESTSYMBOL, "undo.status")) == NULL)
@@ -587,6 +546,9 @@ void organise()
       if (np -> type == VAR)
          fprintf (defs_file, "#define DWARVEN %d\n", np -> refno);
 
+   if (entname)
+     fprintf (defs_file, "#define ENTNAME %d\n", entname->refno);
+     
 #ifdef OBSOLETE
    if ((np = fndsymb(TESTSYMBOL, "fulldisplay")) != NULL)
    {

@@ -1,6 +1,9 @@
- /* parse.c (acdc) - copyright Mike Arnautov 1990-2015.
+ /* parse.c (acdc) - copyright Mike Arnautov 1990-2016.
   * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 07 Mar 16   MLA           Bug: In-line automatic text names can get too long.
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
+ * 28 Feb 16   MLA           BUG: Fixed buffer overrun in the inline text fudge.
  * 04 Jan 15   MLA           BUG: Hendle CR-terminated lines correctly.
  * 02 Dec 13   MLA           BUG: Take care with in-line texts in style 1!
  * 09 Jan 11   MLA           Added in-line text parsing.
@@ -18,10 +21,6 @@
  *
  */
  
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <string.h>
 
@@ -34,13 +33,7 @@
 #include "text.h"
 #include "source.h"
 
-#ifdef __STDC__
 char *get_token(char **cstring, char *delims)
-#else
-char *get_token(cstring, delims)
-char **cstring;
-char *delims;
-#endif
 {
    char *cptr;
    char *token = *cstring;
@@ -61,12 +54,7 @@ char *delims;
 
 /*====================================================================*/
 
-#ifdef __STDC__
 struct node *parse(int type)
-#else
-struct node *parse(type)
-int type;
-#endif
 {
    int index = 0;
    struct node *np;
@@ -117,9 +105,10 @@ int type;
       }
 
       if (index > ANY_NUMBER)
-          gripe ("","*Far* too many arguments!");
+         gripe ("","*Far* too many arguments!");
 
-      if (! *tp[index] || *tp[index] == '{' || *tp[index] == '#')
+      if (! *tp[index] || *tp[index] == '#' || 
+          (*tp[index] == '{' && style < 11))
       {
          tp[index] = NULL;
          break;
@@ -134,7 +123,7 @@ int type;
          int offset;
          int tail;
          
-         sprintf (autoname, "auto_text_%d_", ++inline_count);
+         sprintf (autoname, "inline_%d_", ++inline_count);
          np = fndsymb (SYMBOL, autoname);
          np -> text_type = 0;
          np -> name_addr = next_addr;
@@ -174,7 +163,8 @@ int type;
          strcpy (tmpline + offset, line + tail + 1);
          recase (LOWERCASE, tmpline + offset);
          memcpy (line, tmpline, MAXLINE);
-         cptr += strlen(cptr) + 1;         
+/*         cptr += strlen(cptr) + 1;  */
+         cptr = tp[index] + strlen(tp[index]) + 1;
          line_status = EOL;
       }
    }

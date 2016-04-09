@@ -1,6 +1,7 @@
-/* domajor.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* domajor.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 02 Jan 15   MLA           Disallow DBNAME directive.
  * 18 May 13   MLA           Allowed in-line texts in all styles (for CGI mode).
  * 09 Apr 13   MLA           Ditched second arg of openout().
@@ -43,10 +44,6 @@
  * 15 Sep 90   MLA           Initial coding.
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -62,12 +59,7 @@
 #include "param.h"
 #include "game.h"
 
-#ifdef __STDC__
 int skip (int check_text)
-#else
-int skip (check_text)
-int check_text;
-#endif
 {
    int qualifiers = 0;
    
@@ -103,14 +95,14 @@ int check_text;
          int got_end;
          char *cptr; 
          
-         if ((cptr = strpbrk(line, "#{")) != NULL)
+         if ((cptr = strpbrk(line, style < 11 ? "#{" : "#")) != NULL)
             *cptr = '\0';
          if ((cptr = strchr(line, '"')) == NULL)
          {
             line_status = EOL;
             continue;
          }
-         sprintf (autoname, "auto_text_%d_", ++inline_count);
+         sprintf (autoname, "inline_%d_", ++inline_count);
          np = addsymb (SYMBOL, autoname, TEXT, type_counts[TEXT]++);
          got_end = 0;
          while (1)
@@ -153,11 +145,7 @@ int check_text;
    return (qualifiers);
 }
 
-#ifdef __STDC__
 void domajor (void)
-#else
-void domajor ()
-#endif
 {
    int index;
    struct node *np;
@@ -178,17 +166,10 @@ void domajor ()
    static int next_dummy;
    static int last_stage = -1;
    
-#ifdef __STDC__
    extern void dominor (char *, char *);
    extern void opnsrc (char *, int);
    extern void organise (void);
    extern struct node *getnames (int, struct node *);
-#else
-   extern void dominor ();
-   extern void opnsrc ();
-   extern void organise ();
-   extern struct node *getnames ();
-#endif
 
    line_ptr = line;
    if (isspace (*line_ptr))
@@ -407,11 +388,9 @@ void domajor ()
          return;          /* Preserve line_status as BOL ! */
 	 
       case STYLE:
-         if (style > 0)
+         if (style > 1)
             gripe ("", "Repeated STYLE directive.");
-         if (strcmp (tp[1], "old") == 0 || strcmp (tp[1], "original") == 0)
-               style = 1;
-         else
+         if (strcmp (tp[1], "old") != 0 && strcmp (tp[1], "original") != 0)
          {
             index = chrtobin (tp[2] ? tp[2] : tp[1]);
             if (index > 12)
@@ -592,7 +571,7 @@ void domajor ()
          if (np -> proc_count > 1)
             (np -> proc_done)++;
          refno = np -> proc_base + (np -> proc_done);
-         fprintf (code_file, "#ifdef __STDC__\nint p%d(", refno);
+         fprintf (code_file, "int p%d(", refno);
          next_arg = 0;
          if (tp [2] == NULL || major_type != PROCEDURE)
             fprintf (code_file, "void");
@@ -607,20 +586,7 @@ void domajor ()
                   write_ref (" ARG ", tp [index]);
             }
          }
-         fprintf (code_file, ")\n#else\nint p%d(", refno);
-         if (tp [2])
-         {
-            for (index = 2; tp [index]; index++)
-               fprintf (code_file, "%styp%d,par%d",
-                  index == 2 ? "" : ",", index - 2, index - 2);
-            fprintf (code_file, ")\n");
-            for (index = 2; tp [index]; index++)
-               fprintf (code_file, "int typ%d;int par%d;\n",
-                  index - 2, index - 2);
-         }
-         else
-            fprintf (code_file, ")\n");
-         fprintf (code_file, "#endif\n{\nint done=0;\n");
+         fprintf (code_file, ")\n{\n");
          if (debug)
          {
             strcpy (prochead, tp [0]);
@@ -647,7 +613,7 @@ void domajor ()
             }
 	 }
          dominor (prochead, proccond);
-         fprintf (code_file, "return done;\n}\n");
+         fprintf (code_file, "return 0;\n}\n");
          return;
 
       case DEFINE:

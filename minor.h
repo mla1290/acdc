@@ -1,4 +1,4 @@
-/* minor.h (acdc) - copyright Mike Arnautov 1990-2015.
+/* minor.h (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 06 Oct 10   MLA           Added RESAY.
@@ -107,11 +107,12 @@
 # define RANDOM     106
 # define CHOOSE     107
 # define RANDOMISE  108
-# define LDA        109
-# define EVAL       110
-# define DEPOSIT    111
-# define INTERSECT  112
-# define TIE        113
+# define RANDSEL    109
+# define LDA        110
+# define EVAL       111
+# define DEPOSIT    112
+# define INTERSECT  113
+# define TIE        114
 
 # define GET        121
 # define DROP       122

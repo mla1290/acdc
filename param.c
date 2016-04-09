@@ -1,6 +1,7 @@
-/* param.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* param.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 06 Mar 03   Stuart Munro  Include stdlib.h; declare gripe().
  * 13 Jan 02   MLA           Give up -- pass "hidden" type args.
  * 12 Jan 02   MLA           bug: construct own parameter names.
@@ -9,10 +10,6 @@
  *
  */
  
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <string.h>
 #include <stdlib.h>
 
@@ -21,22 +18,9 @@
 
 struct param_list *param_root = NULL;
 
-#ifdef __STDC__
 void gripe (char *token, char *message);
 
-void addparam (
-   int   arg,
-   char *name)
-   
-#else
-void gripe ();
-
-void addparam (arg, name)
-int   arg;
-char *name;
-
-#endif /* __STDC__ */
-
+void addparam (int arg, char *name)
 {
    struct param_list *ppl = param_root;
    struct param_list *lppl = NULL;
@@ -67,18 +51,7 @@ char *name;
    return;
 }
 
-#ifdef __STDC__
-
-int fndparam (
-   char *name)
-   
-#else
-
-int fndparam (name)
-char *name;
-
-#endif /* __STDC__ */
-
+int fndparam (char *name)
 {
    int lrefno = 0;
    struct param_list *ppl = param_root;
@@ -93,18 +66,7 @@ char *name;
    return (-1);
 }
 
-#ifdef __STDC__
-
-int iniparam (
-   int varsize)
-
-#else
-
-int iniparam (varsize)
-int varsize;
-
-#endif /* __STDC__ */
-
+int iniparam (int varsize)
 {
    int locals = 0;
    struct param_list *ppl = param_root;

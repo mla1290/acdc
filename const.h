@@ -1,4 +1,4 @@
-/* const.h (acdc) - copyright Mike Arnautov 1990-2015.
+/* const.h (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
  * 15 Mar 08   MLA           Version 12 changes.
@@ -11,13 +11,8 @@
  
 /* Change_case keys */
 
-#ifdef __STDC__
 extern void recase (int, char *);
 extern int getconst(char *);
-#else
-extern void recase ();
-extern int getconst ();
-#endif
 
 #define CAPITALISE 1
 #define UPPERCASE 2

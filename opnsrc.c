@@ -1,6 +1,7 @@
-/* opnsrc.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* opnsrc.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 22 Jul 09   MLA           Changed check for the quiet mode.
  * 15 Mar 08   MLA           Version 12 changes.
  * 19 May 07   MLA           Added "quiet".
@@ -10,28 +11,15 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#ifndef PRIMOS
-#include <errno.h>
-#endif
 #include "acdc.h"
 #include "const.h"
 #include "line.h"
 #include "source.h"
 
-#ifdef __STDC__
 void opnsrc(char *name, int fatal)
-#else
-void opnsrc(name, fatal)
-char *name;
-int fatal;
-#endif
 {
    char *cstring;
    int lev;

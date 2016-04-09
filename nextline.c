@@ -1,6 +1,7 @@
-/* getline.c (acdc) - copyright Mike Arnautov 1990-2015.
+/* getline.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 10 Jan 15   MLA           Bug: Make sure all lines are terminated by \n.
  * 04 Jan 15   MLA           Bug: fixed checking for blank lines.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
@@ -15,10 +16,6 @@
  *
  */
 
-#if defined(__cplusplus) && !defined(__STDC__)
-#  define __STDC__
-#endif
-
 #include <string.h>
 #include <ctype.h>
 
@@ -27,12 +24,7 @@
 #include "source.h"
 #include "output.h"
 
-#ifdef __STDC__
 int nextline (int key)
-#else
-int nextline (key)
-int key;
-#endif
 {
    int len;
    line_ptr = line;
