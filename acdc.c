@@ -1,7 +1,7 @@
 /* acdc.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  */
-#define ACDC_VERSION "12.32, 09 Apr 2016"
+#define ACDC_VERSION "12.34, 19 Aug 2016"
 /*
  * 03 Mar 16   MLA           Added SELECT.
  *                           Removed non-ANSI C support.
@@ -142,8 +142,6 @@ int minor_count = 0;
 int debug = 0;
 int xref = 0;
 int next_procno;
-char *cond_buf_ptr;
-int cond_buf_len = COND_INIT_LEN;
 
 /*====================================================================*/
 

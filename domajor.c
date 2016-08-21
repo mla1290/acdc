@@ -1,6 +1,7 @@
 /* domajor.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 21 Aug 16   MLA           Bug: Fixed skipping in-line text with text holders.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 02 Jan 15   MLA           Disallow DBNAME directive.
  * 18 May 13   MLA           Allowed in-line texts in all styles (for CGI mode).
@@ -93,8 +94,51 @@ int skip (int check_text)
          char autoname [32];
          struct node *np;
          int got_end;
-         char *cptr; 
+         char *cptr = line; 
+#ifndef MLA
+         int lesc = 0;
+         int quot = 0;
+         char *inl = NULL;
          
+         while (*cptr)
+         {
+            if (!lesc)
+            {
+               if (*cptr == '\\')
+               {
+                  lesc = 1 - lesc;
+                  cptr++;
+                  continue;
+               }
+               if (*cptr == '"')
+               {
+                  quot = 1 - quot;
+                  cptr++;
+                  if (!inl)
+                     inl = cptr;
+                  continue;
+               }
+               if (!quot)
+               {
+                  if (*cptr == '#' || (*cptr == '{' && style < 11))
+                  {
+                     *cptr = '\0';
+                     break;
+                  }
+               }
+            }
+            else
+               lesc = 0;
+            cptr++;
+         }
+         if (!inl)
+         {
+            line_status = EOL;
+            continue;
+         }
+         cptr = inl;
+#else
+
          if ((cptr = strpbrk(line, style < 11 ? "#{" : "#")) != NULL)
             *cptr = '\0';
          if ((cptr = strchr(line, '"')) == NULL)
@@ -102,6 +146,7 @@ int skip (int check_text)
             line_status = EOL;
             continue;
          }
+#endif /* MLA */
          sprintf (autoname, "inline_%d_", ++inline_count);
          np = addsymb (SYMBOL, autoname, TEXT, type_counts[TEXT]++);
          got_end = 0;

@@ -1,6 +1,7 @@
 /* organise.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 22 Apr 16   MLA           bug: in str(n)cpy string args should not overlap.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 02 Jan 15   MLA           Rationalised GAME_ID for all styles.
  * 31 Dec 14   MLA           Generate sensible GAME_ID for all styles.
@@ -257,13 +258,27 @@ void organise(void)
    if ((text_file = openout (tptr)) == NULL)
       gripe (tptr, "Unable to open data file.");
 
-   tptr = *gameid ? gameid : source_file;
-   len = strlen (tptr);
-   if (len > 79) len = 79;
-   strncpy (gameid, tptr, len);
-   *(gameid + len) = '\0';
-   gameid [79] = '\0';
+/*
+ *  tptr = *gameid ? gameid : source_file;
+ *  len = strlen (tptr);
+ *  if (len > 79) len = 79;
+ *  strncpy (gameid, tptr, len);
+ *  *(gameid + len) = '\0';
+ *  gameid [79] = '\0';
+ *  tptr = gameid;
+ */
+   if (!*gameid)
+   {
+     tptr = source_file;
+     len = strlen (tptr);
+     if (len > 79) len = 79;
+     strncpy (gameid, tptr, len);
+     *(gameid + len) = '\0';
+     gameid [79] = '\0';
+     tptr = gameid;
+   }
    tptr = gameid;
+
    if (memory == 3)
    {
       fprintf (text_file, "unsigned char text [TEXT_BYTES] = {\n");

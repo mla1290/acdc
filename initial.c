@@ -280,8 +280,6 @@ void initial(void)
 
    if ((text_buf_ptr = (char *) calloc (text_buf_len, sizeof(char))) == NULL)
       gripe ("text_buf", "Unable to allocate text buffer.");
-   if ((cond_buf_ptr = (char *) calloc (cond_buf_len, sizeof(char))) == NULL)
-      gripe ("cond_buf", "unable to allocate condition buffer.");
    if ((voc_buf_ptr = (char *) calloc (voc_buf_len, sizeof(char))) == NULL)
       gripe ("voc_buf", "unable to allocate vocabulary buffer.");
    voc_ptr = voc_buf_ptr;

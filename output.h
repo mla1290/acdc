@@ -22,7 +22,3 @@ extern int minor_count;
 extern int debug;
 extern int next_procno;
 extern int xref;
-
-#define COND_INIT_LEN 1024
-extern char *cond_buf_ptr;
-extern int cond_buf_len;

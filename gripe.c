@@ -18,6 +18,7 @@
 #include "const.h"
 #include "line.h"
 #include "source.h"
+#include "output.h"
 
 void gripe(char *error_token, char *error_message)
 {
@@ -37,6 +38,7 @@ void gripe(char *error_token, char *error_message)
    if (error_token && *error_token != '\0')
       fprintf (stderr, "%s - ", error_token);
    fprintf (stderr, "%s\n\n", error_message);
+   fflush (code_file);
    exit (ERROR);
 }
 
