@@ -1,6 +1,7 @@
 /* finalise.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 23 Aug 16   MLA           REPEAT_PROC is now ADVLIB sensitive.
  * 03 Apr 16   MLA           Eliminated setjmp/lomgjmp calls in generated code.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 09 Apr 13   MLA           Ditched 2nd arg of openout().
@@ -249,13 +250,30 @@ static void process_proc (struct node *np)
       for (i = 0; i < (np -> arg_count); i++)
          fprintf (code_file, "%sint typ%d,int par%d", i ? "," : "", i, i);
    fprintf (code_file, ")\n{\n");      
-   for (j = 1; j <= (np -> proc_count); j++)
+   if (strcmp (np -> name , "REPEAT_PROC") == 0)
    {
-      fprintf (code_file, "   if (p%d(", procno + j);
-      if (np -> arg_count > 0)
-         for (i = 0; i < (np -> arg_count); i++)
-            fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
-      fprintf (code_file, ") || loop) return 0;\n");         
+      fprintf (code_file, "#if ADVLIB\n   rep = 0;\n");
+      for (j = 1; j <= (np -> proc_count); j++)
+      {
+         fprintf (code_file, 
+            "   if (nrep < %d) { if (p%d() || loop) return 0; rep = %d; }\n",
+               j, procno + j, j);
+      }
+      fprintf (code_file, "#else\n");
+      for (j = 1; j <= (np -> proc_count); j++)
+         fprintf (code_file, "   if (p%d() || loop) return 0;\n", procno + j);
+      fprintf (code_file, "#endif /* ADVLIB */\n");
+   }
+   else
+   {
+      for (j = 1; j <= (np -> proc_count); j++)
+      {
+         fprintf (code_file, "   if (p%d(", procno + j);
+         if (np -> arg_count > 0)
+            for (i = 0; i < (np -> arg_count); i++)
+               fprintf (code_file, "%styp%d,par%d", i ? "," : "", i, i);
+         fprintf (code_file, ") || loop) return 0;\n");         
+      }
    }
    fprintf (code_file, "   return 1;\n}\n");
    return;

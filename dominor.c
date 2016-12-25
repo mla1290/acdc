@@ -1,6 +1,7 @@
 /* dominor.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 27 Aug 16   MLA           BUG: IFAT always returned false!
  * 23 Apr 16   MLA           Changed handling of all conditionals.
  *                           BUG: CHOOSE must also set pointer status correctly!
  * 09 Apr 16   MLA           BUG: EVAL must set pointer status correctly.
@@ -437,8 +438,9 @@ void dominor (char *prochead, char *proccond)
                       gripe (tp [index], "not reducible to a location.");
                if (index > 1) 
                   { strcpy (cond_ptr, "||"); cond_ptr += 2; }
-               cond_ptr += entvalv (cond_ptr, LOC, HERE);
-               strcpy (cond_ptr, "=="); cond_ptr += 2;
+/*               cond_ptr += entvalv (cond_ptr, LOC, HERE); */
+               strcpy (cond_ptr, "value[HERE]=="); cond_ptr += 13;
+/*               strcpy (cond_ptr, "=="); cond_ptr += 2; */
                cond_ptr += entvalv (cond_ptr, argtyp [index], argval [index]);
             }
             break;

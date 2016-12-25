@@ -1,0 +1,128 @@
+-------------------------------------------------------------------------
+
+New in version 12.35
+
+1. Fixed the IFAT directive, which got broken in version 12.33.
+
+2. In style 1 (i.e. when processing Platt's A-code source of Adv550), handle
+   words split across two lines by hyphenation.
+
+-------------------------------------------------------------------------
+
+New in version 12.34
+
+1. Fixed a bug in in-line texts, which caused non-compiling C to be 
+   generated if such a text contained a text holder (the '#' character).
+
+2. ADVLIB mode handling improved.
+
+-------------------------------------------------------------------------
+
+New in version 12.33
+
+1. Modified handling of all conditionals to support further work on
+   making QUERY work in all modes.
+
+-------------------------------------------------------------------------
+
+New in version 12.32
+
+1. Eliminated setjmp/longjmp dependency of game executables!
+
+2. Fixed ITERATE to make the iterating variable a pointer if
+   the lower iteration bound is a pointer.
+
+3. Fixed a bug in EVAL. If the evaluated variable points to a pointer,
+   the result is now also a pointer.
+
+-------------------------------------------------------------------------
+
+New in version 12.31
+
+1. Style value evaluation rationalised.
+
+2. Fixed a bug in DEPOSIT. Now works correctly when second argument
+   is a local pointer.
+
+3. Added ENTNAME support.
+
+-------------------------------------------------------------------------
+
+New in version 12.30
+
+1. Any trailing, obsolete adv<nn>.c files resulting from some previous 
+   run of acdc created in the same directory, are now automatically
+   cleared and te fact reported.
+
+2. Added SELECT minor directive.
+
+3. Removed non-ANSI C support.
+
+4. Shortened auto-text names to permit more than 10 of them!
+
+-------------------------------------------------------------------------
+
+New in version 12.29
+
+1. Now builds under Mac OSX (using Xcode command line tools).
+
+2. Relaxed a lot of style restriction. E.g. in-line texts are now
+   available in all styles.
+
+3. Fixed cross-reference spacing for LOC entries.
+
+4. A sensible GAME_ID is now generated in all styles.
+
+5. A-code source now can be again specified by pathname. (This
+   got broken in transition from A-code version 11 to 12.)
+
+6. Added more sanity checking for null code blocks and non-terminated
+   source lines.
+
+-------------------------------------------------------------------------
+
+New in version 12.22
+
+1. Fixed automatic naming of in-line texts so that the result is a legal
+   text name.
+
+-------------------------------------------------------------------------
+
+New in version 12.21
+
+1. Added the -version command line keyword.
+
+-------------------------------------------------------------------------
+
+New in version 12.20
+
+1. Restored ITLOC as a synonym of the minor directive ITPLACE.
+
+2. Added minor directive RESAY. Acts like SAY but first zaps all
+   text accumulated so far.
+
+-------------------------------------------------------------------------
+
+New in version 12.18
+
+1. Changed command-line keywords to acdc. Use "acdc -help" for info.
+
+2. Default game mode is now -preload, so that no .dat file is created -
+   just the game executable.
+
+3. The -nw acdc command line keyword (was -nowarn) now actually works.
+
+4. The acdc translator now operates in two passes. The first pass
+   attends to declarations, while the second pass processes game code.
+   As the result, forward references are now allowed.
+
+5. A-code now permits in-line texts. A text delimited by unescaped 
+   double quotes is accepted wherever a text name would be accepted.
+   Such texts can span multiple line and obey exactly the same rules
+   as named texts do. It is even possible to specify their
+   transformation  method. A text starting with i:, r: or c: is treated
+   espectively as incrementing, random or cyclic. Obviously, the 
+   two-letter tag specifying the method is not itself deemed to be a 
+   part of the text.
+
+========================================================================

@@ -1,7 +1,7 @@
 /* acdc.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  */
-#define ACDC_VERSION "12.34, 19 Aug 2016"
+#define ACDC_VERSION "12.35, 18 Dec 2016"
 /*
  * 03 Mar 16   MLA           Added SELECT.
  *                           Removed non-ANSI C support.

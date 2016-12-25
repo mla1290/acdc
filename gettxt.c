@@ -1,6 +1,7 @@
 /* gettxt.c (acdc) - copyright Mike Arnautov 1990-2016.
  * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
  *
+ * 18 Dec 16   MLA           Handle words split across lines in style 1.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 06 Feb 10   MLA           Added quote-block handling.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
@@ -243,16 +244,23 @@ next_line:
        }
     }
 
-/* If we are just spilling from one line to the next, remember to insert
-a space before the first token on this line */
+/* If we are just spilling from one line to the next remember to insert
+a space before the first token on this line, unless this is Platt's
+source and a word is split over two lines, in which case remove the
+trailing stored dash instead */
 
    if (had_forced_lf)
       had_forced_lf = FALSE;
-   else if (!formatted && *(temp_ptr = text_ptr - 1) != SWITCH_START &&
-      *temp_ptr != SWITCH_BREAK && *temp_ptr != SWITCH_END &&
-      *line_ptr != SWITCH_START && *line_ptr != SWITCH_BREAK &&
-      *line_ptr != SWITCH_END)
-         *text_ptr++ = ' ';
+   else
+   {
+      if (style == 1 && isalnum(*line_ptr) && *(text_ptr - 1) == '-')
+        *text_ptr--;
+      else if (!formatted && *(temp_ptr = text_ptr - 1) != SWITCH_START &&
+         *temp_ptr != SWITCH_BREAK && *temp_ptr != SWITCH_END &&
+         *line_ptr != SWITCH_START && *line_ptr != SWITCH_BREAK &&
+         *line_ptr != SWITCH_END)
+            *text_ptr++ = ' ';
+   }
    escaped = 0;
 
 /*   if (in_block == 2)
