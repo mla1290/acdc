@@ -1,6 +1,6 @@
 /* btree.c - balanced tree handling on a linear stack.
  *           Copyright Mike Arnautov 2001-2008.
- * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
+ * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 14 Jul 09   MLA           Fixed gcc --pedantic warnings.
  * 12 May 08   MLA           Removed 32-bit dependency.

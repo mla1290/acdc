@@ -1,5 +1,5 @@
 /* voc.h (acdc) - copyright Mike Arnautov 1990-2016.
- * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
+ * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 02 Feb 03   MLA            Initial coding.
  */

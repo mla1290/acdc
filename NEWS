@@ -1,5 +1,12 @@
 -------------------------------------------------------------------------
 
+New in version 12.36
+
+1. Adding a pointer to a value now results in a pointer, just like when
+   adding a value to a pointer.
+
+-------------------------------------------------------------------------
+
 New in version 12.35
 
 1. Fixed the IFAT directive, which got broken in version 12.33.

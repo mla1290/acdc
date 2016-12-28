@@ -1,6 +1,7 @@
 /* dominor.c (acdc) - copyright Mike Arnautov 1990-2016.
- * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
+ * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
+ * 28 Dec 16   MLA           BUG: adding a pointer to a value must give pointer!
  * 27 Aug 16   MLA           BUG: IFAT always returned false!
  * 23 Apr 16   MLA           Changed handling of all conditionals.
  *                           BUG: CHOOSE must also set pointer status correctly!
@@ -1048,6 +1049,31 @@ void dominor (char *prochead, char *proccond)
                fprintf (code_file, "= lval[%d];\n",argval [2]);
             else
                fprintf (code_file, "= %d;\n", argval [2]);
+            if (minor_type == ADD)
+            {
+              if (argtyp[2] == VAR)
+              {
+                fprintf (code_file, 
+                  "if (*bitword(%d*VARSIZE)==-1) ", argval[2]);
+                if (argtyp[1] == VAR)
+                  fprintf (code_file, "*bitword(%d*VARSIZE)= -1;\n", argval[1]);
+                else if (argtyp[1] == LOCAL)
+                  fprintf (code_file, "lbts[%d*VARSIZE]= -1;\n", argval[1]);
+              }
+              else if (argtyp[2] == LOCAL)
+              {
+                if (argtyp [1] == VAR || (argtyp [1] == LOCAL))
+                {
+                  fprintf (code_file, 
+                    "if (lbts[%d*VARSIZE]==-1) ", argval[2]);
+                  if (argtyp[1] == VAR)
+                    fprintf (code_file, 
+                      "*bitword(%d*VARSIZE)= -1;\n", argval[1]);
+                  else if (argtyp[1] == LOCAL)
+                    fprintf (code_file, "lbts[%d*VARSIZE]= -1;\n", argval[1]);
+		}
+              }
+            }
             break;
 
          case NEGATE:

@@ -1,7 +1,7 @@
 /* acdc.c (acdc) - copyright Mike Arnautov 1990-2016.
- * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
+ * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  */
-#define ACDC_VERSION "12.35, 18 Dec 2016"
+#define ACDC_VERSION "12.36, 28 Dec 2016"
 /*
  * 03 Mar 16   MLA           Added SELECT.
  *                           Removed non-ANSI C support.
@@ -217,7 +217,7 @@ int main (int argc, char **argv)
    
    printf ("[A-code to C translator, version %s]\n", ACDC_VERSION);
    srand ((unsigned int)(now = time (NULL)));
-   strftime (datbuf, sizeof (datbuf), "%d %b %Y", localtime (&now));
+   strftime (datbuf, sizeof (datbuf), "%Y", localtime (&now));
 
 /* Initialise the search stacks.
  */

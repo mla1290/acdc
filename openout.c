@@ -1,6 +1,7 @@
 /* openout.c (acdc) - copyright Mike Arnautov 1990-2016.
- * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
+ * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
+ * 26 Dec 16   MLA           Modified licence header.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 25 Feb 16   MLA           Don't re-compute output stem: use out_stem.
  * 09 Apr 13   MLA           Ditched 2nd argument of openout().
@@ -60,14 +61,15 @@ FILE *openout (char *file)
       exit (1);
    }
 
-   if (*title && *author && strcmp (title, "adv550") != 0)
+   if (*title && *author)
    {
       brk = file + strlen (file) - 2;
       if (*brk == '.' && (*(brk + 1) == 'c' || *(brk + 1) == 'h'))
       {
-         fprintf (outfile, "/* %s: %s - copyright %s, %s.\n", file,
+         fprintf (outfile, "/* %s: %s - copyright %s %s. licensed under\n", file,
             title, author, datbuf);
-         fprintf (outfile, " * Licensed under the Modified BSD Licence (see the supplied LICENCE file).\n */\n\n");
+         fprintf (outfile, " * GPL (version 3 or later) or the Modified BSD Licence, whichever\n");
+         fprintf (outfile, " * is asserted by the supplied LICENCE file.*/\n\n");
       }
    }
 

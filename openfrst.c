@@ -1,5 +1,5 @@
 /* openfrst.c (acdc) - copyright Mike Arnautov 1990-2016.
- * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
+ * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 03 Jan 15   MLA           BUG: Fixed source file specified by pathname.

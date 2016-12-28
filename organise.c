@@ -1,5 +1,5 @@
 /* organise.c (acdc) - copyright Mike Arnautov 1990-2016.
- * Licensed under the Modified BSD Licence (see the supplied LICENCE file).
+ * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 22 Apr 16   MLA           bug: in str(n)cpy string args should not overlap.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
