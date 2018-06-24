@@ -1,6 +1,7 @@
-/* initial.c (acdc) - copyright Mike Arnautov 1990-2016.
+/* initial.c (acdc) - copyright Mike Arnautov 1990-2017.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
+ * 11 Jan 17   MLA           Keep "ifcgi" as a synonym for "ifcloud".
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  *                           Added SELECT.
  * 02 Jan 15   MLA           Give DBNAME own refno.
@@ -19,7 +20,7 @@
  * 08 Sep 05   MLA           IFIS now takes multiple arguments.
  * 27 Aug 05   MLA           Retrofitted GAMED for style 10.
  * 20 Feb 05   MLA           Added separate VERSION and DATE.
- * 20 Aug 04   MLA           Added IFCGI.
+ * 20 Aug 04   MLA           Added IFCLOUD.
  * 14 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
  * 09 Feb 04   MLA           Added ADJECTIVE and PREPOSITION types.
  * 03 Feb 04   MLA           Added FEATURE.
@@ -89,6 +90,7 @@ struct directive keywords[] =
    {"variable",    MAJOR, VAR,         1,   ANY_NUMBER},
    {"var",         MAJOR, VAR,         1,   ANY_NUMBER},
    {"array",       MAJOR, ARRAY,       2,   2},
+   {"word",        MAJOR, NOUN,        1,   ANY_NUMBER},
    {"verb",        MAJOR, VERB,        1,   ANY_NUMBER},
    {"noun",        MAJOR, NOUN,        1,   ANY_NUMBER},
    {"adjective",   MAJOR, ADJECTIVE,   1,   ANY_NUMBER},
@@ -152,7 +154,8 @@ struct directive keywords[] =
    {"ifis",        MINOR, IFIS,        2,   ANY_NUMBER},
    {"ifloc",       MINOR, IFLOC,       2,   ANY_NUMBER},
    {"ifhtml",      MINOR, IFHTML,      0,   0},
-   {"ifcgi",       MINOR, IFCGI,       0,   0},
+   {"ifcloud",     MINOR, IFCLOUD,     0,   0},
+   {"ifcgi",       MINOR, IFCLOUD,     0,   0},     /* For compatibility */
    {"ifdoall",     MINOR, IFDOALL,     0,   0},
    {"iftyped",     MINOR, IFTYPED,     FREE_ARG,   1},
    {"and",         MINOR, AND,         0,   0},

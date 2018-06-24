@@ -1,4 +1,4 @@
-/* major.h (acdc) - copyright Mike Arnautov 1990-2016.
+/* major.h (acdc) - copyright Mike Arnautov 1990-2017.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 04 Apr 12   MLA           Removed redundant definition of FREE.

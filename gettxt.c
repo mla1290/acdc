@@ -1,4 +1,4 @@
-/* gettxt.c (acdc) - copyright Mike Arnautov 1990-2016.
+/* gettxt.c (acdc) - copyright Mike Arnautov 1990-2017.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 18 Dec 16   MLA           Handle words split across lines in style 1.

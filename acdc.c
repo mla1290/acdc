@@ -1,8 +1,9 @@
-/* acdc.c (acdc) - copyright Mike Arnautov 1990-2016.
+/* acdc.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  */
-#define ACDC_VERSION "12.36, 28 Dec 2016"
+#define ACDC_VERSION "12.37, 24 Jun 2018"
 /*
+ * 11 Jun 18   MLA           Added the -outdir option.
  * 03 Mar 16   MLA           Added SELECT.
  *                           Removed non-ANSI C support.
  * 25 Feb 16   MLA           bug: Clear out redundant adv<n>.c files, if any.
@@ -23,7 +24,7 @@
  * 11 Jan 05   MLA           Added pre-declarations for UNDO handling.
  * 01 Jan 05   MLA           Added UNDO/REDO.
  * 12 Sep 04   MLA           CALL is optional.
- * 20 Aug 04   MLA           Added IFCGI.
+ * 20 Aug 04   MLA           Added IFCLOUD.
  * 19 Aug 04   MLA           Added FREE_ARG notation.
  * 14 Aug 04   MLA           Added SAVE/RESTORE.
  * 08 Aug 04   MLA           Added APPEND.
@@ -61,6 +62,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "acdc.h"
 char author [40];
@@ -242,6 +244,11 @@ int main (int argc, char **argv)
             exit (0);         
          if (strncmp (arg, "-debug", len) == 0)
             debug = 1;
+         else if (strncmp (arg, "-outdir", len) == 0 || strcmp(arg, "-o") == 0)
+         {
+            argv++; argc--;
+            sprintf(out_stem, "%s%c", *argv, SEP);            
+         }
          else if (strncmp (arg, "-plain", len) == 0)
             plain_text = 1;
          else if (strncmp (arg, "-xref", len) == 0)
@@ -261,7 +268,7 @@ int main (int argc, char **argv)
                      swap = 16;
                   else if (swap > 128)
                      swap = 128;
-                  argv++;
+                  argv++; argc--;
                }
             }
             else
@@ -344,7 +351,7 @@ int main (int argc, char **argv)
       sprintf (line, "%sadv%02d.c", out_stem, ++code_part);
       if ((code_file = fopen(line, "r")) != NULL)
       {
-         unlink(line);
+         (void) unlink(line);
          obs_last = code_part;
       }
       else

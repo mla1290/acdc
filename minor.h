@@ -1,11 +1,11 @@
-/* minor.h (acdc) - copyright Mike Arnautov 1990-2016.
+/* minor.h (acdc) - copyright Mike Arnautov 1990-2017.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 06 Oct 10   MLA           Added RESAY.
  * 15 Mar 08   MLA           Version 12 changes.
  * 10 Nov 07   MLA           Added DUMP.
  * 01 Jan 05   MLA           Added UNDO/REDO.
- * 20 Aug 04   MLA           Added IFCGI and IFDOALL
+ * 20 Aug 04   MLA           Added IFCLOUD and IFDOALL
  * 27 Jul 02   MLA           Added CHECKPOINT.
  * 12 Jul 02   MLA           Added IFNE, IFLE, IFGE, DESCRIBE.
  * 01 Jan 02   MLA           Added LOCAL.
@@ -37,7 +37,7 @@
 # define IFANY       15
 # define IFFLAG      16
 # define IFHTML      17
-# define IFCGI       18
+# define IFCLOUD     18
 # define IFDOALL     19
 # define IFTYPED     20
 # define CHANCE      21

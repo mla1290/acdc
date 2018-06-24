@@ -1,4 +1,4 @@
-/* text.h (acdc) - copyright Mike Arnautov 1990-2016.
+/* text.h (acdc) - copyright Mike Arnautov 1990-2017.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 06 Feb 10   MLA           Added QUOTE_START.

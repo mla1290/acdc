@@ -1,6 +1,7 @@
-/* dominor.c (acdc) - copyright Mike Arnautov 1990-2016.
+/* dominor.c (acdc) - copyright Mike Arnautov 1990-2017.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
+ * 08 Nov 17   MLA           Bug: APPEND should not act as QUIT!
  * 28 Dec 16   MLA           BUG: adding a pointer to a value must give pointer!
  * 27 Aug 16   MLA           BUG: IFAT always returned false!
  * 23 Apr 16   MLA           Changed handling of all conditionals.
@@ -12,7 +13,7 @@
  * 30 Mar 16   MLA           Bug: never indirect 2nd DEPOSIT argument.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  *                           Added SELECT.
- * 09 Jan 15   MLA           Added multipl-pending sanity check.
+ * 09 Jan 15   MLA           Added multiple-pending sanity check.
  * 06 Oct 10   MLA           Added RESAY.
  * 29 Jan 10   MLA           Added IFHTML.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a
@@ -30,7 +31,7 @@
  * 27 Aug 05   MLA           bug: Allow SAY <place>.
  * 02 Jan 05   MLA           Added UNDO/REDO.
  * 22 Aug 04   MLA           Made CALL directive optional.
- * 20 Aug 04   MLA           Added IFCGI and IFDOALL.
+ * 20 Aug 04   MLA           Added IFCLOUD and IFDOALL.
  * 19 Aug 04   MLA           Added SAVE/RESTORE and VERBATIM.
  * 08 Aug 04   MLA           Added APPEND.
  * 28 Mar 03   MLA           Added NEXT and BREAK.
@@ -540,7 +541,7 @@ void dominor (char *prochead, char *proccond)
             break;
 
          case IFHTML:
-         case IFCGI:
+         case IFCLOUD:
          case IFDOALL:
             cond_ptr += sprintf (cond_ptr, "test(\"%s\")", tp [0] + 2); 
             break;
@@ -923,13 +924,13 @@ void dominor (char *prochead, char *proccond)
             tp [1]     = tp [index];     tp [2]     = tp [index + 1];
             argtyp [1] = argtyp [index]; argtyp [2] = argtyp [index + 1];
             argval [1] = argval [index]; argval [2] = argval [index + 1];
+            minor_type = QUIP;
          case RESAY:
             if (minor_type == RESAY) /* I.e. we didn't fall through to here */
                fprintf (code_file, "zap_text();\n");
          case APPEND:
             if (minor_type == APPEND) /* I.e. we didn't fall through to here */
                fprintf (code_file, "glue_text();\n");
-            minor_type = QUIP;
          case QUIP:
          case SAY:
          case VALUE:

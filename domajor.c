@@ -1,10 +1,11 @@
-/* domajor.c (acdc) - copyright Mike Arnautov 1990-2016.
+/* domajor.c (acdc) - copyright Mike Arnautov 1990-2017.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 21 Aug 16   MLA           Bug: Fixed skipping in-line text with text holders.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 02 Jan 15   MLA           Disallow DBNAME directive.
- * 18 May 13   MLA           Allowed in-line texts in all styles (for CGI mode).
+ * 18 May 13   MLA           Allowed in-line texts in all styles 
+ *                             (for single turn mode).
  * 09 Apr 13   MLA           Ditched second arg of openout().
  * 09 Jan 11   MLA           Added in-line text parsing.
  * 11 Jan 10   MLA           Renamed getline() to nextline() to avoid a

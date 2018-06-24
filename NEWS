@@ -1,5 +1,11 @@
 -------------------------------------------------------------------------
 
+New in version 12.37
+
+1. The APPEND directive should not QUIT!
+
+-------------------------------------------------------------------------
+
 New in version 12.36
 
 1. Adding a pointer to a value now results in a pointer, just like when
@@ -27,7 +33,7 @@ New in version 12.34
 
 New in version 12.33
 
-1. Modified handling of all conditionals to support further work on
+1. Modified handling of all conditionals to support future work on
    making QUERY work in all modes.
 
 -------------------------------------------------------------------------
