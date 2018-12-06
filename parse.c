@@ -1,4 +1,4 @@
- /* parse.c (acdc) - copyright Mike Arnautov 1990-2017.
+ /* parse.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 07 Mar 16   MLA           Bug: In-line automatic text names can get too long.

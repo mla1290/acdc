@@ -1,4 +1,4 @@
-/* gettxt.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* gettxt.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 18 Dec 16   MLA           Handle words split across lines in style 1.
@@ -254,7 +254,7 @@ trailing stored dash instead */
    else
    {
       if (style == 1 && isalnum(*line_ptr) && *(text_ptr - 1) == '-')
-        *text_ptr--;
+        text_ptr--;
       else if (!formatted && *(temp_ptr = text_ptr - 1) != SWITCH_START &&
          *temp_ptr != SWITCH_BREAK && *temp_ptr != SWITCH_END &&
          *line_ptr != SWITCH_START && *line_ptr != SWITCH_BREAK &&

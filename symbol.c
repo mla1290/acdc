@@ -1,4 +1,4 @@
-/* symbol.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* symbol.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 03 Mar 16   MLA           Removed non-ANSI C support.
@@ -79,6 +79,8 @@ struct node *addsymb (int btroot, char *name, int type, int refno)
    np -> text_addr[0] = -1;
    np -> text_addr[1] = -1;
    np -> text_addr[2] = -1;
+   if (type == TEXT) 
+      np -> inline_text = 0;
    np -> name_addr = -1;
    np -> proc_count = 0;
    np -> proc_done = 0;

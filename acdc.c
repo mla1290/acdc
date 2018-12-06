@@ -1,8 +1,9 @@
 /* acdc.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  */
-#define ACDC_VERSION "12.37, 24 Jun 2018"
+#define ACDC_VERSION "12.38, 06 Dec 2018"
 /*
+ * 06 Dec 18   MLA           Added USEQUERY to adv1.h
  * 11 Jun 18   MLA           Added the -outdir option.
  * 03 Mar 16   MLA           Added SELECT.
  *                           Removed non-ANSI C support.
@@ -139,6 +140,7 @@ FILE *defs_file;
 FILE *code_file;
 FILE *xref_file = NULL;
 
+int query_used = 0;
 int code_part = 2;
 int minor_count = 0;
 int debug = 0;
@@ -157,16 +159,18 @@ int check_it (int val, char *arg1, char **arg2)
          return (val);
       }
       else
-         fprintf (stderr, 
+         fprintf (stderr,
             "*ERROR* Conflicting command line keywords '%s' and '%s'!\n", *arg2, arg1);
    }
    else if (val == -2)
       fprintf (stderr, "*ERROR* Bad command line argument '%s'!\n", arg1);
-      
+
    fprintf (stderr, "\nUsage: acdc [options] [(path)name]\n");
    fprintf (stderr, "\nWhere allowed options are:\n");
    fprintf (stderr, "   -plain (abbreviable to -p)\n");
    fprintf (stderr, "       Do not encrypt game text.\n");
+   fprintf (stderr, "   -outdir <dir> (abbreviable to -o)\n");
+   fprintf (stderr, "       Place derived C sources in <dir>.\n");
    fprintf (stderr, "   -preload (abbreviable to -pr; default keyword)\n");
    fprintf (stderr, "       Do not create a separate text file.\n");
    fprintf (stderr, "   -file-page [<npage>] (abbrviable to -fp)\n");
@@ -216,7 +220,7 @@ int main (int argc, char **argv)
    extern void domajor ();
    extern void initial ();
    extern void finalise ();
-   
+
    printf ("[A-code to C translator, version %s]\n", ACDC_VERSION);
    srand ((unsigned int)(now = time (NULL)));
    strftime (datbuf, sizeof (datbuf), "%Y", localtime (&now));
@@ -225,7 +229,7 @@ int main (int argc, char **argv)
  */
    for (i = 0; i < sizeof (roots) / sizeof (roots [0]); i++)
       btinit (i);
-      
+
 /* Obtain the name of the program to process. This may be present on
  * the command line or prompted for.
  */
@@ -239,15 +243,15 @@ int main (int argc, char **argv)
          len = strlen(*argv);
          arg = *argv;
          if (*arg == '-' && *(arg + 1) == '-')  /* Cater for GNU-style keywords */
-            arg++;     
+            arg++;
          if (strncmp (arg, "-version", len) == 0 || strcmp(arg, "-v") == 0)
-            exit (0);         
+            exit (0);
          if (strncmp (arg, "-debug", len) == 0)
             debug = 1;
          else if (strncmp (arg, "-outdir", len) == 0 || strcmp(arg, "-o") == 0)
          {
             argv++; argc--;
-            sprintf(out_stem, "%s%c", *argv, SEP);            
+            sprintf(out_stem, "%s%c", *argv, SEP);
          }
          else if (strncmp (arg, "-plain", len) == 0)
             plain_text = 1;
@@ -284,18 +288,18 @@ int main (int argc, char **argv)
             check_it (-1, NULL, NULL);
          else if (*arg == '-')
             check_it (-2, arg, NULL);
-         else         
+         else
             strcpy (source_path, arg);
       }
    }
    if (memory == -1)
       memory = 3;
-   
+
    if (getenv ("PLAIN"))
       plain_text = 1;
    if (getenv ("DEBUG"))
-      debug = 1;   
-   
+      debug = 1;
+
    if (*source_path == '\0')
    {
       printf ("Adventure name: ");

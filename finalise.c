@@ -1,4 +1,4 @@
-/* finalise.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* finalise.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 23 Aug 16   MLA           REPEAT_PROC is now ADVLIB sensitive.
@@ -233,8 +233,9 @@ static void process_proc (struct node *np)
    int type   = np -> type;
    int count  = np -> proc_count;
 
-   if ((quiet & 2) == 0 && style > 0 && np -> used_count == 0 && *(np -> name) != '.' &&
-      (np -> auto_flag) == '\0' && strncmp (np -> name, "spare..", 7))
+   if ((quiet & 2) == 0 && style > 0 && np -> used_count == 0 && 
+      *(np -> name) != '.' && (np -> auto_flag) == '\0' && 
+      strncmp (np -> name, "spare..", 7))
          printf ("   %-22s symbol defined but not used.\n", np -> name);
 
    if (count == 0) return;
@@ -311,6 +312,7 @@ fflush (stdout);
    clsfile (text_file, "Text");
 
    fprintf (defs_file, "#define TEXT_BYTES %d\n", next_addr);
+   fprintf (defs_file, "#define USEQUERY %d\n", query_used);
    fprintf (defs_file, "#endif\n");
    clsfile (defs_file, "adv1.h");     /* Ahhh.... done at last! */
 

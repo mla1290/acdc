@@ -1,6 +1,11 @@
-/* dominor.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* dominor.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
+ * 29 Oct 18   MLA           STOP: now just falls through to QUIT:
+ * 11 Oct 18   MLA           BUG: STOP should also QUIT!
+ * 02 Jul 18   MLA           Simplified DICT parsing.
+ * 24 Jun 18   MLA           Note input_store() split from special() in kernel.
+ * 22 Jun 18   MLA           Deprecated HAVE, HERE and NEAR.
  * 08 Nov 17   MLA           Bug: APPEND should not act as QUIT!
  * 28 Dec 16   MLA           BUG: adding a pointer to a value must give pointer!
  * 27 Aug 16   MLA           BUG: IFAT always returned false!
@@ -155,7 +160,7 @@ void dominor (char *prochead, char *proccond)
    struct node *ap [ANY_NUMBER + 1];
 
    char *cond_ptr = cond_buf;
-      
+
    memset (nestplus, '\0', sizeof (nestplus));
    while (1)
    {
@@ -191,7 +196,7 @@ void dominor (char *prochead, char *proccond)
       if (minor_type == LOCAL)
       {
          if (got_code)
-            gripe ("", 
+            gripe ("",
                "Local declarations must precede all local code!");
          for (index = 1; tp [index]; index++)
          {
@@ -201,7 +206,7 @@ void dominor (char *prochead, char *proccond)
          }
          continue;
       }
-            
+
       if (got_code == 0)
       {
          locals = iniparam (flag_field_size[VARFLAG]/16 + 1);
@@ -209,10 +214,10 @@ void dominor (char *prochead, char *proccond)
          if (debug && prochead && *prochead)
             fprintf (code_file, "puts(\"*** %s ***\");\n", prochead);
          if (proccond && *proccond)
-            fprintf (code_file, proccond);
+            fprintf (code_file, "%s", proccond);
       }
-      
-      if (minor_type >= ELSE || minor_type < NOT) 
+
+      if (minor_type >= ELSE || minor_type < NOT)
       {
          if (minor_type >= ELSE && (pending_not || pending_conj))
             gripe ("", "Another conditional expected.");
@@ -270,7 +275,7 @@ void dominor (char *prochead, char *proccond)
          chr = tp [index];
          argtyp [index] = -1;
          if (isdigit (*chr) || *chr == '+' || *chr == '-')
-            ap [index] = NULL;        
+            ap [index] = NULL;
          else
          {
             if (index == 1 && np -> min_args >= FREE_ARG)
@@ -324,8 +329,9 @@ void dominor (char *prochead, char *proccond)
       switch (minor_type)
       {
          case KEYWORD:
+           deprecate ("KEYWORD", 11, 0);
          case ANYOF:
-            deprecate ((minor_type == KEYWORD) ? "KEYWORD" : "ANYOF", 11, 0);
+           if (minor_type == ANYOF) deprecate ("ANYOF", 11, 0);
             if (multiple_pending != minor_type)
                fprintf (code_file, "if (!%s(",
                   (minor_type == KEYWORD) ? "keyword" : "anyof");
@@ -340,13 +346,16 @@ void dominor (char *prochead, char *proccond)
             break;
 
          case HAVE:
+           deprecate ("HAVE", 11, 0);
          case NEAR:
+           if (minor_type == NEAR) deprecate ("NEAR", 11, 0);
          case HERE:
+           if (minor_type == HERE) deprecate ("HERE", 11, 0);
             fprintf (code_file, "if (");
             index = 1;
             while (tp [index])
             {
-               if (argtyp [index] != OBJ && 
+               if (argtyp [index] != OBJ &&
                    argtyp [index] != VAR &&
                    argtyp [index] != LOCAL)
                      gripe (tp [index], "not reducible to an object.");
@@ -366,10 +375,10 @@ void dominor (char *prochead, char *proccond)
                   fprintf (code_file, "!ishere");
                }
                if (argtyp [index] == VAR)
-                  fprintf (code_file, "(value[%d],-1,-1)", 
+                  fprintf (code_file, "(value[%d],-1,-1)",
                      argval [index]);
                else if (argtyp [index] == LOCAL)
-                  fprintf (code_file, "(lval[%d],-1,-1)", 
+                  fprintf (code_file, "(lval[%d],-1,-1)",
                      argval [index]);
                else
                   fprintf (code_file, "(%d,-1,-1)", argval [index]);
@@ -388,7 +397,7 @@ void dominor (char *prochead, char *proccond)
                if ((argtyp [index] > VAR && argtyp [index] != LOCAL)
                   || argtyp [index] == VERB)
                {
-                  if (style <= 1) 
+                  if (style <= 1)
                   {
                      index++;
                      continue;
@@ -397,10 +406,10 @@ void dominor (char *prochead, char *proccond)
                }
                fprintf (code_file, "value[HERE]!=");
                if (argtyp [index] == VAR)
-                  fprintf (code_file, "value[%d]", 
+                  fprintf (code_file, "value[%d]",
                      argval [index]);
                else if (argtyp [index] == LOCAL)
-                  fprintf (code_file, "lval[%d]", 
+                  fprintf (code_file, "lval[%d]",
                      argval [index]);
                else
                   fprintf (code_file, "%d", argval [index]);
@@ -431,14 +440,14 @@ void dominor (char *prochead, char *proccond)
               { strcpy (cond_ptr, "<="); cond_ptr += 2; }
             cond_ptr += entvalt (cond_ptr, argtyp [2], argval[2]);
             break;
-            
+
          case IFAT:
             while (tp [++index] != NULL)
             {
                if (argtyp [index] != OBJ && argtyp [index] != LOC &&
                    argtyp [index] != VAR && argtyp [index] != LOCAL)
                       gripe (tp [index], "not reducible to a location.");
-               if (index > 1) 
+               if (index > 1)
                   { strcpy (cond_ptr, "||"); cond_ptr += 2; }
 /*               cond_ptr += entvalv (cond_ptr, LOC, HERE); */
                strcpy (cond_ptr, "value[HERE]=="); cond_ptr += 13;
@@ -473,11 +482,11 @@ void dominor (char *prochead, char *proccond)
 
          case IFKEY:
          case IFANY:
-            if (argtyp [1] != OBJ && argtyp [1] != LOC && 
+            if (argtyp [1] != OBJ && argtyp [1] != LOC &&
                 argtyp [1] != VERB && argtyp [1] != VAR &&
                 argtyp [1] != LOCAL)
-                  gripe (tp [index], 
-                     "Unsuitable IFKEY/IFANY argument type!");  
+                  gripe (tp [index],
+                     "Unsuitable IFKEY/IFANY argument type!");
             if (tp [2] == NULL)
             {
                cond_ptr += sprintf (cond_ptr, "KEY(");
@@ -486,7 +495,7 @@ void dominor (char *prochead, char *proccond)
 	    }
             else
             {
-               cond_ptr += sprintf (cond_ptr, "%s(", 
+               cond_ptr += sprintf (cond_ptr, "%s(",
                   (minor_type == IFKEY) ? "keyword" : "anyof");
                index = 0;
                while (tp [++index] != NULL)
@@ -499,6 +508,7 @@ void dominor (char *prochead, char *proccond)
             break;
 
          case QUERY:
+            query_used = 1;
             if (argtyp [1] != TEXT && argtyp [1] != VAR &&
                argtyp [1] != LOCAL)
                   gripe (tp [1], "Not reducible to text.");
@@ -529,7 +539,7 @@ void dominor (char *prochead, char *proccond)
             {
                if (argtyp [index] > TEXT)
                   gripe (tp [index], "Not a referrable entity.");
-               cond_ptr += sprintf 
+               cond_ptr += sprintf
                   (cond_ptr, "%s", index > 2 ? "||" : "");
                if (argtyp [1] == VAR)
                   cond_ptr += sprintf (cond_ptr, "value[%d]==%d", argval [1],
@@ -543,13 +553,13 @@ void dominor (char *prochead, char *proccond)
          case IFHTML:
          case IFCLOUD:
          case IFDOALL:
-            cond_ptr += sprintf (cond_ptr, "test(\"%s\")", tp [0] + 2); 
+            cond_ptr += sprintf (cond_ptr, "test(\"%s\")", tp [0] + 2);
             break;
-            
+
          case IFTYPED:
             cond_ptr += sprintf (cond_ptr, "typed(\"%s\")", tp [1]);
             break;
-            
+
          case IFLOC:
             if (argtyp [1] != OBJ && argtyp [1] != VAR &&
                argtyp [1] != LOCAL)
@@ -560,7 +570,7 @@ void dominor (char *prochead, char *proccond)
                if (argtyp [index] != OBJ && argtyp [index] != LOC &&
                    argtyp [index] != VAR && argtyp [index] != LOCAL)
                       gripe (tp [index], "not reducible to a location.");
-               cond_ptr += sprintf (cond_ptr, "%sgetloc(", 
+               cond_ptr += sprintf (cond_ptr, "%sgetloc(",
                   index > 2 ? "||" : "");
                if (argtyp [1] == VAR)
                   cond_ptr += sprintf (cond_ptr, "value[%d])==", argval [1]);
@@ -578,7 +588,7 @@ void dominor (char *prochead, char *proccond)
             if (pending_not)
               gripe (tp [0], "A condition expected after NOT.");
             if (pending_conj)
-              gripe (tp [0], 
+              gripe (tp [0],
                  "A condition expected before another conjunction.");
             if (minor_type == AND) pending_conj = '&';
             else if (minor_type == OR) pending_conj = '|';
@@ -592,7 +602,7 @@ void dominor (char *prochead, char *proccond)
          case ELSE:
             fprintf (code_file, "}else{\n");
             break;
-         
+
          case OTHERWISE:
             fprintf (code_file, "}else{");
             nesting--;
@@ -674,7 +684,7 @@ void dominor (char *prochead, char *proccond)
                {
                   fprintf (code_file, "!isat(");
                   if (argtyp [1] == VAR)
-                     fprintf (code_file, "value[%d]", 
+                     fprintf (code_file, "value[%d]",
                         argval [1]);
                   else if (argtyp [1] == LOCAL)
                      fprintf (code_file, "lval[%d]",
@@ -683,15 +693,15 @@ void dominor (char *prochead, char *proccond)
                      fprintf (code_file, "%d", argval [1]);
                   fprintf (code_file, ",-1,-1,");
                   if (argtyp [index] == VAR)
-                     fprintf (code_file, "value[%d])", 
+                     fprintf (code_file, "value[%d])",
                         argval [index]);
                   else if (argtyp [index] == LOCAL)
-                     fprintf (code_file, "lval[%d])", 
+                     fprintf (code_file, "lval[%d])",
                         argval [index]);
                   else
                      fprintf (code_file, "%d)", argval [index]);
               }
-               fprintf (code_file, ") continue;\n");       
+               fprintf (code_file, ") continue;\n");
             }
             break;
 
@@ -699,7 +709,7 @@ void dominor (char *prochead, char *proccond)
             if (argtyp [1] != VAR && argtyp [1] != LOCAL)
                gripe (tp [1], "Not a variable.");
             if (tp [2] && !tp [3])
-               gripe (tp [0], 
+               gripe (tp [0],
                   "Wrong parameter count - should be 1 or 3.");
             if (tp [2] && argtyp [2] != LOC)
                gripe (tp [2], "Not a place!");
@@ -779,19 +789,17 @@ void dominor (char *prochead, char *proccond)
             else
                fprintf (code_file, "break;\n");
             break;
-            
+
          case PROCEED:
          case RETURN:
-            fprintf (code_file, "return %d;\n", 
+            fprintf (code_file, "return %d;\n",
                minor_type == PROCEED ? 0 : 1);
             break;
 
+         case STOP:
+            fprintf (code_file, "finita();\n");  /* And fall through */
          case QUIT:
             fprintf (code_file, "loop=1; return(0);\n");
-            break;
-
-         case STOP:
-            fprintf (code_file, "finita();\n");
             break;
 
          case GET:
@@ -882,36 +890,69 @@ void dominor (char *prochead, char *proccond)
             break;
 
          case DICT:
-            if (argtyp [1] > VERB &&
-               (argtyp [1] != CONSTANT || argval [1] != 0))
-                  gripe (tp [1], "Not verb, place or object.");
-            if (argtyp [2] > LOC &&
-               (argtyp [2] != CONSTANT || argval [2] != 0))
-                  gripe (tp [2], "Not a place, object or zero.");
-            if (argtyp [3] != FLAGS &&
-               (argtyp [3] != CONSTANT || argval [3] != 0))
-                  gripe (tp [3], "Not a flag name or zero.");
-            if (tp [4] != NULL)
             {
-               if (argtyp [4] != TEXT && 
-                  (argtyp [4] != CONSTANT || argval [4] != 0))
-                     gripe (tp [4], "Not a text or zero.");
-               index = argval [4];
+               int word = 0;
+               int  what= 0;
+               int flag = 0;
+               int text = 0;
+               index = 1;
+               if (tp [1])
+               {
+                  if (argtyp [1] <= VERB || argval [index] == 0)
+                     word = argval [index++];
+               }
+               if (tp [index])
+               {
+                  if (argtyp [index] < VERB || argval [index] == 0)
+                     what = argval [index++];
+               }
+               if (tp [index] != NULL)
+               {
+                  if (argtyp [index] == FLAGS || argval [index] == 0)
+                     flag = argval [index++];
+               }
+               if (tp [index])
+               {
+                  if (argtyp [index] == TEXT || argval [index] == 0)
+                     text = argval [index];
+               }
+               if (word == 0 && (what || flag))
+                 gripe (tp [1], "Not a word, place or object.");
+               fprintf (code_file, "voc (%d, %d, %d, %d);\n",
+                  word, what, flag, text);
             }
-            else
-               index = 0;
-            fprintf (code_file, "voc (%d, %d, %d, %d);\n",
-               argval [1], argval [2], argval [3], index);
             break;
-            
+
+//            if (argtyp [1] > VERB &&
+//               (argtyp [1] != CONSTANT || argval [1] != 0))
+//                  gripe (tp [1], "Not verb, place or object.");
+//            if (argtyp [2] > LOC &&
+//               (argtyp [2] != CONSTANT || argval [2] != 0))
+//                  gripe (tp [2], "Not a place, object or zero.");
+//            if (argtyp [3] != FLAGS &&
+//               (argtyp [3] != CONSTANT || argval [3] != 0))
+//                  gripe (tp [3], "Not a flag name or zero.");
+//            if (tp [4] != NULL)
+//            {
+//               if (argtyp [4] != TEXT &&
+//                  (argtyp [4] != CONSTANT || argval [4] != 0))
+//                     gripe (tp [4], "Not a text or zero.");
+//               index = argval [4];
+//            }
+//            else
+//               index = 0;
+//            fprintf (code_file, "voc (%d, %d, %d, %d);\n",
+//               argval [1], argval [2], argval [3], index);
+            break;
+
          case RESPOND:
-            if (argtyp [1] != OBJ && argtyp [1] != LOC && 
+            if (argtyp [1] != OBJ && argtyp [1] != LOC &&
                argtyp [1] != VERB)
-                  gripe (tp [1], 
+                  gripe (tp [1],
                      "Not an object, place or verb!");
             fprintf (code_file, "if (anyof(%d,", argval[1]);
             index = 2;
-            while (tp [index] && argtyp [index] < TEXT && 
+            while (tp [index] && argtyp [index] < TEXT &&
                argtyp [index] != VAR)
             {
                fprintf (code_file, "%d,", argval [index]);
@@ -958,21 +999,21 @@ void dominor (char *prochead, char *proccond)
                    gripe (tp[1], "Argument not reducible to a text!");
             if (argtyp [1] == TEXT && style >= 11)
             {
-               if ((ap[1] -> text_type & QUALIFIER_ALLOWED) == 0 && 
+               if ((ap[1] -> text_type & QUALIFIER_ALLOWED) == 0 &&
                     ap[1] -> state_count < 2 && tp[2])
                   gripe (tp[1], "Redundant word qualifier.");
                else if (
-                  (ap[1] -> text_type & QUALIFIER_MANDATORY) == QUALIFIER_MANDATORY 
+                  (ap[1] -> text_type & QUALIFIER_MANDATORY) == QUALIFIER_MANDATORY
                      && tp[2] == NULL)
                   gripe (tp[1], "Missing required word qualifier.");
 	    }
-            if (minor_type == DESCRIBE && 
+            if (minor_type == DESCRIBE &&
                (argtyp [1] == VERB || argtyp [1] == TEXT ||
                 argtyp [1] == LOC))
                   gripe (tp [1], "Not reducible to a detailed description!");
             if (argtyp [1] == VAR)
                type += 2;
-               
+
             if (tp [2] != NULL)
             {
                 type += 8;
@@ -1012,7 +1053,7 @@ void dominor (char *prochead, char *proccond)
             else gripe (tp [1], "Not a value holder.");
 
             fprintf (code_file, "set('%c',%d,", ctype, argval [1]);
-            if      (argtyp [2] == CONSTANT || 
+            if      (argtyp [2] == CONSTANT ||
                      argtyp [2] == SYNONYM ||
                      argtyp [2] == STATE)    ctype = 'c';
             else if (argtyp [2] == VAR) ctype = 'v';
@@ -1024,7 +1065,7 @@ void dominor (char *prochead, char *proccond)
 
             fprintf (code_file, "'%c',%d,", ctype, argval [2]);
             fprintf (code_file, "%s);\n",
-               (argtyp [1] == LOCAL || argtyp [2] == LOCAL) ? 
+               (argtyp [1] == LOCAL || argtyp [2] == LOCAL) ?
                   "lval, lbts" : "NULL,NULL");
             break;
 
@@ -1054,7 +1095,7 @@ void dominor (char *prochead, char *proccond)
             {
               if (argtyp[2] == VAR)
               {
-                fprintf (code_file, 
+                fprintf (code_file,
                   "if (*bitword(%d*VARSIZE)==-1) ", argval[2]);
                 if (argtyp[1] == VAR)
                   fprintf (code_file, "*bitword(%d*VARSIZE)= -1;\n", argval[1]);
@@ -1065,10 +1106,10 @@ void dominor (char *prochead, char *proccond)
               {
                 if (argtyp [1] == VAR || (argtyp [1] == LOCAL))
                 {
-                  fprintf (code_file, 
+                  fprintf (code_file,
                     "if (lbts[%d*VARSIZE]==-1) ", argval[2]);
                   if (argtyp[1] == VAR)
-                    fprintf (code_file, 
+                    fprintf (code_file,
                       "*bitword(%d*VARSIZE)= -1;\n", argval[1]);
                   else if (argtyp[1] == LOCAL)
                     fprintf (code_file, "lbts[%d*VARSIZE]= -1;\n", argval[1]);
@@ -1139,7 +1180,7 @@ void dominor (char *prochead, char *proccond)
             break;
 
          case RANDSEL:
-            if (argtyp [1] > VAR && argtyp [1] != LOCAL)   
+            if (argtyp [1] > VAR && argtyp [1] != LOCAL)
                gripe (tp [1], "Not a value holder.");
             cnt = 0;
             type = argtyp [2];
@@ -1154,10 +1195,10 @@ void dominor (char *prochead, char *proccond)
             if (cnt < 2)
                gripe (tp [1], "Not enough options to select from.");
             if (argtyp [1] == VAR)
-               fprintf (code_file, "value[%d]=randsel(%d,%d", 
+               fprintf (code_file, "value[%d]=randsel(%d,%d",
                   argval [1], cnt, argval [2]);
             else
-               fprintf (code_file, "lval[%d]=randsel(%d,%d", 
+               fprintf (code_file, "lval[%d]=randsel(%d,%d",
                   argval [1], type, argval [2]);
             for (index = 3; tp[index] != NULL; index++)
                fprintf (code_file, ",%d", argval[index]);
@@ -1179,7 +1220,7 @@ void dominor (char *prochead, char *proccond)
             else
                fprintf (code_file, "%d;\n", argval[2]);
             break;
-            
+
          case LDA:           /* LDA variable refno */
          case EVAL:          /* EVAL variable refno */
          case LOCATE:        /* LOCATE variable {objptr} */
@@ -1245,26 +1286,26 @@ void dominor (char *prochead, char *proccond)
          case UNFLAG:
             if (argtyp [1] > VAR && argtyp [1] != LOCAL)
                gripe (tp [1], "Not a bit mask holder.");
-            if ((argtyp [2] < CONSTANT && argtyp [2] != VAR) || 
+            if ((argtyp [2] < CONSTANT && argtyp [2] != VAR) ||
                argtyp [2] == STATE)
                   gripe (tp [2],"Bit mask not a flag or constant.");
             if (argtyp [1] == LOCAL)
                fprintf (code_file, "lbitmod(%d,'%c',", locals,
                   (minor_type == FLAG) ? 's' : 'c');
             else
-               fprintf (code_file, "bitmod('%c',", 
+               fprintf (code_file, "bitmod('%c',",
                   (minor_type == FLAG) ? 's' : 'c');
             if (argtyp [1] == VAR)
                fprintf (code_file, "evar(%d)", argval [1]);
             else
                fprintf (code_file, "%d", argval [1]);
-            if (argtyp [2] == VAR)            
+            if (argtyp [2] == VAR)
                fprintf (code_file, ",value[%d]", argval [2]);
-            else if (argtyp [2] == LOCAL)            
+            else if (argtyp [2] == LOCAL)
                fprintf (code_file, ",lval[%d]", argval [2]);
             else
                fprintf (code_file, ",%d", argval [2]);
-            fprintf (code_file, "%s);\n", 
+            fprintf (code_file, "%s);\n",
                argtyp [1] == LOCAL ? ",lval,lbts" : "");
             break;
 
@@ -1320,7 +1361,7 @@ void dominor (char *prochead, char *proccond)
             if (tp [2] != NULL)
             {
                if (argtyp [1] == FLAGS)
-                  gripe (tp [1], 
+                  gripe (tp [1],
                      "Only second of two arguments may be a flag!");
                if (argtyp [2] != FLAGS)
                   gripe (tp [2], "Not a bit flag.");
@@ -1371,22 +1412,22 @@ void dominor (char *prochead, char *proccond)
                cond_ptr += sprintf (cond_ptr, "0,lval[%d]",
                   argval [2]);
             else if (argtyp [2] < CONSTANT)
-               cond_ptr += sprintf (cond_ptr, "0,value[%d])", 
+               cond_ptr += sprintf (cond_ptr, "0,value[%d])",
                   argval [2]);
             else
-               cond_ptr += sprintf (cond_ptr, "%d,%d)", 
+               cond_ptr += sprintf (cond_ptr, "%d,%d)",
                   (argtyp [2] == FLAGS) ? 1 : 0, argval [2]);
             break;
 
          case RANDOMISE:
-            if (argtyp [1] != OBJ && argtyp [1] != LOC && 
+            if (argtyp [1] != OBJ && argtyp [1] != LOC &&
                 argtyp [1] != TEXT)
                   gripe (tp [1], "Not a place, object or text.");
             if (argtyp [2] != CONSTANT)
                gripe (tp [2], "Not a constant.");
             if (argval [2] + 1 >= ap [1] -> state_count)
                gripe (tp [2], "Randomisation offset too high.");
-            if (argval [2] < 0) 
+            if (argval [2] < 0)
                gripe (tp [2], "Negative offset not legal.");
             fprintf (code_file, "value[%d] = %crand(%d - %d) + %d;\n",
                argval [1], argtyp [1] == TEXT ? 'j' : 'i',
@@ -1405,18 +1446,18 @@ void dominor (char *prochead, char *proccond)
                   argval[index], argval [1]);
             }
             break;
-            
+
          case FAKEARG:
          case FAKECOM:
             for (index = 1; index <= 2; index++)
                if (argtyp [index] > TEXT && argtyp [index] != LOCAL)
-                  gripe (tp [index], 
+                  gripe (tp [index],
                      "Not reducible to a place, object or verb");
             if (argtyp [1] == VAR)
-               fprintf (code_file, "if (value[ARG1] == value[%d])", 
+               fprintf (code_file, "if (value[ARG1] == value[%d])",
                   argval [1]);
             else if (argtyp [1] == LOCAL)
-               fprintf (code_file, "if (value[ARG1] == lval[%d])", 
+               fprintf (code_file, "if (value[ARG1] == lval[%d])",
                   argval [1]);
             else
                fprintf (code_file, "if (value[ARG1] == %d)", argval [1]);
@@ -1448,10 +1489,10 @@ void dominor (char *prochead, char *proccond)
                   fprintf (code_file, "%d;\n", argval [2]);
 	    }
             if (argtyp [1] == VAR)
-               fprintf (code_file, "if (value[ARG2] == value[%d])", 
+               fprintf (code_file, "if (value[ARG2] == value[%d])",
                   argval [1]);
             else if (argtyp [1] == LOCAL)
-               fprintf (code_file, "if (value[ARG2] == lval[%d])", 
+               fprintf (code_file, "if (value[ARG2] == lval[%d])",
                   argval [1]);
             else
                fprintf (code_file, "if (value[ARG2] == %d)", argval [1]);
@@ -1483,15 +1524,16 @@ void dominor (char *prochead, char *proccond)
                   fprintf (code_file, "%d;\n", argval [2]);
 	    }
             break;
-            
+
          case CHECKPOINT:
-            fprintf (code_file, 
+            fprintf (code_file,
                "puts (\"=== Checkpoint: %s, line %d ===\");",
                   pathname[level], line_count[level]);
             break;
-         
+
          case SAVE:
          case RESTORE:
+         case DELETE:
             if (tp[1] == NULL)
             {
                gripe (tp[0], "Missing operation type indicator");
@@ -1505,24 +1547,35 @@ void dominor (char *prochead, char *proccond)
             {
                gripe (tp [2], "Not a variable.");
             }
-            if (strcmp (tp[1], "file") == 0)
+
+            if (strcmp (tp[1], "memory") == 0)
             {
-               type = (minor_type == SAVE) ? 1 : 2;
-            }
-            else if (strcmp (tp[1], "memory") == 0)
-            {
-               type = (minor_type == SAVE) ? 0 : 1;
+               if (minor_type == DELETE) type = 3;
+               else if (minor_type == SAVE) type = 1;
+               else type = 2;     /* Must be RESTORE */
                fprintf (code_file, "%s[%d] = memstore (%d);\n",
-                  (argtyp[2] == LOCAL) ? "lval" : "value", argval[2],
-                     (minor_type == SAVE) ? 0 : 1);
+                  (argtyp[2] == LOCAL) ? "lval" : "value", argval[2], type);
                break;
             }
             else if (strcmp (tp[1], "command") == 0)
             {
-               type = (minor_type == SAVE) ? 23 : 24;
+               fprintf (code_file, "input_store('%c', &%s[%d]);\n",
+                 minor_type == SAVE ? 'S' : 'R',
+                   argtyp [2] == LOCAL ? "lval" : "value", argval [2]);
+               break;
+            }
+            else if (strcmp (tp[1], "file") == 0)
+            {
+               if (minor_type == SAVE) type = 1;
+               else if (minor_type == RESTORE) type = 2;
+               else type = 3;   /* Must be DELETE! */
+               type = (minor_type == SAVE) ? 1 : 2;
             }
             else if (strcmp (tp[1], "value") == 0)
             {
+               if (minor_type == DELETE)
+                  gripe ("VALUE", "Not a valid subtype of DELETE");
+               deprecate("SAVE/RESTORE VALUE", 12, 0);
                type = (minor_type == SAVE) ? 6 : 7;
             }
             else
@@ -1532,17 +1585,17 @@ void dominor (char *prochead, char *proccond)
             fprintf (code_file, "special(%d, &%s[%d]);\n",
                type, argtyp [2] == LOCAL ? "lval" : "value", argval [2]);
             break;
-            
+
            case VERBATIM:
               fprintf (code_file, "verbatim(%d);\n", argval [1]);
               break;
-              
+
            case UNDO:
            case REDO:
-              fprintf (code_file, "%s();\n", 
+              fprintf (code_file, "%s();\n",
                  minor_type == UNDO ? "undo" : "redo");
               break;
-              
+
 /*         case DELETE:
  *            if (tp[1])
  *            {
@@ -1558,7 +1611,7 @@ void dominor (char *prochead, char *proccond)
  *            }
  *            break;
  */
-             
+
 /*         case SAVEDLIST:
  *            if (tp[1] == NULL)
  *            {
@@ -1574,7 +1627,7 @@ void dominor (char *prochead, char *proccond)
  *            }
  *            break;
  */
-             
+
          case DUMP:
             fprintf (code_file, " show_data();");
             break;
@@ -1590,16 +1643,16 @@ void dominor (char *prochead, char *proccond)
             proc_index = index;
             if (argtyp [index] != PROCEDURE && argtyp [index] > VERB &&
                argtyp [index] != VAR && argtyp [index] != LOCAL)
-                  gripe (tp [index], 
+                  gripe (tp [index],
                      "Not a minor directive or a callable symbol.");
             if (argtyp [index] == PROCEDURE)
                fprintf (code_file, "p%d(", argval [index]);
             else if (argtyp [index] == VAR)
-               fprintf (code_file, 
-                  "if (value[%d]<LPROC && value[%d]>= 0) (*procs[value[%d]])(", 
+               fprintf (code_file,
+                  "if (value[%d]<LPROC && value[%d]>= 0) (*procs[value[%d]])(",
                      argval [index], argval [index], argval[index]);
             else if (argtyp [index] == LOCAL)
-               fprintf (code_file, 
+               fprintf (code_file,
                   "if (lval[%d]<LPROC && lval[%d] >= 0) (*procs[lval[%d]])(",
                      argval [index], argval [index], argval[index]);
             else
@@ -1608,7 +1661,7 @@ void dominor (char *prochead, char *proccond)
             {
                args_count = (ap [index] -> arg_count);
                for (++index; tp [index]; index++)
-               { 
+               {
                   if (args_count == 0)
                      gripe (tp [proc_index], "too many arguments!");
                   if (argtyp [index] > TEXT && argtyp [index] != CONSTANT &&
@@ -1616,10 +1669,10 @@ void dominor (char *prochead, char *proccond)
                         gripe (tp [index], "illegal argument type!");
                   fprintf (code_file, "%s", index == 2 ? "" : ",");
                   if (argtyp [index] != VAR)
-                     fprintf (code_file, "%d,", 
+                     fprintf (code_file, "%d,",
                         argtyp [index] == CONSTANT ? 0 : -1);
                   else
-                     fprintf (code_file, "*bitword(%d),", 
+                     fprintf (code_file, "*bitword(%d),",
                         argval [index]);
                   if (argtyp [index] == VAR)
                      fprintf (code_file, "value[%d]", argval [index]);
@@ -1640,20 +1693,20 @@ void dominor (char *prochead, char *proccond)
                fprintf (code_file, ");\n");
             fprintf (code_file, "if (loop) return (0);\n");
             break;
-            
+
          default:
             gripe (tp [0], "not a known minor directive.");
       }
       if (minor_type < NOT) pending_not = 0;
 #ifdef MLATEST
  fflush (code_file);
- fprintf (stderr, "+++ NEST %d, PLUS %d %d %d %d ", 
+ fprintf (stderr, "+++ NEST %d, PLUS %d %d %d %d ",
     nesting, nestplus[0], nestplus[1], nestplus[2], nestplus[3]);
  {
     int l = nesting;
     while (l--)
     {
-      fputc (' ', stderr); fputc (' ', stderr); 
+      fputc (' ', stderr); fputc (' ', stderr);
     }
  }
  fprintf (stderr, "%s", tp[0]);
@@ -1672,7 +1725,7 @@ void dominor (char *prochead, char *proccond)
 terminate:
    if (multiple_pending)
       gripe("", "Null code block?");
-      
+
    if (nesting > 0)
    {
       if (style <= 1)

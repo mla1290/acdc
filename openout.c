@@ -1,4 +1,4 @@
-/* openout.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* openout.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 26 Dec 16   MLA           Modified licence header.
@@ -66,7 +66,7 @@ FILE *openout (char *file)
       brk = file + strlen (file) - 2;
       if (*brk == '.' && (*(brk + 1) == 'c' || *(brk + 1) == 'h'))
       {
-         fprintf (outfile, "/* %s: %s - copyright %s %s. licensed under\n", file,
+         fprintf (outfile, "/* %s: %s - copyright %s %s. Licensed under\n", file,
             title, author, datbuf);
          fprintf (outfile, " * GPL (version 3 or later) or the Modified BSD Licence, whichever\n");
          fprintf (outfile, " * is asserted by the supplied LICENCE file.*/\n\n");

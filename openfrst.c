@@ -1,4 +1,4 @@
-/* openfrst.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* openfrst.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 03 Mar 16   MLA           Removed non-ANSI C support.
@@ -58,6 +58,7 @@ void openfrst (char *file_spec)
    if ((*infile = fopen (fullname, "r")) == NULL)
    {
       fprintf (stderr, "Sorry, cannot find source file %s.\n", fullname);
+      system("/bin/rmdir C");
       exit (1);
    }
    strcpy (pathname [0], fullname);
@@ -72,7 +73,6 @@ void openfrst (char *file_spec)
    text_lines = 0;
    text_count = 0;
    switch_count = 0;
-   inline_count = 0;
    for (i=0; i<10; i++)
       line_count[i] = 0;
    return;

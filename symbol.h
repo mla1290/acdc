@@ -52,6 +52,7 @@
       int text_addr[3];      /* Text address */
       int name_addr;         /* OBJECT/PLACE/VERB name or TEXT name */
       int text_type;         /* Types like plain, auto-increment, random... */
+      int inline_text;       /* True iff text is in-line */
 
 /* Vocabulary related stuff */
 

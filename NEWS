@@ -1,5 +1,20 @@
 -------------------------------------------------------------------------
 
+New in version 12.38
+
+1. Minor directives HAVE, HERE and NEAR now officially deprecated.
+2. Added the -outdir command line option.
+3. Non-morphed in-line texts are no longer a problem for upward
+   compatibility of saved games.
+4. Added simplified DICT syntax.
+5. Fixed in-line texts with text holders.
+6. Added default declarations of NO.MATCH and NO.AMATCH constants.
+7. Bug fix: STOP now QUITs immediately.
+8. MS-style line endings are now allowed.
+9. If SEEN flag declared, add it to symbols known to the kernel.
+
+-------------------------------------------------------------------------
+
 New in version 12.37
 
 1. The APPEND directive should not QUIT!

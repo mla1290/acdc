@@ -1,4 +1,4 @@
-/* domajor.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* domajor.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 21 Aug 16   MLA           Bug: Fixed skipping in-line text with text holders.
@@ -149,7 +149,8 @@ int skip (int check_text)
          }
 #endif /* MLA */
          sprintf (autoname, "inline_%d_", ++inline_count);
-         np = addsymb (SYMBOL, autoname, TEXT, type_counts[TEXT]++);
+         np = addsymb (SYMBOL, autoname, TEXT, inline_count);
+         np -> inline_text = 1;
          got_end = 0;
          while (1)
          {
@@ -439,7 +440,7 @@ void domajor (void)
          if (strcmp (tp[1], "old") != 0 && strcmp (tp[1], "original") != 0)
          {
             index = chrtobin (tp[2] ? tp[2] : tp[1]);
-            if (index > 12)
+            if (index > 12 && index != 20)
                gripe ("",
                   "Style higher than current maximum of 12!");
             if (index < 10 && style != 1)

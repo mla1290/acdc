@@ -64,7 +64,7 @@ extern int getconst(char *);
 
 /* Size of a code chunk. */
 
-#define CODE_CHUNK 2000
+#define CODE_CHUNK 1000000
 
 /* Predefined common flags. LAST_DAFAULT_FLAG specifies the last flag
  * taken by default flags and hence not available for object and place 

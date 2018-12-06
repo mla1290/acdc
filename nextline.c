@@ -1,6 +1,7 @@
-/* getline.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* getline.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
+ * 11 Oct 18   MLA           Bug: Allow for Windows style line endings.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 10 Jan 15   MLA           Bug: Make sure all lines are terminated by \n.
  * 04 Jan 15   MLA           Bug: fixed checking for blank lines.
@@ -45,6 +46,8 @@ next_line:
       }
       line_count [level]++;
       len = strlen (line) - 1;
+      if (*(line + len -1) == '\r')
+         *(line + len - 1) = ' ';
       if (*(line + len) != '\n')
       {
          *(line + (len++)) = '\n';

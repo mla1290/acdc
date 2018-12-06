@@ -8,6 +8,7 @@ extern int quiet;
 extern int stage;
 extern int swap;
 extern char *acdc_version;
+extern int query_used;
 #ifndef __MACH__
 #include <malloc.h>
 #endif /* __MACH__ */

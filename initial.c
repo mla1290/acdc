@@ -1,4 +1,4 @@
-/* initial.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* initial.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
  * 11 Jan 17   MLA           Keep "ifcgi" as a synonym for "ifcloud".
@@ -90,7 +90,7 @@ struct directive keywords[] =
    {"variable",    MAJOR, VAR,         1,   ANY_NUMBER},
    {"var",         MAJOR, VAR,         1,   ANY_NUMBER},
    {"array",       MAJOR, ARRAY,       2,   2},
-   {"word",        MAJOR, NOUN,        1,   ANY_NUMBER},
+   {"word",        MAJOR, WORD,        1,   ANY_NUMBER},
    {"verb",        MAJOR, VERB,        1,   ANY_NUMBER},
    {"noun",        MAJOR, NOUN,        1,   ANY_NUMBER},
    {"adjective",   MAJOR, ADJECTIVE,   1,   ANY_NUMBER},
@@ -200,7 +200,7 @@ struct directive keywords[] =
    {"respond",     MINOR, RESPOND,     2,   ANY_NUMBER},
    {"quip",        MINOR, QUIP,        1,   2},
    {"value",       MINOR, VALUE,       2,   2},
-   {"vocab",       MINOR, DICT,        4,   4},
+   {"vocab",       MINOR, DICT,        0,   4},
    {"append",      MINOR, APPEND,      1,   2},
    {"resay",       MINOR, RESAY,       1,   2},
    {"set",         MINOR, SET,         2,   2},

@@ -1,6 +1,10 @@
-/* organise.c (acdc) - copyright Mike Arnautov 1990-2017.
+/* organise.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
+ * 02 Nov 18   MLA           Conditionally added SEEN.
+ * 03 Oct 18   MLA           Addded NO_MATCH and NO_AMATCH.
+ *                           declarations. 
+ * 18 Aug 18   MLA           Ditched some redundant UNDO flags.
  * 22 Apr 16   MLA           bug: in str(n)cpy string args should not overlap.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 02 Jan 15   MLA           Rationalised GAME_ID for all styles.
@@ -155,6 +159,14 @@ void process_procnos (struct node *np)
 
 /*======================================================================*/
 
+void process_inline (struct node *np)
+{
+   if (np -> type == TEXT && np -> inline_text == 1)
+      np -> refno += type_counts [TEXT] + type_base [TEXT] - 1;
+}
+
+/*======================================================================*/
+
 void process_refnos (struct node *np)
 {
    int type = np -> type;
@@ -164,10 +176,14 @@ void process_refnos (struct node *np)
       case LOC:
       case VERB:
       case VAR:
-      case TEXT:
          np -> refno += type_base [type];
          break;
-      
+
+      case TEXT:
+         if (! (np -> inline_text))
+            np -> refno += type_base [type];
+         break;
+
       case AT:
       case ACTION:
          gripe (np -> name, "Symbol used, but not defined.");
@@ -399,8 +415,20 @@ void organise(void)
    type_base[0] = 3;
    for (index = 0; index <= TEXT; index++)
       type_base[index + 1] = type_base[index] + type_counts[index];
+/*
+ * Convert relative refnos to absolute ones, ignoring in-line texts in the
+ * first btspan() pass. Then append in-line texts to other texts. All this
+ * helps with preserving upward compatibility of saved games in the
+ * presence of (non-morphed) in-line texts.
+ */
    btspan (SYMBOL, process_refnos);
-
+   if (inline_count)
+   {
+      btspan (SYMBOL, process_inline);
+      type_counts [TEXT] += inline_count;
+      type_base [TEXT + 1] += inline_count;
+      inline_count = 0;
+   }
 /*  Now create the include file which will define various symbolic
  *  constants required by the kernel routines.
  */
@@ -492,12 +520,10 @@ void organise(void)
             gripe ("UNDO", "Declared as a non-verb!");
       }
       fprintf (defs_file, "#define UNDO_STAT %d\n", undo_stat -> refno);
-      declare_flag ("undo.off",  "UNDO_OFF",   3);
-      declare_flag ("undo.info", "UNDO_INFO" , 4);
-      declare_flag ("undo.none", "UNDO_NONE" , 5);
-      declare_flag ("undo.trim", "UNDO_TRIM" , 6);
-      declare_flag ("undo.inv",  "UNDO_INV"  , 7);
-      declare_flag ("undo.bad",  "UNDO_BAD"  , 8);
+      declare_flag ("undo.info", "UNDO_INFO" , 4);  /* NB: flag 3 is spare! */
+      declare_flag ("undo.trim", "UNDO_TRIM" , 5);
+      declare_flag ("undo.inv",  "UNDO_INV"  , 6);
+      declare_flag ("undo.bad",  "UNDO_BAD"  , 7);
    }
    
    define_constant ("schizoid",   "SCHIZOID",   "object flag");
@@ -509,6 +535,13 @@ void organise(void)
       if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
          gripe ("PLS.CLARIFY", "Declared as other than a bit constant.");
       else fprintf (defs_file, "#define PLSCLARIFY %d\n", np -> refno);
+   }
+   
+   if ((np = fndsymb(TESTSYMBOL, "seen")) != NULL)
+   {
+      if (np -> type != FLAGS && (style != 1 || np -> type != SYNONYM))
+         gripe ("SEEN", "Declared as other than a bit constant.");
+      else fprintf (defs_file, "#define SEEN %d\n", np -> refno);
    }
    
    if ((np = fndsymb(TESTSYMBOL, "again")) != NULL)
@@ -656,6 +689,11 @@ void organise(void)
       declare_constant ("sceneword", "SCENEWORD", next_constant--);
       declare_constant ("badsyntax", "BADSYNTAX", next_constant--);
    }
+   if (style >= 10)
+   {
+      declare_constant ("no.match",  "NO_MATCH",  98);
+      declare_constant ("no.amatch", "NO_AMATCH", 99);
+   }
    if (style <= 1)
    {
       if ((np = fndsymb(TESTSYMBOL, "objflag")) != NULL)
@@ -687,8 +725,7 @@ void organise(void)
    define_constant ("quickie",       "BRIEF",    "flag or synonym");
    define_constant ("briefdisplay",  "BRIEF",    "flag or synonym");
 
-   if (plain_text)
-      fprintf (defs_file, "#define PLAIN\n");
+   fprintf (defs_file, "#define PLAIN %d\n", plain_text ? 1 : 0);
 
    fprintf (defs_file, "#define DBSTATUS %d\n", 3 - memory);
    fprintf (defs_file, "#define LPROC %d\n", type_base [VERB + 1]);
