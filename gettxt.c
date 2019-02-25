@@ -346,12 +346,12 @@ next_char:
          }
          goto next_char;
       }
-      else if (style >= 10 && *line_ptr == DWARVISH_TAG)
-      {
-         *text_ptr++ = DWARVISH;
-         line_ptr++;
-         goto next_char;
-      }
+//      else if (style >= 10 && *line_ptr == DWARVISH_TAG)
+//      {
+//         *text_ptr++ = DWARVISH;
+//         line_ptr++;
+//         goto next_char;
+//      }
    }
    else
       escaped = 0;
@@ -431,10 +431,10 @@ store:
                *text_ptr = '\0';
             else if (*text_ptr == '_' && style >= 10)
                *text_ptr = NBSP;
-            else if (*text_ptr == '<' && style >= 10)
-               *text_ptr = TAG_START;
-            else if (*text_ptr == '>' && style >= 10)
-               *text_ptr = TAG_END;
+//            else if (*text_ptr == '<' && style >= 10)
+//               *text_ptr = TAG_START;
+//            else if (*text_ptr == '>' && style >= 10)
+//               *text_ptr = TAG_END;
          }
       }
       escaped = 0;

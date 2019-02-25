@@ -1,6 +1,7 @@
 /* getnames.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  *
+ * 19 Feb 19   MLA           bug: store names following a minus-prefised one.
  * 03 Mar 16   MLA           Removed non-ANSI C support.
  * 11 May 13   MLA           bug: Fixed LOC spacing in cross-reference file.
  * 08 Jul 09   MLA           bug: Reinstate style 1 support.
@@ -87,12 +88,12 @@ struct node *getnames (int major_type, struct node *gp)
             write_ref (tag, tp [index]);
          }
          
-         if (prefix != '-')
-               np -> name_addr = next_vocaddr;
-         else
-            return (np);
+         if (prefix == '-')
+            continue;
       }
 
+      if (np -> name_addr == -1)
+         np -> name_addr = next_vocaddr;
       if (xref) 
       {
          if (real_type == LOC)

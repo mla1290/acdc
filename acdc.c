@@ -1,7 +1,7 @@
 /* acdc.c (acdc) - copyright Mike Arnautov 1990-2018.
  * Licensed under GPL, version 3 or later (see the supplied LICENCE file).
  */
-#define ACDC_VERSION "12.38, 06 Dec 2018"
+#define ACDC_VERSION "12.39, 19 Feb 2019"
 /*
  * 06 Dec 18   MLA           Added USEQUERY to adv1.h
  * 11 Jun 18   MLA           Added the -outdir option.

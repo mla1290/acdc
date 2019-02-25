@@ -1,5 +1,12 @@
 -------------------------------------------------------------------------
 
+New in version 12.39
+
+1. An object name excluded from game's vocabulary (by the '-' prefix)
+   no longer causes acdc to ignore any names following the excluded one.
+
+-------------------------------------------------------------------------
+
 New in version 12.38
 
 1. Minor directives HAVE, HERE and NEAR now officially deprecated.
